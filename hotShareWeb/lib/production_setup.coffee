@@ -1,5 +1,5 @@
 
-@withSocialBar = true
+@withSocialBar = false
 @withAfterPostIntroduce = false
 @withChat = false
 @withDiscover = false
