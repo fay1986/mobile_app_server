@@ -915,7 +915,8 @@ if Meteor.isClient
 
   Template.addPost.helpers
     isIOS:->
-      isIOS
+      #isIOS
+      false
     progressBarWidth:->
       Session.get('importProcedure')
     displayUrl:->
