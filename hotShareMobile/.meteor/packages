@@ -31,7 +31,6 @@ u2622:persistent-session
 raix:md5
 http
 percolate:synced-cron
-standard-minifiers
 meteor-base
 mobile-experience
 mongo
@@ -55,3 +54,5 @@ accounts-ui
 accounts-base
 service-configuration
 tap:i18n-bundler
+standard-minifier-css
+standard-minifier-js
