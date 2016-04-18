@@ -7,6 +7,7 @@
 #import <MobileCoreServices/MobileCoreServices.h>
 #import "WXApi.h"
 #import "WeixinActivity.h"
+#import "NSData+Base64.h"
 
 //NSString* WECHAT_APPID_KEY = @"wechatappid";
 @implementation SocialSharing {
@@ -32,7 +33,12 @@
 }
 
 - (NSString*)getIPadPopupCoordinates {
+    
+#ifndef __CORDOVA_4_0_0
+    
   return [self.webView stringByEvaluatingJavaScriptFromString:@"window.plugins.socialsharing.iPadPopupCoordinates();"];
+    
+#endif
 }
 
 - (CGRect)getPopupRectFromIPadPopupCoordinates:(NSArray*)comps {
@@ -293,7 +299,7 @@
           fileName = @"attachment.";
           fileName = [fileName stringByAppendingString:(NSString*)[[mimeType componentsSeparatedByString: @"/"] lastObject]];
           NSString *base64content = (NSString*)[[basename componentsSeparatedByString: @","] lastObject];
-          data = [NSData dataFromBase64String:base64content];
+          data = [NSData dataWithBase64EncodedString:base64content];
         } else {
           fileName = [basename pathComponents].lastObject;
           mimeType = [self getMimeTypeFromFileExtension:[basename pathExtension]];
@@ -524,7 +530,7 @@
       NSString *fileType = (NSString*)[[[fileName substringFromIndex:5] componentsSeparatedByString: @";"] objectAtIndex:0];
       fileType = (NSString*)[[fileType componentsSeparatedByString: @"/"] lastObject];
       NSString *base64content = (NSString*)[[fileName componentsSeparatedByString: @","] lastObject];
-      NSData *fileData = [NSData dataFromBase64String:base64content];
+      NSData *fileData = [NSData dataWithBase64EncodedString:base64content];
       file = [NSURL fileURLWithPath:[self storeInFile:[NSString stringWithFormat:@"%@.%@", @"file", fileType] fileData:fileData]];
     } else {
       // assume anywhere else, on the local filesystem

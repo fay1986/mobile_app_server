@@ -11,6 +11,9 @@
 
 @implementation JPushPlugin
 
+
+#ifndef __CORDOVA_4_0_0
+
 - (CDVPlugin*)initWithWebView:(UIWebView*)theWebView{
     if (self=[super initWithWebView:theWebView]) {
         
@@ -19,10 +22,14 @@
                           selector:@selector(networkDidReceiveMessage:)
                               name:kJPFNetworkDidReceiveMessageNotification
                             object:nil];
-
+        
     }
     return self;
 }
+
+#endif
+
+
 
 -(void)setTagsWithAlias:(CDVInvokedUrlCommand*)command{
     
@@ -188,7 +195,8 @@
     
     dispatch_async(dispatch_get_main_queue(), ^{
         
-        [self writeJavascript:[NSString stringWithFormat:@"window.plugins.jPushPlugin.receiveMessageIniOSCallback('%@')",jsonString]];
+        [self.commandDelegate evalJs:[NSString stringWithFormat:@"window.plugins.jPushPlugin.receiveMessageIniOSCallback('%@')",jsonString]];
+        //[self writeJavascript:[NSString stringWithFormat:@"window.plugins.jPushPlugin.receiveMessageIniOSCallback('%@')",jsonString]];
         
     });
 

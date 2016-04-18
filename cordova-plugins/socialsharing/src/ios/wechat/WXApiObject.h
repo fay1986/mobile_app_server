@@ -7,7 +7,8 @@
 //
 
 #import <Foundation/Foundation.h>
-
+#ifndef _WXAPIOBJECT
+#define _WXAPIOBJECT
 /*! @brief 错误码
  *
  */
@@ -603,3 +604,5 @@ enum WXMPWebviewType {
 @property (nonatomic, retain) NSData    *fileData;
 
 @end
+
+#endif

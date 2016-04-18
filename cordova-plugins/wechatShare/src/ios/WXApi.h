@@ -9,6 +9,8 @@
 #import <Foundation/Foundation.h>
 #import "WXApiObject.h"
 
+#ifndef _WXAPI
+#define _WXAPI
 
 #pragma mark - WXApiDelegate
 /*! @brief 接收并处理来自微信终端程序的事件消息
@@ -155,3 +157,5 @@
 
 
 @end
+
+#endif

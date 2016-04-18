@@ -255,16 +255,19 @@
 
 - (void)openInCordovaWebView:(NSURL*)url withOptions:(NSString*)options
 {
-    if ([self.commandDelegate URLIsWhitelisted:url]) {
-        NSURLRequest* request = [NSURLRequest requestWithURL:url];
+     NSURLRequest* request = [NSURLRequest requestWithURL:url];
+       
 #ifdef __CORDOVA_4_0_0
-        [self.webViewEngine loadRequest:request];
+      [self.webViewEngine loadRequest:request];
+        
 #else
+    if ([self.commandDelegate.urlTransformer(url)]) {
         [self.webView loadRequest:request];
-#endif
+
     } else { // this assumes the InAppBrowser can be excepted from the white-list
         [self openInInAppBrowser:url withOptions:options];
     }
+#endif
 }
 
 - (void)openInSystem:(NSURL*)url

@@ -126,7 +126,7 @@ static RemoteControls *remoteControls = nil;
         NSData *jsonData = [NSJSONSerialization dataWithJSONObject:dict options: 0 error: nil];
         NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
         NSString *jsStatement = [NSString stringWithFormat:@"if(window.remoteControls)remoteControls.receiveRemoteEvent(%@);", jsonString];
-        [self.webView stringByEvaluatingJavaScriptFromString:jsStatement];
+        [self.commandDelegate evalJs:jsStatement];
 
     }
 }
