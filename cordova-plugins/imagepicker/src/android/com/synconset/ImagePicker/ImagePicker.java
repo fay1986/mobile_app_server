@@ -5,6 +5,7 @@ package com.synconset;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -14,8 +15,6 @@ import java.util.ArrayList;
 import android.app.Activity;
 import android.content.Intent;
 import android.util.Log;
-
-import com.photoselector.ui.PhotoSelectorActivity;
 
 public class ImagePicker extends CordovaPlugin {
 	public static String TAG = "ImagePicker";
@@ -27,8 +26,7 @@ public class ImagePicker extends CordovaPlugin {
 		 this.callbackContext = callbackContext;
 		 this.params = args.getJSONObject(0);
 		if (action.equals("getPictures")) {
-			Intent intent = new Intent(cordova.getActivity(), PhotoSelectorActivity.class);
-			//Intent intent = new Intent(cordova.getActivity(), MultiImageChooserActivity.class);
+			Intent intent = new Intent(cordova.getActivity(), MultiImageChooserActivity.class);
 			int max = 20;
 			int desiredWidth = 0;
 			int desiredHeight = 0;
@@ -40,7 +38,7 @@ public class ImagePicker extends CordovaPlugin {
 				desiredWidth = this.params.getInt("width");
 			}
 			if (this.params.has("height")) {
-				desiredHeight = this.params.getInt("height");
+				desiredWidth = this.params.getInt("height");
 			}
 			if (this.params.has("quality")) {
 				quality = this.params.getInt("quality");
@@ -49,12 +47,6 @@ public class ImagePicker extends CordovaPlugin {
 			intent.putExtra("WIDTH", desiredWidth);
 			intent.putExtra("HEIGHT", desiredHeight);
 			intent.putExtra("QUALITY", quality);
-		    intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-			/*
-			if (this.cordova != null) {
-				this.cordova.startActivityForResult((CordovaPlugin) this, intent, 0);
-			}
-			*/
 			if (this.cordova != null) {
 				this.cordova.startActivityForResult((CordovaPlugin) this, intent, 0);
 			}

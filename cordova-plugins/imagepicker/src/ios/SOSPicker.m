@@ -7,10 +7,10 @@
 //
 
 #import "SOSPicker.h"
-#import "DNImagePickerController.h"
-#import <AssetsLibrary/AssetsLibrary.h>
+#import "ELCAlbumPickerController.h"
+#import "ELCImagePickerController.h"
+#import "ELCAssetTablePicker.h"
 
-extern NSUInteger kDNImageFlowMaxSeletedNumber;
 #define CDV_PHOTO_PREFIX @"cdv_photo_"
 
 @implementation SOSPicker
@@ -24,40 +24,47 @@ extern NSUInteger kDNImageFlowMaxSeletedNumber;
 	self.width = [[options objectForKey:@"width"] integerValue];
 	self.height = [[options objectForKey:@"height"] integerValue];
 	self.quality = [[options objectForKey:@"quality"] integerValue];
-    self.storage = [options objectForKey:@"storage"];   //persistent, temporary
 
-    kDNImageFlowMaxSeletedNumber = maximumImagesCount;
+	// Create the an album controller and image picker
+	ELCAlbumPickerController *albumController = [[ELCAlbumPickerController alloc] init];
+	
+	if (maximumImagesCount == 1) {
+      albumController.immediateReturn = true;
+      albumController.singleSelection = true;
+   } else {
+      albumController.immediateReturn = false;
+      albumController.singleSelection = false;
+   }
+   
+   ELCImagePickerController *imagePicker = [[ELCImagePickerController alloc] initWithRootViewController:albumController];
+   imagePicker.maximumImagesCount = maximumImagesCount;
+   imagePicker.returnsOriginalImage = 1;
+   imagePicker.imagePickerDelegate = self;
 
-    DNImagePickerController *imagePicker = [[DNImagePickerController alloc] init];
-    imagePicker.imagePickerDelegate = self;
-    self.callbackId = command.callbackId;
-    [self.viewController presentViewController:imagePicker animated:YES completion:nil];
+   albumController.parent = imagePicker;
+	self.callbackId = command.callbackId;
+	// Present modally
+	[self.viewController presentViewController:imagePicker
+	                       animated:YES
+	                     completion:nil];
 }
 
 
-
-#pragma mark - DNImagePickerControllerDelegate
-
-- (void)dnImagePickerController:(DNImagePickerController *)imagePickerController sendImages:(NSArray *)imageAssets isFullImage:(BOOL)fullImage
-{
-    //NSArray *assetsArray = [NSMutableArray arrayWithArray:imageAssets];
-    NSArray *info = [NSMutableArray arrayWithArray:imageAssets];
-
-    CDVPluginResult* result = nil;
-    NSMutableArray *resultStrings = [[NSMutableArray alloc] init];
+- (void)elcImagePickerController:(ELCImagePickerController *)picker didFinishPickingMediaWithInfo:(NSArray *)info {
+	CDVPluginResult* result = nil;
+	NSMutableArray *resultStrings = [[NSMutableArray alloc] init];
     NSData* data = nil;
-    NSString* docsPath = [self getDraftsDirectory];
+    NSString* docsPath = [NSTemporaryDirectory()stringByStandardizingPath];
     NSError* err = nil;
     NSFileManager* fileMgr = [[NSFileManager alloc] init];
     NSString* filePath;
     ALAsset* asset = nil;
     UIImageOrientation orientation = UIImageOrientationUp;;
     CGSize targetSize = CGSizeMake(self.width, self.height);
-
-    for (NSObject *dict in info) {
-        asset = [dict valueForKey:@"ALAsset"];
+	for (NSDictionary *dict in info) {
+        asset = [dict objectForKey:@"ALAsset"];
         // From ELCImagePickerController.m
-        
+
         int i = 1;
         do {
             filePath = [NSString stringWithFormat:@"%@/%@%03d.%@", docsPath, CDV_PHOTO_PREFIX, i++, @"jpg"];
@@ -69,25 +76,21 @@ extern NSUInteger kDNImageFlowMaxSeletedNumber;
             
             //defaultRepresentation returns image as it appears in photo picker, rotated and sized,
             //so use UIImageOrientationUp when creating our image below.
-	    if (fullImage) {
-                //imgRef = [assetRep fullResolutionImage];
-                //orientation = [assetRep orientation];
-                Byte *buffer = (Byte*)malloc(assetRep.size);
-                NSUInteger buffered = [assetRep getBytes:buffer fromOffset:0.0 length:assetRep.size error:nil];
-                data = [NSData dataWithBytesNoCopy:buffer length:buffered freeWhenDone:YES];
+            if (picker.returnsOriginalImage) {
+                imgRef = [assetRep fullResolutionImage];
+                orientation = [assetRep orientation];
             } else {
                 imgRef = [assetRep fullScreenImage];
-                UIImage* image = [UIImage imageWithCGImage:imgRef scale:1.0f orientation:orientation];
-                if ([self checkIfGif:asset]) {
-                    data = UIImageJPEGRepresentation(image, 1.0f);
-                } else if (self.width == 0 && self.height == 0) {
-                    data = UIImageJPEGRepresentation(image, self.quality/100.0f);
-                } else {
-                    UIImage* scaledImage = [self imageByScalingNotCroppingForSize:image toSize:targetSize];
-                    data = UIImageJPEGRepresentation(scaledImage, self.quality/100.0f);
-                }
             }
-
+            
+            UIImage* image = [UIImage imageWithCGImage:imgRef scale:1.0f orientation:orientation];
+            if (self.width == 0 && self.height == 0) {
+                data = UIImageJPEGRepresentation(image, self.quality/100.0f);
+            } else {
+                UIImage* scaledImage = [self imageByScalingNotCroppingForSize:image toSize:targetSize];
+                data = UIImageJPEGRepresentation(scaledImage, self.quality/100.0f);
+            }
+            
             if (![data writeToFile:filePath options:NSAtomicWrite error:&err]) {
                 result = [CDVPluginResult resultWithStatus:CDVCommandStatus_IO_EXCEPTION messageAsString:[err localizedDescription]];
                 break;
@@ -95,37 +98,23 @@ extern NSUInteger kDNImageFlowMaxSeletedNumber;
                 [resultStrings addObject:[[NSURL fileURLWithPath:filePath] absoluteString]];
             }
         }
-        
-    }
-    
-    if (nil == result) {
-        result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:resultStrings];
-    }
-    
-    [self.viewController dismissViewControllerAnimated:YES completion:nil];
-    [self.commandDelegate sendPluginResult:result callbackId:self.callbackId];
+
+	}
+	
+	if (nil == result) {
+		result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:resultStrings];
+	}
+
+	[self.viewController dismissViewControllerAnimated:YES completion:nil];
+	[self.commandDelegate sendPluginResult:result callbackId:self.callbackId];
 }
 
-- (void)dnImagePickerControllerDidCancel:(DNImagePickerController *)imagePicker
-{
-    CDVPluginResult* pluginResult = nil;
+- (void)elcImagePickerControllerDidCancel:(ELCImagePickerController *)picker {
+	[self.viewController dismissViewControllerAnimated:YES completion:nil];
+	CDVPluginResult* pluginResult = nil;
     NSArray* emptyArray = [NSArray array];
-    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:emptyArray];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackId];
-
-    [imagePicker dismissViewControllerAnimated:YES completion:^{
-        
-    }];
-}
-
-- (BOOL)checkIfGif:(ALAsset *)asset{
-    NSArray *strArray = [[NSString stringWithFormat:@"%@", [[asset defaultRepresentation] url]] componentsSeparatedByString:@"="];
-    NSString *ext = [strArray objectAtIndex:([strArray count]-1)];
-    if ([[ext lowercaseString] isEqualToString:@"gif"]) {
-        return YES;
-    } else {
-        return NO;
-    }
+	pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:emptyArray];
+	[self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackId];
 }
 
 - (UIImage*)imageByScalingNotCroppingForSize:(UIImage*)anImage toSize:(CGSize)frameSize
@@ -169,77 +158,6 @@ extern NSUInteger kDNImageFlowMaxSeletedNumber;
     // pop the context to get back to the default
     UIGraphicsEndImageContext();
     return newImage;
-}
-
-- (NSString*)createDirectory:(NSString*)dir
-{
-    BOOL isDir = FALSE;
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    BOOL isDirExist = [fileManager fileExistsAtPath:dir isDirectory:&isDir];
-    
-    //If dir is not exist, create it
-    if(!(isDirExist && isDir))
-    {
-        BOOL bCreateDir =[[NSFileManager defaultManager] createDirectoryAtPath:dir withIntermediateDirectories:YES attributes:nil error:nil];
-        if (bCreateDir == NO)
-        {
-            NSLog(@"Failed to create Directory:%@", dir);
-            return nil;
-        }
-    } else{
-        //NSLog(@"Directory exist:%@", dir);
-    }
-
-    return dir;
-}
-
-- (NSString *)applicationLibraryDirectory
-{
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES);
-    NSString *basePath = ([paths count] > 0) ? [paths objectAtIndex:0] : nil;
-    return basePath;
-}
-
-- (NSString *)getDraftsDirectory
-{
-    NSString *draftsDirectory = [[self applicationLibraryDirectory] stringByAppendingPathComponent:@"files/drafts"];
-    [self createDirectory:draftsDirectory];
-    return draftsDirectory;
-}
-
-- (void)cleanupPersistentDirectory:(CDVInvokedUrlCommand*)command
-{
-    // empty the tmp directory
-    NSFileManager* fileMgr = [[NSFileManager alloc] init];
-    NSError* err = nil;
-    BOOL hasErrors = NO;
-
-    // clear contents of NSTemporaryDirectory
-    NSString* tempDirectoryPath = [self getDraftsDirectory];
-    NSDirectoryEnumerator* directoryEnumerator = [fileMgr enumeratorAtPath:tempDirectoryPath];
-    NSString* fileName = nil;
-    BOOL result;
-
-    while ((fileName = [directoryEnumerator nextObject])) {
-        // only delete the files we created
-        if (![fileName hasPrefix:CDV_PHOTO_PREFIX]) {
-            continue;
-        }
-        NSString* filePath = [tempDirectoryPath stringByAppendingPathComponent:fileName];
-        result = [fileMgr removeItemAtPath:filePath error:&err];
-        if (!result && err) {
-            NSLog(@"Failed to delete: %@ (error: %@)", filePath, err);
-            hasErrors = YES;
-        }
-    }
-
-    CDVPluginResult* pluginResult;
-    if (hasErrors) {
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_IO_EXCEPTION messageAsString:@"One or more files failed to be deleted."];
-    } else {
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-    }
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 @end
