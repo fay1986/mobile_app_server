@@ -650,6 +650,11 @@ if Meteor.isClient
       Session.get('showContentInAddPost')
     mainImage:->
       Drafts.findOne({type:'image'})
+    isShareExtension:->
+      if Session.get('isShareExtension')
+         false
+      else
+         true
     isIOS:->
       if withMusicSharing
         isIOS
@@ -947,6 +952,7 @@ if Meteor.isClient
           $('.addPost').addClass('animated ' + animateOutUpperEffect);
           Meteor.setTimeout ()->
             Router.go('/')
+            window.plugins.shareExtension.closeView()
           ,animatePageTrasitionTimeout
           return
         , '您确定要删除未保存的草稿吗？', ['删除故事','继续创作']);
@@ -1039,6 +1045,7 @@ if Meteor.isClient
       Drafts.remove {owner: Meteor.userId()}
       TempDrafts.remove {owner: Meteor.userId()}
       history.back()
+      window.plugins.shareExtension.closeView()
       #PUB.back()
 
 
@@ -1102,9 +1109,11 @@ if Meteor.isClient
               window.plugins.toast.showShortBottom('上传失败，请稍后重试')
               return
             publishPostHandle()
+            window.plugins.shareExtension.closeView()
           )
         else
           publishPostHandle()
+          window.plugins.shareExtension.closeView()
         return
     'click .remove':(event)->
       Drafts.remove this._id

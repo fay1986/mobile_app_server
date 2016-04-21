@@ -122,9 +122,11 @@
           <div id="addmore">
             <i class="fa fa-picture-o"></i>
           </div>
-          <div id="takephoto">
-            <i class="fa fa-camera"></i>
-          </div>
+          {{#if isShareExtension}}
+            <div id="takephoto">
+              <i class="fa fa-camera"></i>
+            </div>
+          {{/if}}
           <div id="addText">
             <i class="fa fa-pencil-square-o"></i>
           </div>

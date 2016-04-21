@@ -4,17 +4,21 @@
   {{else}}
   <div class="home">
     {{#if wasLogon}}
-      <div class="head">
-        <strong>{{_ "gst"}}</strong>
-        <div id="follow" class="leftButton">
-          <span class="fa fa-plus"></span><i class="fa fa-user"></i>
+      {{#if isShareExtension}}
+        {{> addPost}}
+      {{else}}
+        <div class="head">
+          <strong>{{_ "gst"}}</strong>
+          <div id="follow" class="leftButton">
+            <span class="fa fa-plus"></span><i class="fa fa-user"></i>
+          </div>
+          <div class="rightButton clickHelp"><i class="fa fa-question-circle fa-fw"></i></div>
         </div>
-        <div class="rightButton clickHelp"><i class="fa fa-question-circle fa-fw"></i></div>
-      </div>
-      <div class="content">
-        {{> listPosts}}
-      </div>
-      {{> footer}}
+        <div class="content">
+          {{> listPosts}}
+        </div>
+        {{> footer}}
+      {{/if}}
     {{else}}
       {{#if isCordova}}
           {{> authOverlay}}

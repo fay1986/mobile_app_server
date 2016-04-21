@@ -115,7 +115,7 @@ static CustomDialogView* _instance = nil;
         UIWebView *webView = (UIWebView *)self.superview;
         
         //NSString *scriptCall = [NSString stringWithFormat:@"editFromShare('%@','%@')",self.url,self.ID];
-        NSString *scriptCall = [NSString stringWithFormat:@"editFromShare('%@');ShareURLs.remove({ _id:'%@'})",self.url,self.ID];
+        NSString *scriptCall = [NSString stringWithFormat:@"editFromShare('%@');window.plugins.shareExtension.emptyData();",self.url,self.ID];
         [webView stringByEvaluatingJavaScriptFromString:scriptCall];
     }
     

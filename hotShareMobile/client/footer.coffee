@@ -17,11 +17,18 @@ if Meteor.isClient
       else
         0
     wait_import_count:->
-       waitImportCount = ShareURLs.find().count()
-       if waitImportCount > 0
-          return true
-       else
-          return false
+        window.plugins.shareExtension.getShareData ((data) ->
+            if data and data != ''
+                return ture
+          ), ->
+            console.log 'getShareData was Error!'
+         return false
+       
+      #  waitImportCount = ShareURLs.find().count()
+      #  if waitImportCount > 0
+      #     return true
+      #  else
+      #     return false
     focus_style:(channelName)->
       channel = Session.get "focusOn"
       if channel is channelName
@@ -133,9 +140,15 @@ if Meteor.isClient
         handleAddedLink(null)
         window.plugins.toast.showLongCenter("无法获得粘贴板数据，请手动粘贴\n浏览器内容加载后，点击地址栏右侧\"导入\"按钮");
     'click #share-import':(e)->
-        data = ShareURLs.find().fetch()
-        editFromShare(data[0].url)
-        ShareURLs.remove({ _id:data[0]._id})
+        window.plugins.shareExtension.getShareData ((data) ->
+            if data and data != ''
+                editFromShare(data)
+                window.plugins.shareExtension.emptyData()
+          ), ->
+            console.log 'getShareData was Error!'
+        # data = ShareURLs.find().fetch()
+        # editFromShare(data[0].url)
+        # ShareURLs.remove({ _id:data[0]._id})
     'click #photo-select':(e)->
       Meteor.defer ()->
         $('.modal-backdrop.in').remove()

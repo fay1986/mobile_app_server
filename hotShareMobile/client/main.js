@@ -100,6 +100,9 @@ if (Meteor.isCordova) {
             console.log(error_message);
           });
         }
+        if (Session.get("isShareExtension")) {
+            return
+        }
         //TAPi18n.setLanguage("zh")
          //当用户第八次使用该软件时提示评价app
         AppRate.preferences.usesUntilPrompt = 7;
@@ -109,17 +112,36 @@ if (Meteor.isCordova) {
         
     }
     
-    function checkShareExtension(){
-        
-        window.plugins.shareExtension.getShareData(function(data) {
-            if(data && data !==""){  
-                Session.set("isShareExtension", true);
-                window.plugins.shareExtension.emptyData();
+    function checkShareExtension() {
+
+        window.plugins.shareExtension.getShareData(function (data) {
+            if (data && data !== "") {
+                if (Session.get("isShareExtension")) {                  
+                   editFromShare(data);
+                   window.plugins.shareExtension.emptyData();
+                }
+                else{
+                   CustomDialog.show({url:data});
+                }       
             }
-            else{
-                Session.set("isShareExtension", false);
-            }
-        }, function() {});
+        }, function () { });
+
+        if (Session.get("isShareExtension")) {
+            window.plugins.userinfo.getUserInfo(function (userId) {
+                console.log("getUserInfo :" + userId);
+                if (userId && userId !== "") {
+                    Meteor.loginWithUserId(userId,true,function(err) {
+                        if (!err) {
+                                return console.log("登录成功!");
+                            } else {
+                                return console.log("登录失败!原因如下:" + err);
+                            } 
+                    })
+                }
+            }, function () {
+                return console.log("getUserInfo was Error!");
+            });
+        }
     }
     function eventResume(){
         if (Meteor.user()) {
