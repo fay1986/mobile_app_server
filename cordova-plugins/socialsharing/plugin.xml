@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
-        id="nl.x-services.plugins.socialsharing"
-        version="4.3.12">
+        id="cordova-plugin-x-socialsharing"
+        version="5.0.12">
 
   <name>SocialSharing</name>
 
   <description>
-    This plugin allows you to share text, images (and other files), or a link via the native sharing widget of your device.
+    Share text, images (and other files), or a link via the native sharing widget of your device.
     Android is fully supported, as well as iOS 6 and up. WP8 has somewhat limited support.
   </description>
 
@@ -15,7 +15,7 @@
 
   <license>MIT</license>
 
-  <keywords>Social, Share, Twitter, Facebook, Email, SMS, WhatsApp, Tumblr, Pocket, LinkedIN</keywords>
+  <keywords>Social, Share, Twitter, Facebook, Email, SMS, WhatsApp, Tumblr, Pocket, LinkedIn</keywords>
 
   <repo>https://github.com/EddyVerbruggen/SocialSharing-PhoneGap-Plugin.git</repo>
 
@@ -31,49 +31,21 @@
 
   <!-- ios -->
   <platform name="ios">
-    <preference name="APP_ID" />
 
     <config-file target="config.xml" parent="/*">
       <feature name="SocialSharing">
         <param name="ios-package" value="SocialSharing"/>
         <param name="onload" value="true" />
       </feature>
-      <preference name="wechatappid" value="$APP_ID" />
     </config-file>
 
+    <header-file src="src/ios/NSString+URLEncoding.h"/>
+    <source-file src="src/ios/NSString+URLEncoding.m"/>
     <header-file src="src/ios/SocialSharing.h"/>
     <source-file src="src/ios/SocialSharing.m"/>
 
-    <header-file src="src/ios/wechat/WeixinActivity.h"/>
-    <source-file src="src/ios/wechat/WeixinActivity.m"/>
-
-    <header-file src="src/ios/wechat/WeixinActivityBase.h"/>
-    <source-file src="src/ios/wechat/WeixinActivityBase.m"/>
-
-    <header-file src="src/ios/wechat/WeixinSessionActivity.h"/>
-    <source-file src="src/ios/wechat/WeixinSessionActivity.m"/>
-
-    <header-file src="src/ios/wechat/WeixinTimelineActivity.h"/>
-    <source-file src="src/ios/wechat/WeixinTimelineActivity.m"/>
-
-    <header-file src="src/ios/wechat/WXApi.h"/>
-    <header-file src="src/ios/wechat/WXApiObject.h"/>
-
-    <resource-file src="src/ios/wechat/resource/icon_session-8@2x.png" />
-    <resource-file src="src/ios/wechat/resource/icon_timeline-8@2x.png" />
-    <source-file src="src/ios/wechat/resource/libWeChatSDK.a" framework="true" />
-
-      <framework src="Social.framework" weak="true" />
+    <framework src="Social.framework" weak="true" />
     <framework src="MessageUI.framework" weak="true" />
-
-      <!-- Other required frameworks -->
-      <framework src="libz.dylib" />
-      <framework src="libsqlite3.0.dylib" />
-      <framework src="SystemConfiguration.framework" />
-      <framework src="Security.framework" />
-      <framework src="libstdc++.6.dylib" />
-
-
   </platform>
 
   <!-- android -->
@@ -85,7 +57,7 @@
       </feature>
     </config-file>
 
-    <config-file target="AndroidManifest.xml" parent="/manifest">
+    <config-file target="AndroidManifest.xml" parent="/*">
       <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     </config-file>
 
@@ -101,6 +73,15 @@
     </config-file>
 
     <source-file src="src/wp8/SocialSharing.cs" />
+    <framework src="src/wp8/Newtonsoft.Json.dll" custom="true"/>
+  </platform>
+  
+  <!-- windows -->
+  <platform name="windows">
+    <js-module src="src/windows/SocialSharingProxy.js" name="SocialSharingProxy">
+      <merges target="" />
+    </js-module>
+    <source-file src="" />
   </platform>
 
 </plugin>

@@ -1,10 +1,9 @@
-# wechat support
 # PhoneGap Social Sharing plugin for Android, iOS and Windows Phone
 
 by [@EddyVerbruggen](http://www.twitter.com/eddyverbruggen), [read my blog about this plugin](http://www.x-services.nl/phonegap-share-plugin-facebook-twitter-social-media/754)
 
-* These instructions are for PhoneGap 3.0.0 and up.
-* For Phonegap 2.9.0 and lower, see [the 2.x branch](https://github.com/EddyVerbruggen/SocialSharing-PhoneGap-Plugin/tree/phonegap-2.x/).
+[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=eddyverbruggen%40gmail%2ecom&lc=US&item_name=cordova%2dplugin%2dsocialsharing&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted)
+Every now and then kind folks ask me how they can give me all their money. So if you want to contribute to my pension fund, then please go ahead :)
 
 <table width="100%">
     <tr>
@@ -78,16 +77,10 @@ SocialSharing is compatible with [Cordova Plugman](https://github.com/apache/cor
 ```
 $ phonegap local plugin add https://github.com/EddyVerbruggen/SocialSharing-PhoneGap-Plugin.git
 ```
-or
+
+or with Cordova CLI, from npm:
 ```
-$ cordova plugin add https://github.com/EddyVerbruggen/SocialSharing-PhoneGap-Plugin.git
-```
-or using the cordova plugin registry
-```
-$ cordova plugin add nl.x-services.plugins.socialsharing
-```
-run this command afterwards (backup your project first!):
-```
+$ cordova plugin add cordova-plugin-x-socialsharing
 $ cordova prepare
 ```
 
@@ -138,11 +131,11 @@ Window Phone: Copy `SocialSharing.cs` to `platforms/wp8/Plugins/nl.x-services.pl
 ### PhoneGap Build
 Just add the following xml to your `config.xml` to always use the latest version of this plugin (which is published to plugins.cordova.io these days):
 ```xml
-<gap:plugin name="nl.x-services.plugins.socialsharing" source="plugins.cordova.io" />
+<gap:plugin name="cordova-plugin-x-socialsharing" source="npm" />
 ```
 or to use an older version, hosted at phonegap build:
 ```xml
-<gap:plugin name="nl.x-services.plugins.socialsharing" version="4.3.0" />
+<gap:plugin name="nl.x-services.plugins.socialsharing" version="4.3.16" />
 ```
 
 SocialSharing.js is brought in automatically. Make sure though you include a reference to cordova.js in your index.html's head:
@@ -154,11 +147,11 @@ SocialSharing.js is brought in automatically. Make sure though you include a ref
 You can share text, a subject (in case the user selects the email application), (any type and location of) file (like an image), and a link.
 However, what exactly gets shared, depends on the application the user chooses to complete the action. A few examples:
 - Mail: message, subject, file.
-- Twitter: message, image (other filetypes are not supported), link (which is automatically shortened).
+- Twitter: message, image (other filetypes are not supported), link (which is automatically shortened if the Twitter client deems it necessary).
 - Google+ / Hangouts (Android only): message, subject, link
 - Flickr: message, image (an image is required for this option to show up).
-- Facebook iOS: message, image (other filetypes are not supported), link.
 - Facebook Android: sharing a message is not possible. You can share either a link or an image (not both), but a description can not be prefilled. See [this Facebook issue which they won't solve](https://developers.facebook.com/x/bugs/332619626816423/). As an alternative you can use `shareViaFacebookWithPasteMessageHint` since plugin version 4.3.4. See below for details. Also note that sharing a URL on a non standard domain (like .fail) [may not work on Android](https://github.com/EddyVerbruggen/SocialSharing-PhoneGap-Plugin/issues/253). Make sure you test this. You can use a [link shortener](https://goo.gl) to workaround this issue.
+- Facebook iOS: message, image (other filetypes are not supported), link. Beware that since a Fb update in April 2015 sharing a prefilled message is no longer possible when the Fb app is installed (like Android), see #344. Alternative: use `shareViaFacebookWithPasteMessageHint`.
 
 ### Using the share sheet
 Here are some examples you can copy-paste to test the various combinations:
@@ -183,32 +176,70 @@ Example: share a PDF file from the local www folder:
 ```
 
 ### Sharing directly to..
-Twitter
+
+####Twitter
 ```html
 <!-- unlike most apps Twitter doesn't like it when you use an array to pass multiple files as the second param -->
 <button onclick="window.plugins.socialsharing.shareViaTwitter('Message via Twitter')">message via Twitter</button>
 <button onclick="window.plugins.socialsharing.shareViaTwitter('Message and link via Twitter', null /* img */, 'http://www.x-services.nl')">msg and link via Twitter</button>
 ```
 
-Facebook
+####Facebook
 ```html
 <button onclick="window.plugins.socialsharing.shareViaFacebook('Message via Facebook', null /* img */, null /* url */, function() {console.log('share ok')}, function(errormsg){alert(errormsg)})">msg via Facebook (with errcallback)</button>
 ```
 
-Facebook with prefilled message - as a workaround for [this Facebook Android bug](https://developers.facebook.com/x/bugs/332619626816423/).
+Facebook with prefilled message - as a workaround for [this Facebook (Android) bug](https://developers.facebook.com/x/bugs/332619626816423/). BEWARE: it's against Facebooks policy to prefil the message, or even hint the user to prefill a message for them. [See this page for details.](https://developers.facebook.com/docs/apps/review/prefill)
 
 * On Android the user will see a Toast message with a message you control (default: "If you like you can paste a message from your clipboard").
-* On iOS this function behaves the same as `shareViaFacebook`.
+* On iOS this function used to behave the same as `shareViaFacebook`, but since 4.3.18 a short message is shown prompting the user to paste a message (like Android). This message is not shown in case the Fb app is not installed since the internal iOS Fb share widget still supports prefilling the message.
+* iOS9 quirk: if you want to use this method, you need to whitelist `fb://` in your .plist file.
 ```html
 <button onclick="window.plugins.socialsharing.shareViaFacebookWithPasteMessageHint('Message via Facebook', null /* img */, null /* url */, 'Paste it dude!', function() {console.log('share ok')}, function(errormsg){alert(errormsg)})">msg via Facebook (with errcallback)</button>
 ```
 
-WhatsApp
+Whitelisting Facebook in your app's .plist:
+```xml
+<key>LSApplicationQueriesSchemes</key>
+<array>
+  <string>fb</string>
+</array>
+```
+
+####Instagram
+```html
+<button onclick="window.plugins.socialsharing.shareViaInstagram('Message via Instagram', 'https://www.google.nl/images/srpr/logo4w.png', function() {console.log('share ok')}, function(errormsg){alert(errormsg)})">msg via Instagram</button>
+```
+
+Quirks:
+* Instagram no longer permits prefilling a message - you can prompt the user to paste the message you've passed to the plugin because we're adding it to the clipboard for you.
+
+iOS Quirks:
+* Before trying to invoke `shareViaInstagram` please use `canShareVia('instagram'..` AND whitelist the urlscheme (see below).
+* Although this plugin follows the Instagram sharing guidelines, the user may not only see Instagram in the share sheet, but also other apps that listen to the "Instagram sharing ID". Just google "com.instagram.exclusivegram" and you see what I mean.
+
+
+#### WhatsApp
+* Note that on iOS when sharing an image and text, only the image is shared - let's hope WhatsApp creates a proper iOS extension to fix this.
+* Before using this method you may want to use `canShareVia('whatsapp'..` (see below).
 ```html
 <button onclick="window.plugins.socialsharing.shareViaWhatsApp('Message via WhatsApp', null /* img */, null /* url */, function() {console.log('share ok')}, function(errormsg){alert(errormsg)})">msg via WhatsApp (with errcallback)</button>
 ```
 
-SMS (note that on Android, SMS via Hangouts may not behave correctly)
+##### Experimental feature: sharing directly to someone
+Available in 5.0.8 and up - please let me know if this works for your device! Open an issue if not..
+
+```html
+<button onclick="window.plugins.socialsharing.shareViaWhatsAppToReceiver(receiver, 'Message via WhatsApp', null /* img */, null /* url */, function() {console.log('share ok')})">msg via WhatsApp for Addressbook ID 101</button>
+```
+For `receiver` on iOS pass in the Addressbook ID (or 'abid'). You can find those abid's by using the [Cordova Contacts Plugin](https://github.com/apache/cordova-plugin-contacts).
+The result in the success callback of the `find` function is a JSON array of contact objects, use the 'id' you find in those objects.
+Don't pass in an image on iOS because that can't be sent to someone directly unfortunately. Message and URL are fine though.
+
+On Android pass in the phone number of the person you want to send a message to (untested at the moment).
+
+####SMS
+Note that on Android, SMS via Hangouts may not behave correctly
 ```html
 <!-- Want to share a prefilled SMS text? -->
 <button onclick="window.plugins.socialsharing.shareViaSMS('My cool message', null /* see the note below */, function(msg) {console.log('ok: ' + msg)}, function(msg) {alert('error: ' + msg)})">share via SMS</button>
@@ -218,8 +249,8 @@ SMS (note that on Android, SMS via Hangouts may not behave correctly)
 <button onclick="window.plugins.socialsharing.shareViaSMS({'message':'My cool message', 'subject':'The subject', 'image':'https://www.google.nl/images/srpr/logo4w.png'}, '0612345678,0687654321', function(msg) {console.log('ok: ' + msg)}, function(msg) {alert('error: ' + msg)})">share via SMS</button>
 ```
 
-Email - code inspired by the [EmailComposer plugin](https://github.com/katzer/cordova-plugin-email-composer),
-note that this is not supported on the iOS 8 simulator (an alert will be shown if your try to).
+####Email
+Code inspired by the [EmailComposer plugin](https://github.com/katzer/cordova-plugin-email-composer), note that this is not supported on the iOS 8 simulator (an alert will be shown if your try to).
 ```js
 window.plugins.socialsharing.shareViaEmail(
   'Message', // can contain HTML tags, but support on Android is rather limited:  http://stackoverflow.com/questions/15136480/how-to-send-html-content-with-image-through-android-default-email-client
@@ -233,7 +264,7 @@ window.plugins.socialsharing.shareViaEmail(
 );
 ```
 
-If Facebook, Twitter, WhatsApp, SMS or Email is not available, the errorCallback is called with the text 'not available'.
+If Facebook, Twitter, Instagram, WhatsApp, SMS or Email is not available, the errorCallback is called with the text 'not available'.
 
 If you feel lucky, you can even try to start any application with the `shareVia` function:
 ```html
@@ -259,8 +290,10 @@ You can even specify the activity if the app offers multiple sharing ways, passi
 ```html
 <button onclick="window.plugins.socialsharing.canShareVia('com.tencent.mm/com.tencent.mm.ui.tools.ShareToTimeLineUI', 'msg', null, img, null, function(e){alert(e)}, function(e){alert(e)})">is WeChat available on Android?</button>
 <button onclick="window.plugins.socialsharing.canShareVia('com.apple.social.facebook', 'msg', null, null, null, function(e){alert(e)}, function(e){alert(e)})">is facebook available on iOS?</button>
+// this one requires whitelisting of whatsapp:// on iOS9 in your .plist file
 <button onclick="window.plugins.socialsharing.canShareVia('whatsapp', 'msg', null, null, null, function(e){alert(e)}, function(e){alert(e)})">is WhatsApp available?</button>
 <button onclick="window.plugins.socialsharing.canShareVia('sms', 'msg', null, null, null, function(e){alert(e)}, function(e){alert(e)})">is SMS available?</button>
+<button onclick="window.plugins.socialsharing.canShareVia('instagram', 'msg', null, null, null, function(e){alert(e)}, function(e){alert(e)})">is Instagram available?</button>
 <!-- Email is a different beast, so I added a specific method for it -->
 <button onclick="window.plugins.socialsharing.canShareViaEmail(function(e){alert(e)}, function(e){alert(e)})">is Email available?</button>
 ```
@@ -294,7 +327,7 @@ If you can't get the plugin to work, have a look at [this demo project](https://
 
 #### Notes about the successCallback (you can just ignore the callbacks if you like)
 Since version 3.8 the plugin passes a boolean to the successCallback to let the app know whether or not content was actually shared, or the share widget was closed by the user.
-On iOS this works as expected, but on Android some sharing targets may return false, even though sharing succeeded. This is not a limitation of the plugin, it's the target app which doesn't play nice.
+On iOS this works as expected (except for Facebook, in case the app is installed), but on Android some sharing targets may return false, even though sharing succeeded. This is not a limitation of the plugin, it's the target app which doesn't play nice.
 To make it more confusing, when sharing via SMS on Android, you'll likely always have the successCallback invoked. Thanks Google.
 
 #### Sharing multiple images (or other files)
@@ -316,23 +349,51 @@ window.plugins.socialsharing.share(
 
 Note that a lot of apps support sharing multiple files, but Twitter just doesn't accept more that one file.
 
+#### Saving images to the photo album (iOS only currently)
+Since version 4.3.16 of this plugin you can save an array of images to the camera roll:
+```js
+window.plugins.socialsharing.saveToPhotoAlbum(
+  ['https://www.google.nl/images/srpr/logo4w.png','www/image.gif'],
+  onSuccess, // optional success function
+  onError    // optional error function
+);
+```
+
 #### iOS quirk (with camera plugin)
 When using this plugin in the callback of the Phonegap camera plugin, wrap the call to `share()` in a `setTimeout()`.
 The share widget has the same limitation as the alert dialogue [mentioned in the Phonegap documentation](http://docs.phonegap.com/en/2.9.0/cordova_camera_camera.md.html#camera.getPicture_ios_quirks).
 
 #### Excluding some options from the widget
-If you want to exclude (for example) the assign-to-contact and copy-to-pasteboard options, add these lines
-right before the last line of the share() method in SocialSharing.m (see the commented lines in that file):
+If you want to exclude (for example) the assign-to-contact and copy-to-pasteboard options, add this to your main plist file:
+
+```xml
+<key>SocialSharingExcludeActivities</key>
+<array>
+  <string>com.apple.UIKit.activity.AssignToContact</string>
+  <string>com.apple.UIKit.activity.CopyToPasteboard</string>
+</array>
 ```
-NSArray * excludeActivities = @[UIActivityTypeAssignToContact, UIActivityTypeCopyToPasteboard];
-activityVC.excludedActivityTypes = excludeActivities;
-```
-I'll probably make this configurable via Javascript one day.
-And thanks for the tip, Simon Robichaud!
+
+Here's the list of available activities you can disable :
+
+ - com.apple.UIKit.activity.PostToFacebook
+ - com.apple.UIKit.activity.PostToTwitter
+ - com.apple.UIKit.activity.PostToFlickr
+ - com.apple.UIKit.activity.PostToWeibo
+ - com.apple.UIKit.activity.PostToVimeo
+ - com.apple.UIKit.activity.TencentWeibo
+ - com.apple.UIKit.activity.Message
+ - com.apple.UIKit.activity.Mail
+ - com.apple.UIKit.activity.Print
+ - com.apple.UIKit.activity.CopyToPasteboard
+ - com.apple.UIKit.activity.AssignToContact
+ - com.apple.UIKit.activity.SaveToCameraRoll
+ - com.apple.UIKit.activity.AddToReadingList
+ - com.apple.UIKit.activity.AirDrop
 
 
 ## 4b. Usage on Windows Phone
-The available methods on WP8 are: `available`, `canShareViaEmail`, `share` and `shareViaEmail`.
+The available methods on WP8 are: `available`, `canShareViaEmail`, `share`, `shareViaEmail` and `shareViaSMS`.
 Currently the first two always return true, but this may change in the future in case I can find a way to truly detect the availability.
 
 The `share` function on WP8 supports two flavours: message only, or a combination of message, title and link.
@@ -380,31 +441,20 @@ Note that since iOS 8 this popup is the only way Apple allows you to share stuff
 the popup at the bottom of the screen (seems like a logical default because that's where it previously was as well).
 You can however override this position in the same way as explained above.
 
+**Note**: when using the [WkWebView polyfill](https://github.com/Telerik-Verified-Plugins/WKWebView) the `iPadPopupCoordinates` overrides [doesn't work](https://github.com/Telerik-Verified-Plugins/WKWebView/issues/77) so you can call the alternative `setIPadPopupCoordinates` method to define the popup position just before you call the `share` method.
+
+example :
+
+```js
+var targetRect = event.targetElement.getBoundingClientRect(),
+    targetBounds = targetRect.left + ',' + targetRect.top + ',' + targetRect.width + ',' + targetRect.height;
+
+window.plugins.socialsharing.setIPadPopupCoordinates(targetBounds);
+window.plugins.socialsharing.share('Hello from iOS :)')
+```
+
 ## 5. Credits ##
 
 This plugin was enhanced for Plugman / PhoneGap Build by [Eddy Verbruggen](http://www.x-services.nl).
 The Android and Windows Phone code was entirely created by the author.
 The first iteration of the iOS code was inspired by [Cameron Lerch](https://github.com/bfcam/phonegap-ios-social-plugin).
-
-
-## 6. License
-
-[The MIT License (MIT)](http://www.opensource.org/licenses/mit-license.html)
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
