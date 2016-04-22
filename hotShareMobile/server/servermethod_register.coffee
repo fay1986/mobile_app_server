@@ -1,5 +1,6 @@
 if Meteor.isServer
-  myCrypto = Meteor.npmRequire "crypto"
+  #myCrypto = Meteor.npmRequire "crypto"
+  myCrypto = require 'crypto'
   Meteor.startup ()->
     Meteor.methods
       "unpublish":(postId,userId,drafts)->

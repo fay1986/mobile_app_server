@@ -1,0 +1,21 @@
+{
+  "name": "hotShareMobile",
+  "version": "1.1.4",
+  "main": "mobile-config.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "hotShare Design Team",
+  "license": "ISC",
+  "description": "Share everything with everyone",
+  "dependencies": {
+    "eventie": "^1.0.6",
+    "jpush-sdk": "^3.2.1",
+    "jquery": "^2.2.3",
+    "jssha": "^2.0.2",
+    "meteor-node-stubs": "^0.2.3",
+    "seedrandom": "^2.4.2",
+    "wolfy87-eventemitter": "^4.3.0"
+  }
+}

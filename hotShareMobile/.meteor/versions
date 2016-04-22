@@ -66,11 +66,9 @@ meteor@1.1.14
 meteor-base@1.0.4
 meteor-phonegap-push@0.0.1
 meteor-swipe@0.0.10
-meteorhacks:async@1.0.0
 meteorhacks:cluster@1.6.9
 meteorhacks:kadira@2.28.5
 meteorhacks:meteorx@1.4.1
-meteorhacks:npm@1.5.0
 meteorhacks:picker@1.0.3
 meteorhacks:search-source@1.4.2
 meteorhacks:subs-manager@1.6.4
@@ -86,7 +84,6 @@ mongo@1.1.7
 mongo-id@1.0.4
 mongo-livedata@1.0.12
 npm-bcrypt@0.8.5
-npm-container@1.2.0
 npm-mongo@1.4.43
 oauth@1.1.10
 oauth2@1.1.9

@@ -10,7 +10,6 @@ coffeescript
 less
 fastclick
 accounts-password
-meteorhacks:npm@1.2.2
 accounts-weibo
 mdg:camera
 leonzhang1109:accounts-wechat
@@ -45,7 +44,6 @@ spacebars
 check
 
 
-npm-container
 crosswalk
 meteorhacks:subs-manager
 tap:i18n
@@ -56,3 +54,4 @@ service-configuration
 tap:i18n-bundler
 standard-minifier-css
 standard-minifier-js
+ecmascript
