@@ -25,7 +25,6 @@ meteorhacks:cluster
 tmeasday:publish-counts
 http
 percolate:synced-cron
-standard-minifiers
 meteor-base
 mobile-experience
 mongo
@@ -49,3 +48,5 @@ meteorhacks:subs-manager
 u2622:persistent-session
 spiderable
 tap:i18n
+standard-minifier-css
+standard-minifier-js
