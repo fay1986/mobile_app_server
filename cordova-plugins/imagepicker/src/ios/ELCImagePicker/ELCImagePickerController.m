@@ -51,11 +51,21 @@
     if (!shouldSelect) {
         NSString *title = [NSString stringWithFormat:NSLocalizedString(@"Maximum %d photos.", nil), self.maximumImagesCount];
         NSString *message = [NSString stringWithFormat:NSLocalizedString(@"You can only select %d photos at a time.", nil), self.maximumImagesCount];
+#ifndef TARGET_IS_EXTENSION
         [[[UIAlertView alloc] initWithTitle:title
                                     message:message
                                    delegate:nil
                           cancelButtonTitle:nil
                           otherButtonTitles:NSLocalizedString(@"Okay", nil), nil] show];
+#else
+        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:title message:message preferredStyle:UIAlertControllerStyleAlert];
+        
+        UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"Okay" style:UIAlertActionStyleDefault handler:nil];
+        
+        [alertController addAction:okAction];
+        
+        [self presentViewController:alertController animated:YES completion:nil];
+#endif
     }
     return shouldSelect;
 }

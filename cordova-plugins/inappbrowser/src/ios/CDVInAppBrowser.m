@@ -238,8 +238,9 @@
         NSLog(@"Tried to show IAB while already shown");
         return;
     }
-
+#ifndef TARGET_IS_EXTENSION
     _previousStatusBarStyle = [UIApplication sharedApplication].statusBarStyle;
+#endif
 
     CDVInAppBrowserNavigationController* nav = [[CDVInAppBrowserNavigationController alloc]
                                    initWithRootViewController:self.inAppBrowserViewController];
@@ -272,11 +273,15 @@
 
 - (void)openInSystem:(NSURL*)url
 {
+#ifndef TARGET_IS_EXTENSION
     if ([[UIApplication sharedApplication] canOpenURL:url]) {
         [[UIApplication sharedApplication] openURL:url];
     } else { // handle any custom schemes to plugins
         [[NSNotificationCenter defaultCenter] postNotification:[NSNotification notificationWithName:CDVPluginHandleOpenURLNotification object:url]];
     }
+#else
+    [[NSNotificationCenter defaultCenter] postNotification:[NSNotification notificationWithName:CDVPluginHandleOpenURLNotification object:url]];
+#endif
 }
 
 // This is a helper method for the inject{Script|Style}{Code|File} API calls, which
@@ -498,11 +503,11 @@
     // Don't recycle the ViewController since it may be consuming a lot of memory.
     // Also - this is required for the PDF/User-Agent bug work-around.
     self.inAppBrowserViewController = nil;
-
+#ifndef TARGET_IS_EXTENSION
     if (IsAtLeastiOSVersion(@"7.0")) {
         [[UIApplication sharedApplication] setStatusBarStyle:_previousStatusBarStyle];
     }
-
+#endif
     _previousStatusBarStyle = -1; // this value was reset before reapplying it. caused statusbar to stay black on ios7
 }
 
@@ -527,11 +532,11 @@
     //        [self.viewController dismissViewControllerAnimated:YES completion:nil];
     //    }
     //});
-
+#ifndef TARGET_IS_EXTENSION
     if (IsAtLeastiOSVersion(@"7.0")) {
         [[UIApplication sharedApplication] setStatusBarStyle:_previousStatusBarStyle];
     }
-
+#endif
     _previousStatusBarStyle = -1; // this value was reset before reapplying it. caused statusbar to stay black on ios7
 }
 
@@ -1125,9 +1130,11 @@
 
 - (void)viewWillAppear:(BOOL)animated
 {
+#ifndef TARGET_IS_EXTENSION
     if (IsAtLeastiOSVersion(@"7.0")) {
         [[UIApplication sharedApplication] setStatusBarStyle:[self preferredStatusBarStyle]];
     }
+#endif
     [self rePositionViews];
 
     [super viewWillAppear:animated];
@@ -1139,9 +1146,13 @@
 // change that value.
 //
 - (float) getStatusBarOffset {
+#ifndef TARGET_IS_EXTENSION
     CGRect statusBarFrame = [[UIApplication sharedApplication] statusBarFrame];
     float statusBarOffset = IsAtLeastiOSVersion(@"7.0") ? MIN(statusBarFrame.size.width, statusBarFrame.size.height) : 0.0;
     return statusBarOffset;
+#else
+    return 0.0;
+#endif
 }
 
 - (void) rePositionViews {
@@ -1334,7 +1345,7 @@
 @implementation CDVInAppBrowserNavigationController : UINavigationController
 
 - (void) viewDidLoad {
-
+#ifndef TARGET_IS_EXTENSION
     CGRect frame = [UIApplication sharedApplication].statusBarFrame;
 
     // simplified from: http://stackoverflow.com/a/25669695/219684
@@ -1342,6 +1353,7 @@
     UIToolbar* bgToolbar = [[UIToolbar alloc] initWithFrame:frame];
     bgToolbar.barStyle = UIBarStyleDefault;
     [self.view addSubview:bgToolbar];
+#endif
 
     [super viewDidLoad];
 }

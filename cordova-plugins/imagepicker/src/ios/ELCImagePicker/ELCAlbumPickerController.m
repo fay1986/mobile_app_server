@@ -66,9 +66,18 @@
             
             // Group Enumerator Failure Block
             void (^assetGroupEnumberatorFailure)(NSError *) = ^(NSError *error) {
-                
+#ifndef TARGET_IS_EXTENSION
                 UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Error" message:[NSString stringWithFormat:@"Album Error: %@ - %@", [error localizedDescription], [error localizedRecoverySuggestion]] delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil];
                 [alert show];
+#else
+                UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Error" message:[NSString stringWithFormat:@"Album Error: %@ - %@", [error localizedDescription], [error localizedRecoverySuggestion]] preferredStyle:UIAlertControllerStyleAlert];
+                
+                UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"Ok"style:UIAlertActionStyleDefault handler:nil];
+                
+                [alertController addAction:okAction];
+                
+                [self presentViewController:alertController animated:YES completion:nil];
+#endif
                 
                 NSLog(@"A problem occured %@", [error description]);	                                 
             };	

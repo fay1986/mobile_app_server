@@ -297,6 +297,7 @@ if Meteor.isClient
           $('.modal-backdrop.in').remove()
           if Drafts.find().count() < 1
             Router.go('/')
+            window.plugins.shareExtension.closeView("取消");
         )
       onClose: ()->
         window.popupProgressBar = undefined
@@ -952,7 +953,7 @@ if Meteor.isClient
           $('.addPost').addClass('animated ' + animateOutUpperEffect);
           Meteor.setTimeout ()->
             Router.go('/')
-            window.plugins.shareExtension.closeView()
+            window.plugins.shareExtension.closeView("取消")
           ,animatePageTrasitionTimeout
           return
         , '您确定要删除未保存的草稿吗？', ['删除故事','继续创作']);
@@ -1045,7 +1046,7 @@ if Meteor.isClient
       Drafts.remove {owner: Meteor.userId()}
       TempDrafts.remove {owner: Meteor.userId()}
       history.back()
-      window.plugins.shareExtension.closeView()
+      window.plugins.shareExtension.closeView("存储成功")
       #PUB.back()
 
 
@@ -1109,11 +1110,11 @@ if Meteor.isClient
               window.plugins.toast.showShortBottom('上传失败，请稍后重试')
               return
             publishPostHandle()
-            window.plugins.shareExtension.closeView()
+            window.plugins.shareExtension.closeView("发表成功")
           )
         else
           publishPostHandle()
-          window.plugins.shareExtension.closeView()
+          window.plugins.shareExtension.closeView("发表成功")
         return
     'click .remove':(event)->
       Drafts.remove this._id
