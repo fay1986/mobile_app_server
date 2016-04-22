@@ -1,6 +1,7 @@
 if Meteor.isServer
   Meteor.startup ()->
-    seedrandom = Meteor.npmRequire('seedrandom')
+    #seedrandom = Meteor.npmRequire('seedrandom')
+    seedrandom = require 'seedrandom'
     rng = seedrandom(new Date())
     name_numbers = RefNames.find({}).count()
     @getRandomAnonymousName = ()->

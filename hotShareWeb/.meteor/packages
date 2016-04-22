@@ -11,7 +11,6 @@ less
 meteorhacks:fast-render
 fortawesome:fontawesome
 meteorhacks:search-source
-meteorhacks:npm
 meteor-phonegap-push
 
 
@@ -43,10 +42,10 @@ check
 
 
 
-npm-container
 meteorhacks:subs-manager
 u2622:persistent-session
 spiderable
 tap:i18n
 standard-minifier-css
 standard-minifier-js
+ecmascript

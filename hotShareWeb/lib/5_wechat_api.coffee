@@ -148,7 +148,8 @@ if Meteor.isServer
     return;
   token = ''
   ticket = ''
-  jsSHA = Meteor.npmRequire('jssha')
+  #jsSHA = Meteor.npmRequire('jssha')
+  jsSHA = require 'jssha'
   appId = process.env.WECHATAPI_APP_ID || ''
   appSecret = process.env.WECHATAPI_APP_SECRET || ''
   requestUrl = 'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid='+appId+'&secret='+appSecret
