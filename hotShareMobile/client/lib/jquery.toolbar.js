@@ -40,6 +40,7 @@ if ( typeof Object.create !== 'function' ) {
                 .hide();
             self.toolbar_arrow = self.toolbar.find('.arrow');
             self.initializeToolbar();
+            scrollMonitor = require("../lib/scrollMonitor.1.0.12.js")
             self.scrollMontor = scrollMonitor.create(self.$elem);
             self.needRestart = false;
         },

@@ -3,6 +3,7 @@ if Meteor.isClient
   window.iabHandle = null
   Session.set('lastImportedUrl','')
   Session.setDefault('itemInAddPostPending',0)
+  async = require("../lib/async.1.4.2.js")
   @getDisplayElementWidth=()->
     $('.addPost').width()*0.9
   handleSaveDraft = ()->
@@ -1046,7 +1047,7 @@ if Meteor.isClient
       Drafts.remove {owner: Meteor.userId()}
       TempDrafts.remove {owner: Meteor.userId()}
       history.back()
-      window.plugins.shareExtension.closeView("存储成功")
+      window.plugins.shareExtension.closeView("存储成功，可打开故事贴查看")
       #PUB.back()
 
 
@@ -1058,8 +1059,10 @@ if Meteor.isClient
         $('.modal-backdrop.fade.in').remove()
 
       if Meteor.user() is null
-        window.plugins.toast.showShortBottom('请登录后发表您的故事')
+        if Session.get("isShareExtension") is false
+            window.plugins.toast.showShortBottom('请登录后发表您的故事')
         Router.go('/user')
+        window.plugins.shareExtension.closeView("发表失败，请打开故事贴重试")
         false
       else
         if(!Meteor.status().connected and Meteor.status().status isnt 'connecting')
@@ -1110,11 +1113,11 @@ if Meteor.isClient
               window.plugins.toast.showShortBottom('上传失败，请稍后重试')
               return
             publishPostHandle()
-            window.plugins.shareExtension.closeView("发表成功")
+            window.plugins.shareExtension.closeView("发表成功，可打开故事贴查看")
           )
         else
           publishPostHandle()
-          window.plugins.shareExtension.closeView("发表成功")
+          window.plugins.shareExtension.closeView("发表成功，可打开故事贴查看")
         return
     'click .remove':(event)->
       Drafts.remove this._id
