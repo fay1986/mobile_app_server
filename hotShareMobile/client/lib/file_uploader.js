@@ -1,6 +1,7 @@
 
 if (Meteor.isCordova){
     uploadingFilesInfo = {filesCount:0, files:[]};
+    async = require("../lib/async.1.4.2.js")
     abortuploader = function(){}
     var showDebug=false
     var uploadToAliyun_new = function(filename,URI, callback){

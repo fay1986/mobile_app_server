@@ -1,4 +1,5 @@
 if Meteor.isClient
+  async = require("../lib/async.1.4.2.js")
   @isIOS = (navigator.userAgent.match(/(iPad|iPhone|iPod)/g) ? true : false)
   @isWeiXinFunc = ()->
     ua = window.navigator.userAgent.toLowerCase()
