@@ -11,8 +11,8 @@
 #import <MobileCoreServices/UTCoreTypes.h>
 
 @interface ShareViewController ()
-{  
-    NSString *userId;  
+{
+    NSString *userId;
     NSString *imagePath;
     NSString *entensionTitle;
     
@@ -66,7 +66,14 @@ static ShareViewController* shareVaribleHandle =nil;
     }
     else if (error){
         
-        [responder showDialogWithMessage:[error stringByAppendingString:@",可打开故事贴查看"]];
+        if ([error isEqualToString:@"发表失败，请打开故事贴重试"]) {
+            
+            [responder.mySharedDefults setObject:responder.entensionURL forKey:@"shareUrl"];
+            
+            [responder.mySharedDefults synchronize];
+        }
+        
+        [responder showDialogWithMessage:error];
     }
     
 }
@@ -119,7 +126,7 @@ static ShareViewController* shareVaribleHandle =nil;
     if (!userId || [userId isEqualToString:@""]) {
         
         [self showDialogWithMessage:@"抱歉，请先打开故事贴，并登录，才可以使用分享功能。"];
-
+        
     }
     else{
         

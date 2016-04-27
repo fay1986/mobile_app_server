@@ -14,21 +14,17 @@
     
     NSDictionary *dic = [mySharedDefults objectForKey:@"shareExtensionItem"];
     
-   // NSLog(@"shareExtensionItem =======  %@",dic);
+    NSLog(@"shareExtensionItem =======  %@",dic);
     
-    //NSString *url = dic[@"url"];
-     NSString *url = [mySharedDefults objectForKey:@"shareUrl"];
-    
-    if (url) {
+    if (dic.count) {
         
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:url];
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dic];
     }
     else{
         
-        //pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@""];
-    }
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
     
+    }
     
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
@@ -40,7 +36,7 @@
     
     NSUserDefaults * mySharedDefults = [[NSUserDefaults alloc] initWithSuiteName:@"group.org.hotsharetest"];
   
-    [mySharedDefults removeObjectForKey:@"shareUrl"];
+    [mySharedDefults removeObjectForKey:@"shareExtensionItem"];
     
     [mySharedDefults synchronize];
     

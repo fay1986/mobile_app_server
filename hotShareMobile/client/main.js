@@ -100,11 +100,11 @@ if (Meteor.isCordova) {
             console.log(error_message);
           });
         }
-        if (Session.get("isShareExtension")) {
-            return
-        }
         //TAPi18n.setLanguage("zh")
          //当用户第八次使用该软件时提示评价app
+        if (Session.get("isShareExtension")) {
+            return;
+        }         
         AppRate.preferences.usesUntilPrompt = 7;
         AppRate.preferences.storeAppURL.ios = '957024953';
         AppRate.preferences.storeAppURL.android = 'http://a.app.qq.com/o/simple.jsp?pkgname=org.hotshare.everywhere';
@@ -115,33 +115,37 @@ if (Meteor.isCordova) {
     function checkShareExtension() {
 
         window.plugins.shareExtension.getShareData(function (data) {
-            if (data && data !== "") {
-                if (Session.get("isShareExtension")) {                  
-                   editFromShare(data);
-                   window.plugins.shareExtension.emptyData();
+            if (data) {
+                if (Session.get("isShareExtension")) {
+                    editFromShare(data);
+                    window.plugins.shareExtension.emptyData();
+                    window.plugins.userinfo.getUserInfo(function (userId) {
+                        console.log("getUserInfo :" + userId);
+                        if (userId && userId !== "") {
+                            Meteor.loginWithUserId(userId, true, function (err) {
+                                if (!err) {
+                                    return console.log("登录成功!");
+                                } else {
+                                    return console.log("登录失败!原因如下:" + err);
+                                }
+                            })
+                        }
+                    }, function () {
+                        return console.log("getUserInfo was Error!");
+                    });
                 }
-                else{
-                   CustomDialog.show({url:data});
-                }       
+                else {
+                    if(data.type === 'url'){
+                        CustomDialog.show({ url: data.items[0]});
+                        return;
+                    }
+                    if(data.type === 'image'){
+                        CustomDialog.show({ imagePath: data.items[0]});
+                    }
+                }
             }
         }, function () { });
 
-        if (Session.get("isShareExtension")) {
-            window.plugins.userinfo.getUserInfo(function (userId) {
-                console.log("getUserInfo :" + userId);
-                if (userId && userId !== "") {
-                    Meteor.loginWithUserId(userId,true,function(err) {
-                        if (!err) {
-                                return console.log("登录成功!");
-                            } else {
-                                return console.log("登录失败!原因如下:" + err);
-                            } 
-                    })
-                }
-            }, function () {
-                return console.log("getUserInfo was Error!");
-            });
-        }
     }
     function eventResume(){
         if (Meteor.user()) {

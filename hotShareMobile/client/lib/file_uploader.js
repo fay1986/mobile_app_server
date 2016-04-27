@@ -512,5 +512,34 @@ if (Meteor.isCordova){
             storage: 'persistent'
           });
         };
+    importImagesFromShareExtension = function (results, callback) {
+        if (results === undefined) {
+            return;
+        }
+
+        var length = 0;
+        try {
+            length = results.length;
+        }
+        catch (error) {
+            length = results.length;
+        }
+        if (length === 0) {
+            callback('cancel');
+            return;
+        }
+
+        for (var i = 0; i < length; i++) {
+            var timestamp = new Date().getTime();
+            var originalFilename = results[i].replace(/^.*[\\\/]/, '');
+            var filename = Meteor.userId() + '_' + timestamp + '_' + originalFilename;
+            showDebug && console.log('File name ' + filename);
+            showDebug && console.log('Original full path ' + results[i]);
+            var params = { filename: filename, URI: results[i], smallImage: 'cdvfile://localhost/persistent/drafts/' + originalFilename };
+
+            callback(null, params, (i + 1), length);
+        }
+
+    };
         uploadFile = uploadFileInCordova;
     }

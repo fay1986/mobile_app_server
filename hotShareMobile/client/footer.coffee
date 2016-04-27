@@ -17,11 +17,6 @@ if Meteor.isClient
       else
         0
     wait_import_count:->
-        window.plugins.shareExtension.getShareData ((data) ->
-            if data and data != ''
-                return ture
-          ), ->
-            console.log 'getShareData was Error!'
          return false
        
       #  waitImportCount = ShareURLs.find().count()
@@ -77,14 +72,31 @@ if Meteor.isClient
               CustomDialog.show data[0]
         ,100)
         
-  @editFromShare = (url)->
+  @editFromShare = (data)->
     Meteor.defer ()->
       $('.modal-backdrop.in').remove()
     prepareToEditorMode()
     PUB.page '/add'
-    Meteor.setTimeout(()->
-      handleDirectLinkImport(url)
-    ,100)
+    if data.type is 'url'
+       Meteor.setTimeout(()->
+          handleDirectLinkImport(data.items[0])
+       ,100)
+       return
+    if data.type is 'image'
+       Meteor.defer ()->
+          importImagesFromShareExtension(data.items, (cancel, result,currentCount,totalCount)->
+            if cancel
+              #$('#level2-popup-menu').modal('hide');
+              PUB.back()
+              return
+            if result
+              console.log 'Local is ' + result.smallImage
+              Drafts.insert {type:'image', isImage:true, owner: Meteor.userId(), imgUrl:result.smallImage, filename:result.filename, URI:result.URI, layout:''}
+              if currentCount >= totalCount
+                Meteor.setTimeout(()->
+                  Template.addPost.__helpers.get('saveDraft')()
+                ,100)
+          )
   Template.footer.events
     'click #home':(e)->
       PUB.page('/')
@@ -141,7 +153,7 @@ if Meteor.isClient
         window.plugins.toast.showLongCenter("无法获得粘贴板数据，请手动粘贴\n浏览器内容加载后，点击地址栏右侧\"导入\"按钮");
     'click #share-import':(e)->
         window.plugins.shareExtension.getShareData ((data) ->
-            if data and data != ''
+            if data
                 editFromShare(data)
                 window.plugins.shareExtension.emptyData()
           ), ->
