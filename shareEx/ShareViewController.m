@@ -167,6 +167,19 @@ static ShareViewController* shareVaribleHandle =nil;
                   
                     
                 }];
+            }else if ([dataType isEqualToString:@"public.jpeg"]){
+                [provider loadItemForTypeIdentifier:dataType options:nil completionHandler:^(UIImage *image, NSError *error){
+                    //collect image...
+                    [self getImagePath:image];
+                    
+                }];
+            }
+            else if ([dataType isEqualToString:@"public.image"]){
+                [provider loadItemForTypeIdentifier:dataType options:nil completionHandler:^(UIImage *image, NSError *error){
+                    //collect image...
+                    [self getImagePath:image];
+                    
+                }];
             }else if ([dataType isEqualToString:@"public.plain-text"]){
                 [provider loadItemForTypeIdentifier:dataType options:nil completionHandler:^(NSString *contentText, NSError *error){
                     //collect image...
@@ -181,6 +194,10 @@ static ShareViewController* shareVaribleHandle =nil;
                     [_entensionItems setObject:@"url" forKey:@"type"];
                     
                     [_entensionItems setObject:@[url.absoluteString] forKey:@"items"];
+                    
+                    [_mySharedDefults setObject:_entensionItems forKey:@"shareExtensionItem"];
+                    
+                    [_mySharedDefults synchronize];
                     
                     NSLog(@"entensionURL:%@", url);
                     
@@ -239,7 +256,14 @@ static ShareViewController* shareVaribleHandle =nil;
     }
     if (imagesAry.count == count) {
         
-        [_mySharedDefults setObject:imagesAry forKey:@"items"];
+        [_entensionItems setObject:@"image" forKey:@"type"];
+        [_entensionItems setObject:imagesAry forKey:@"items"];
+        [_mySharedDefults setObject:_entensionItems forKey:@"shareExtensionItem"];
+        [_mySharedDefults synchronize];
+        
+        NSString *scriptCall = [NSString stringWithFormat:@"if(Session.get('shareExtensionItemIsNull')){checkShareExtension();}"];
+        
+        [self.commandDelegate evalJs:scriptCall];
     }
 
 }

@@ -19,7 +19,44 @@ getShareData = function(userId,url,title,imagePath) {
             });           
         }
     }
-}
+};
+
+    checkShareExtension = function () {
+
+        window.plugins.shareExtension.getShareData(function (data) {
+            if (data) {
+                Session.set('shareExtensionItemIsNull', false);
+                if (Session.get("isShareExtension")) {
+                    editFromShare(data);
+                    window.plugins.shareExtension.emptyData();
+                    window.plugins.userinfo.getUserInfo(function (userId) {
+                        console.log("getUserInfo :" + userId);
+                        if (userId && userId !== "") {
+                            Meteor.loginWithUserId(userId, true, function (err) {
+                                if (!err) {
+                                    return console.log("登录成功!");
+                                } else {
+                                    return console.log("登录失败!原因如下:" + err);
+                                }
+                            })
+                        }
+                    }, function () {
+                        return console.log("getUserInfo was Error!");
+                    });
+                }
+                else {
+                    if(data.type === 'url'){
+                        CustomDialog.show({ url: data.items[0]});
+                        return;
+                    }
+                    if(data.type === 'image'){
+                        CustomDialog.show({ imagePath: data.items[0]});
+                    }
+                }
+            }
+        }, function () {Session.set('shareExtensionItemIsNull', true);});
+
+    };
 
 if (Meteor.isCordova) {
     window.updatePushNotificationToken = function(type,token){
@@ -112,41 +149,6 @@ if (Meteor.isCordova) {
         
     }
     
-    function checkShareExtension() {
-
-        window.plugins.shareExtension.getShareData(function (data) {
-            if (data) {
-                if (Session.get("isShareExtension")) {
-                    editFromShare(data);
-                    window.plugins.shareExtension.emptyData();
-                    window.plugins.userinfo.getUserInfo(function (userId) {
-                        console.log("getUserInfo :" + userId);
-                        if (userId && userId !== "") {
-                            Meteor.loginWithUserId(userId, true, function (err) {
-                                if (!err) {
-                                    return console.log("登录成功!");
-                                } else {
-                                    return console.log("登录失败!原因如下:" + err);
-                                }
-                            })
-                        }
-                    }, function () {
-                        return console.log("getUserInfo was Error!");
-                    });
-                }
-                else {
-                    if(data.type === 'url'){
-                        CustomDialog.show({ url: data.items[0]});
-                        return;
-                    }
-                    if(data.type === 'image'){
-                        CustomDialog.show({ imagePath: data.items[0]});
-                    }
-                }
-            }
-        }, function () { });
-
-    }
     function eventResume(){
         if (Meteor.user()) {
             console.log('Refresh Main Data Source when resume');
