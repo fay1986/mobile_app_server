@@ -38,7 +38,7 @@
 				<key>NSExtensionActivationSupportsWebURLWithMaxCount</key>
 				<integer>1</integer>
 				<key>NSExtensionActivationSupportsText</key>
-				<integer>1</integer>
+				<true/>
 			</dict>
 			<key>NSExtensionJavaScriptPreprocessingFile</key>
 			<string>MyJavaScriptFile</string>
