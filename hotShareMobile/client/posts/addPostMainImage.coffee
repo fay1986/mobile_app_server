@@ -1,6 +1,6 @@
 
 if Meteor.isClient
-
+  Hammer = require '../lib/hammer.min.js'
   titleBorderColor = ()->
     if $("#title").is(':focus') is true and $("#title").css('border-color') is 'rgb(255, 255, 255)'
       $("#title").css('border-color', '#00c4ff')

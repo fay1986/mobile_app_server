@@ -1,5 +1,6 @@
 
 if Meteor.isClient
+  Hammer = require '../lib/hammer.min.js'
   @getImagePath=(path,uri,id)->
     if !path or !id
       return ''

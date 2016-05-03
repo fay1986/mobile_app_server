@@ -863,6 +863,7 @@
 
 				var currentSlide = $( '#swipebox-slider .slide' ).eq( index );
 				var zoomimg = currentSlide[0];
+				Hammer = require('../lib/hammer.min.js');
 				var hammertime = new Hammer(zoomimg);
 				var pinch = new Hammer.Pinch();
 				var rotate = new Hammer.Rotate();
