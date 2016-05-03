@@ -1,4 +1,4 @@
-root = exports ? this
+#root = exports ? this
 if Meteor.isServer
   Meteor.startup ()->
     #Files are placed in the `/private` folder:
@@ -18,7 +18,6 @@ if Meteor.isServer
         keyData: apnsProductionKey
         gateway: 'gateway.push.apple.com'
 
-    pushServer = new CordovaPush 'AIzaSyAeo0xEPBfrUJ5MztClvICNo-ZLIHcM8Zo', optionsProduction
-
+    @pushServer = new CordovaPush 'AIzaSyAeo0xEPBfrUJ5MztClvICNo-ZLIHcM8Zo', optionsProduction
     pushServer.initFeedback()
-    root.pushServer = pushServer
+    #root.pushServer = pushServer

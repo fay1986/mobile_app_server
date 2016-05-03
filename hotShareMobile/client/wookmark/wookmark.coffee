@@ -40,6 +40,7 @@ predefineColors = [
 colorLength = predefineColors.length
 colorIndex = 0
 scrollMonitor = require("../lib/scrollMonitor.1.0.12.js")
+imagesLoaded = require("../wookmark/imagesloaded.pkgd.js")
 
 class @newLayout
   @setRandomlyBackgroundColor = ($node)->
