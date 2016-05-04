@@ -533,7 +533,8 @@ if Meteor.isClient
       console.log("#comment lost focus");
       if Meteor.isCordova and isIOS
         cordova.plugins.Keyboard.disableScroll(false)
-    'click .showPosts .back' :->
+    'click .showPosts .back' :(event)->
+      event.stopPropagation()
       Session.set("pcommetsId","")
       Session.set("pcommentsName","")
       $(window).children().off()
