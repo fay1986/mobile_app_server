@@ -35,6 +35,7 @@ Template.accounts_management.events
     
     Meteor.loginWithUserId(
       @_id
+      false
       (err)->
         $title.html(title)
         if(!err)
