@@ -75,7 +75,10 @@ if Meteor.isClient
     document.ontouchmove = (e) ->
       e.preventDefault()
       return
-    $('.text').focus()
+    setTimeout ()->
+        $('.text').focus()
+      ,5
+    
   Template.setNickname.destroyed=->
     document.ontouchmove = (e) ->
       true
@@ -86,7 +89,7 @@ if Meteor.isClient
       if Meteor.isCordova and device.platform is 'iOS'
         $('.me .setNickname .head').css('position', 'static')
         Meteor.setTimeout(()->
-          distance = $('.me .setNickname .head').offset().top - ($(window).scrollTop())
+          distance = $('.me .setNickname .head').offset().top - ($(window).scrollTop())+11
           distance = '-' + distance + 'px'
           $('.me .setNickname .head').css 'margin-top', distance
           return
