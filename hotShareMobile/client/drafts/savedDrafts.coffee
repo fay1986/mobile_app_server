@@ -34,6 +34,28 @@ if Meteor.isClient
               SavedDrafts.remove saveddrafts._id
           Session.setPersistent('mySavedDraftsCount',0)
           Session.setPersistent('persistentMySavedDrafts',null)
+          window.requestFileSystem LocalFileSystem.PERSISTENT, 0, ((fs)->
+            docPath = cordova.file.documentsDirectory 
+            console.log docPath
+            window.resolveLocalFileSystemURL docPath,((dirEntry) ->
+                directoryReader = dirEntry.createReader()
+                directoryReader.readEntries ((entries)->
+                  console.log 'directoryReader.readEntries succeeded' 
+                  i = 0
+                  while i < entries.length
+                     if entries[i].name.indexOf('.jpg') != -1
+                        # delete stuff from above could go in here
+                        entries[i].remove (->
+                           console.log 'Removal succeeded'
+                        ),(e) ->
+                          console.log 'Error removing file:' + e.code
+                     i++
+                ), (e) ->
+                  console.log 'Error readEntries :' + e.code
+            ), (error) ->
+                console.log 'fileEntry.file  Error =  ' + error.code
+          ), ->
+            console.log 'Request file system error'
           Meteor.setTimeout ()->
             PUB.back()
           ,animatePageTrasitionTimeout

@@ -4,6 +4,7 @@ if Meteor.isClient
   Session.set('lastImportedUrl','')
   Session.setDefault('itemInAddPostPending',0)
   async = require("../lib/async.1.4.2.js")
+  require("../lib/file_uploader.js")
   @getDisplayElementWidth=()->
     $('.addPost').width()*0.9
   handleSaveDraft = ()->
@@ -906,6 +907,8 @@ if Meteor.isClient
         Session.set 'isReviewMode','1'
         #Delete it from SavedDrafts
         draftData = Drafts.find().fetch()
+        draftImageData = Drafts.find({type:'image'}).fetch()
+        removeImagesFromCache(draftImageData)
         draftId = draftData[0]._id
         if SavedDrafts.find().count() is 1
           Session.setPersistent('mySavedDraftsCount',0)
@@ -946,6 +949,8 @@ if Meteor.isClient
           Session.set 'isReviewMode','1'
           #Delete it from SavedDrafts
           draftData = Drafts.find().fetch()
+          draftImageData = Drafts.find({type:'image'}).fetch()
+          removeImagesFromCache(draftImageData)
           if draftData[0] and draftData[0]._id
             draftId = draftData[0]._id
             SavedDrafts.remove draftId
@@ -1113,6 +1118,7 @@ if Meteor.isClient
               window.plugins.toast.showShortBottom('上传失败，请稍后重试')
               return
             publishPostHandle()
+            removeImagesFromCache(draftImageData)
             window.plugins.shareExtension.closeView("发表成功，可打开故事贴查看")
           )
         else

@@ -235,7 +235,7 @@ static ShareViewController* shareVaribleHandle =nil;
     if (!imagesAry) {
         imagesAry = [NSMutableArray new];
         fileMgr = [[NSFileManager alloc] init];
-        docsPath = [NSTemporaryDirectory()stringByStandardizingPath];
+        docsPath  = [NSHomeDirectory()stringByAppendingPathComponent:@"Documents/"];
         orientation = UIImageOrientationUp;
         targetSize = CGSizeMake(1900, 1900);
         i = 1;

@@ -54,7 +54,7 @@
 	CDVPluginResult* result = nil;
 	NSMutableArray *resultStrings = [[NSMutableArray alloc] init];
     NSData* data = nil;
-    NSString* docsPath = [NSTemporaryDirectory()stringByStandardizingPath];
+    NSString* docsPath = [NSHomeDirectory()stringByAppendingPathComponent:@"Documents/"];
     NSError* err = nil;
     NSFileManager* fileMgr = [[NSFileManager alloc] init];
     NSString* filePath;

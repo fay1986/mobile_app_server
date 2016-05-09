@@ -541,5 +541,35 @@ if (Meteor.isCordova){
         }
 
     };
+    
+    removeImagesFromCache = function (draftImageData) {
+        var length = draftImageData.length;
+        if (length === 0) {
+            return;
+        }
+
+        window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function () {
+            for (var i = 0; i < length; i++) {
+                var URI = draftImageData[i].URI;
+                if (URI === void 0 || draftImageData[i].imgUrl.toLowerCase().indexOf("http://") >= 0 || draftImageData[i].imgUrl.toLowerCase().indexOf("https://") >= 0) {
+                    continue;
+                }
+                window.resolveLocalFileSystemURL(URI, function (fileEntry) {
+                    fileEntry.remove(function () {
+                        console.log("Removal succeeded");
+                    }, function (e) {
+                        console.log('Error removing file: ' + e);
+                    });
+                }, function (error) {
+                    console.log("fileEntry.file Error = " + error.code);
+                });
+            }
+
+        }, function () {
+            console.log('Request file system error');
+        });
+
+    };
+    
         uploadFile = uploadFileInCordova;
     }
