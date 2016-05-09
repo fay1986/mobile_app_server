@@ -3,7 +3,7 @@ if Meteor.isClient
   window.iabHandle = null
   Session.set('lastImportedUrl','')
   Session.setDefault('itemInAddPostPending',0)
-  async = require("../lib/async.1.4.2.js")
+  async = require("../lib/async.1.5.2.js")
   require("../lib/file_uploader.js")
   @getDisplayElementWidth=()->
     $('.addPost').width()*0.9
