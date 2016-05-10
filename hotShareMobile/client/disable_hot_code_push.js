@@ -1,5 +1,5 @@
 
-if(Meteor.isCordova){
+/*if(Meteor.isCordova){
   if(Package.reload){
     Package.reload = null;
   }
@@ -12,4 +12,4 @@ if(Meteor.isCordova){
   if(Package.autoupdate.Autoupdate.newClientAvailable){
     Package.autoupdate.Autoupdate.newClientAvailable = function(){return false;};
   }
-}
+}*/
