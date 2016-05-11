@@ -98,6 +98,20 @@ if (Meteor.isCordova) {
       return lang;
     };
     document.addEventListener("deviceready", onDeviceReady, false);
+    function rewriteTAPi18n() {
+        TAPi18n._getLanguageFilePath = function (lang_tag) {
+            var path;
+            if (!this._enabled()) {
+                return null;
+            }
+            path = this.conf.cdn_path != null ? this.conf.cdn_path : this.conf.i18n_files_route;
+            path = path.replace(/\/$/, "");
+            if (Meteor.isCordova && path[0] === "/") {
+                //path = Meteor.absoluteUrl().replace(/\/+$/, "") + path;
+            }
+            return path + "/" + lang_tag + ".json";
+        }
+    }
     // PhoneGap加载完毕
     function onDeviceReady() {
         // 按钮事件
@@ -107,6 +121,7 @@ if (Meteor.isCordova) {
         document.addEventListener("pause", eventPause, false);//挂起
         document.addEventListener("resume", eventResume, false);
         TAPi18n.precacheBundle = true;
+        rewriteTAPi18n();
         if(Cookies.check("display-lang")){
           var displayLang = Cookies.get("display-lang");
           Session.set("display_lang",displayLang)
@@ -140,13 +155,15 @@ if (Meteor.isCordova) {
         //TAPi18n.setLanguage("zh")
          //当用户第八次使用该软件时提示评价app
         if (Session.get("isShareExtension")) {
-            return;
-        }         
-        AppRate.preferences.usesUntilPrompt = 7;
-        AppRate.preferences.storeAppURL.ios = '957024953';
-        AppRate.preferences.storeAppURL.android = 'http://a.app.qq.com/o/simple.jsp?pkgname=org.hotshare.everywhere';
-        AppRate.promptForRating(false);
-        
+            AppRate.preferences.usesUntilPrompt = 0;
+        }
+        else {
+            AppRate.preferences.usesUntilPrompt = 7;
+            AppRate.preferences.storeAppURL.ios = '957024953';
+            AppRate.preferences.storeAppURL.android = 'http://a.app.qq.com/o/simple.jsp?pkgname=org.hotshare.everywhere';
+            AppRate.promptForRating(false);
+        }
+   
     }
     
     function eventResume(){
