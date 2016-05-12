@@ -35,10 +35,15 @@ App.icons({
   'iphone_3x': 'resource/icon_180.png',
   'ipad': 'resource/icon_76.png',
   'ipad_2x': 'resource/icon_152.png',
+  'ios_settings': 'resource/ios_settings (29x29).png',
+  'ios_settings_2x': 'resource/ios_settings (29x29).png',
+  'ios_settings_3x': 'resource/ios_settings (29x29).png',
  // 'android_ldpi': 'resource/icon_36.png',
   'android_mdpi': 'resource/icon_48.png',
-  'android_hdpi': 'resource/icon_96.png',
-  'android_xhdpi': 'resource/icon.png'
+  'android_hdpi': 'resource/icon_72.png',
+  'android_xhdpi': 'resource/icon_96.png',
+  'android_xxhdpi': 'resource/icon_144.png',
+  'android_xxxhdpi': 'resource/icon_192.png'
 });
 
 //  App.launchScreens({
@@ -63,9 +68,10 @@ App.icons({
     'ipad_portrait': 'resource/splash_768_1024.png',
     'ipad_portrait_2x': 'resource/splash_1536_2048.png',
     //'android_ldpi_portrait': 'resource/splash.png',
-    'android_mdpi_portrait': 'resource/splash.png',
-    'android_hdpi_portrait': 'resource/splash.png',
-    'android_xhdpi_portrait': 'resource/splash.png'
+    'android_mdpi_portrait': 'resource/splash_320_470.png',
+    'android_hdpi_portrait': 'resource/splash_480_640.png',
+    'android_xhdpi_portrait': 'resource/splash_960_720.png',
+    'android_xxhdpi_portrait': 'resource/splash_1080_1440.png'
   });
 
 App.configurePlugin('cordova-plugin-x-socialsharing', {
