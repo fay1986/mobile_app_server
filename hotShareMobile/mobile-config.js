@@ -70,7 +70,7 @@ App.icons({
     //'android_ldpi_portrait': 'resource/splash.png',
     'android_mdpi_portrait': 'resource/splash_320_470.png',
     'android_hdpi_portrait': 'resource/splash_480_640.png',
-    'android_xhdpi_portrait': 'resource/splash_960_720.png',
+    'android_xhdpi_portrait': 'resource/splash_720_960.png',
     'android_xxhdpi_portrait': 'resource/splash_1080_1440.png'
   });
 
