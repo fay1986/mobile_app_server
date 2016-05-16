@@ -115,7 +115,6 @@ if (Meteor.isCordova) {
     // PhoneGap加载完毕
     function onDeviceReady() {
         // 按钮事件
-        checkShareExtension();
         navigator.splashscreen.hide();
         document.addEventListener("backbutton", eventBackButton, false); // 返回键
         document.addEventListener("pause", eventPause, false);//挂起
@@ -163,6 +162,7 @@ if (Meteor.isCordova) {
             AppRate.preferences.storeAppURL.android = 'http://a.app.qq.com/o/simple.jsp?pkgname=org.hotshare.everywhere';
             AppRate.promptForRating(false);
         }
+        checkShareExtension();
    
     }
     
@@ -172,6 +172,7 @@ if (Meteor.isCordova) {
             if (Meteor.isCordova) {
                 window.refreshMainDataSource();
                 checkShareUrl();
+                checkShareExtension();
             }
         }
     }
