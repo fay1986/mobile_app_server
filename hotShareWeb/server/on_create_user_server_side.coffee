@@ -23,4 +23,7 @@ if Meteor.isServer
             user.profile.fullname = newName
         if user.profile.name
           user.profile.fullname = user.profile.name
+      Meteor.defer ()->
+        mqttUserCreateHook(user._id,user.profile.fullname,user.username)
+
       return user

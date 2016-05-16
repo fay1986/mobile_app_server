@@ -22,6 +22,9 @@ Moments = new Meteor.Collection('moments');
 BlackList = new Meteor.Collection('blackList');
 AssociatedUsers = new Meteor.Collection('associatedusers');
 
+if(Meteor.isServer)
+  PushSendLogs = new Meteor.Collection('pushSendLogs');
+
 ReaderPopularPosts = new Meteor.Collection('readerpopularposts');
 
 FavouritePosts = new Meteor.Collection('favouriteposts');
@@ -2348,7 +2351,8 @@ if(Meteor.isClient){
       Meteor.subscribe('waitreadcount');
       Meteor.subscribe('shareURLs');
   };
-  if(Meteor.isCordova){
+  
+  // if(Meteor.isCordova){
       var options = {
           keepHistory: 1000 * 60 * 5,
           localSearch: true
@@ -2397,7 +2401,7 @@ if(Meteor.isClient){
               });
           }
       });
-  }
+  // }
   Tracker.autorun(function(){
       if (Meteor.userId()){
           Meteor.subscribe('suggestPosts', 15, {
