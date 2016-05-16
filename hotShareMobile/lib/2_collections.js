@@ -1480,10 +1480,6 @@ if(Meteor.isServer){
       return [];
     else
       return SavedDrafts.find({owner: this.userId},{sort: {createdAt: -1}});
-    // var self = this;
-    // Meteor.setTimeout(function () {
-    //   self.ready();
-    // }, 5000);
   });
   Meteor.publish("feeds", function(limit) {
     if(this.userId === null || !Match.test(limit, Number))
