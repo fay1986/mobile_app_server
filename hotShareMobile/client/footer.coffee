@@ -69,7 +69,7 @@ if Meteor.isClient
             if waitImportCount > 0
               data = ShareURLs.find().fetch()
               console.log 'CustomDialog show!'
-              CustomDialog.show data[0]
+              #CustomDialog.show data[0]
         ,100)
         
   @editFromShare = (data)->
