@@ -14,5 +14,5 @@
 @withLocalBase64 = true
 @withSuggestAlreadyRead = true
 @withSponserLinkAds = false
-@isUSVersion = false
+@isUSVersion = true
 @withZhiFaCDN = false

@@ -1,3 +1,5 @@
+/* *********hotshare app config********** */
+/*
 App.info({
   id: 'org.hotshare.everywhere',
   version: '1.1.39',
@@ -67,9 +69,10 @@ App.configurePlugin('org.hotshare.baidutts', {
   API_SECRET: 'BlTv4N92QQb9F28vGXLkODdc3sOsXoUl',
   APP_ID: '6092105'
 });
+*/
 
-/* *********storeboard app config********** */
-/*
+/* *********storyboard app config********** */
+
 App.info({
   id: 'org.hotshare.storeboard',
   version: '0.0.3',
@@ -139,4 +142,4 @@ App.configurePlugin('org.hotshare.baidutts', {
   API_SECRET: 'BlTv4N92QQb9F28vGXLkODdc3sOsXoUl',
   APP_ID: '6092105'
 });
-*/
+
