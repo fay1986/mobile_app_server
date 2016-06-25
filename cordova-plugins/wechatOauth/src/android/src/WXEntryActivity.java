@@ -1,4 +1,4 @@
-package org.hotshare.everywhere.wxapi1;
+package org.hotshare.storeboard.wxapi1;
 
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;

@@ -28,11 +28,11 @@ Template.splashScreen.helpers({
     }
   },
   isUSVersion: function () {
-    // return isUSVersion;
-    if(Session.equals('display-lang',undefined)){
-      return getUserLanguage() == 'en';
-    } else {
-      return Session.equals('display-lang','en');
-    }
+    return isUSVersion;
+    // if(Session.equals('display-lang',undefined)){
+    //   return getUserLanguage() == 'en';
+    // } else {
+    //   return Session.equals('display-lang','en');
+    // }
   }
 });
