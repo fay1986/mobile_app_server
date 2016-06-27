@@ -1,11 +1,19 @@
 <template name="dashboard">
+  <style>
+    .color-1{background-color: #FCC015; color: #fff;}
+    .color-2{background-color: #675A85; color: #fff;}
+    .color-3{background-color: #3ECCC2; color: #fff;}
+    .color-4{background-color: #F98026; color: #fff;}
+    .color-5{background-color: #56C6FF; color: #fff;}
+    .color-6{background-color: #B6D827; color: #fff;}
+  </style>
   <div class="dashboard">
     <div class="head">
-      <div>{{_ "setting"}}</div>
+      <div style="color:#fff">{{_ "setting"}}</div>
       <div class="rightButton back" style="margin-top:0px;">{{_ "done"}}</div>
     </div>
     <div class="content">
-      <div class="accounts-management box boxTitle"><div class='accounts-management'>{{_ "Account"}}<span><i class="fa fa-angle-right fa-fw"></i></span></div></div>
+      <div class="accounts-management box boxTitle"><div class='accounts-management'><i class="fa fa-joomla color-1" style="margin-right: 14px;font-size: 18px;height: 25px;width: 25px;padding: 3px;padding-left: 5px;border-radius: 6px;"></i>{{_ "Account"}}<span><i class="fa fa-angle-right fa-fw"></i></span></div></div>
       {{#unless anonymous}}
           <div class="emailPasswd box">
             <div class='email bottomBorder boxTitle'>{{_ "email"}}<span>{{userEmail}}<i class="fa fa-angle-right fa-fw"></i></span></div>
@@ -17,10 +25,10 @@
         <div class='info bottomBorder boxTitle'>编辑个人资料<span><i class="fa fa-angle-right fa-fw"></i></span></div>
         <div class='accounts bottomBorder boxTitle'>已连接的账户<span><i class="fa fa-angle-right fa-fw"></i></span></div>
         -->
-        <div class='notice boxTitle'>{{_ "notification"}}<span><i class="fa fa-angle-right fa-fw"></i></span></div>
+        <div class='notice boxTitle' style="border-top: 20px solid#EFEFF4;"><i class="fa fa-circle-thin color-2" style="margin-right: 14px;font-size: 18px;height: 25px;width: 25px;padding: 3px;padding-left: 5px;border-radius: 6px;"></i>{{_ "notification"}}<span><i class="fa fa-angle-right fa-fw"></i></span></div>
       </div>
-      <div class="blacklist box boxTitle">{{_ "blacklist"}}<span><i class="fa fa-angle-right fa-fw"></i></span></div>
-      <div class="language box boxTitle">{{_ "language"}}
+      <div class="blacklist box boxTitle"><i class="fa fa-pencil color-3" style="margin-right: 14px;font-size: 18px;height: 25px;width: 25px;padding: 3px;padding-left: 5px;border-radius: 6px;"></i>{{_ "blacklist"}}<span><i class="fa fa-angle-right fa-fw"></i></span></div>
+      <div class="language box boxTitle"><i class="fa fa-globe color-4" style="margin-right: 14px;font-size: 18px;height: 25px;width: 25px;padding: 3px;padding-left: 5px;border-radius: 6px;"></i>{{_ "language"}}
         {{#if isEnglish}}
           <span class="right" style="margin-right: 28px;margin-top: 2px;color: #a1a1a1;">English</span>
         {{else}}
@@ -28,9 +36,9 @@
         {{/if}}
         <span><i class="fa fa-angle-right fa-fw"></i></span>
       </div>
-      <div class="about box boxTitle"><div class='about'>{{_ "about"}}<span><i class="fa fa-angle-right fa-fw"></i></span></div></div>
+      <div class="about box boxTitle"><div class='about'><i class="fa fa-info color-5 lable" style="margin-right: 14px;font-size: 18px;height: 25px;width: 25px;padding: 3px;padding-left: 9px;border-radius: 6px;"></i>{{_ "about"}}<span><i class="fa fa-angle-right fa-fw"></i></span></div></div>
       <!--<div class="clear box boxTitle boxCenter">清除缓存</div>-->
-      <div class="logout box boxTitle boxCenter">{{_ "logOut"}}</div>
+      <div class="logout box boxTitle boxCenter" style="margin-top: 20px;">{{_ "logOut"}}</div>
     </div>
   </div>
 </template>
