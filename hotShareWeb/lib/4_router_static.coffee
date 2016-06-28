@@ -45,16 +45,16 @@ if Meteor.isServer
     
         prefix = ""
         if dateM > DyMilli
-          prefix = days+"天 前"
+          prefix = days+"days ago"
         else if dateM > HrMilli
-          prefix = hours+"小时 前"
+          prefix = hours+"hours ago"
         else if dateM > MinMilli
-          prefix = minutes+"分钟 前"
+          prefix = minutes+"minutes ago"
         else if dateM <= MinMilli
           if seconds <= 0
-              prefix = "刚刚"
+              prefix = "this moment"
           else
-              prefix = seconds+"秒 前"
+              prefix = seconds+"seconds ago"
 
         return prefix
 

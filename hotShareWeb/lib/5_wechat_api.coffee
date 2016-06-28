@@ -109,7 +109,7 @@ if Meteor.isClient
           textArr = Session.get('postContent').pub
           for i in [patagraphLength - 1..0]
             if textArr[i].text is invalidString
-              descriptionFirstParagraph = "来自故事贴"
+              descriptionFirstParagraph = "form Storyboard"
             else if textArr[i].text
               descriptionFirstParagraph = textArr[i].text.substring(0, 100)
         else if  patagraphLength >= 2

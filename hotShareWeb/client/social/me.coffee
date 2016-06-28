@@ -35,10 +35,10 @@ if Meteor.isClient
     sex:()->
       if Meteor.user() and Meteor.user().profile.sex
         if Meteor.user().profile.sex is 'male'
-          return '男'
+          return 'Male'
         else if Meteor.user().profile.sex is 'female'
-          return '女'
-      return '[未知]'
+          return 'Female'
+      return '[Unknown]'
     favposts: ()->
       return []
   Template.information.events
