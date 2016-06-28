@@ -53,7 +53,7 @@ Meteor.startup(function(){
 				return defaultText;
 		},
 		'reconnectAfterCountdownText': function(event, template){
-			var defaultText = " secounds later ...";
+			var defaultText = " seconds later ...";
 			if(Meteor.settings && Meteor.settings.public && Meteor.settings.public.connectionBanner && Meteor.settings.public.connectionBanner.reconnectAfterCountdownText)
 				return Meteor.settings.public.connectionBanner.reconnectAfterCountdownText;
 			else
