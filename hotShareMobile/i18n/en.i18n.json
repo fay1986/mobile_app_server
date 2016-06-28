@@ -150,10 +150,10 @@
   //search.html
   "searchTopic": "Discover",
   "popTopics" :"Topics you may like",
-  "searchPeople": "Discover Friends and #Topics#",
+  "searchPeople": "Discover Storytellers and #Topics#",
   "plainTopic": "Topics",
-  "discoverPeople": "Discover Friends",
-  "plainPeople": "People",
+  "discoverPeople": "Discover Storytellers",
+  "plainPeople": "Storytellers",
   "recommandUser": "Friends you may like to follow",
   //end
 

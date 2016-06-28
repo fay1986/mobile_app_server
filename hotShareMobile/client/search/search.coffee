@@ -151,9 +151,9 @@ if Meteor.isClient
        Session.get('is_people')
     placeHolder:->
        if Session.get('is_people')
-          "搜索人"
+          "Search for people"
        else
-          "搜索话题"
+          "Search for topics"
     isFollowedUser:(follow)->
       fcount = Follower.find({"userId":Meteor.userId(),"followerId":follow._id}).count()
       if fcount > 0
