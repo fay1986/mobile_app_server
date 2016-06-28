@@ -235,7 +235,7 @@
   "aboutTitle": "About Storyboard",
   "ver": "v.",
   "logOut": "Logout",
-  "NewFriends": "New Friends",
+  "NewFriends": "Friends",
   "NickName": "Nick Name",
   "Gender": "Gender",
   "Save": "Save",
@@ -277,5 +277,5 @@
   //end
 
   "readMore": "More",
-  "readingRoom": "Reading Room"
+  "readingRoom": "ReadingRoom"
 }
