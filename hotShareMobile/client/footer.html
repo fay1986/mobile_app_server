@@ -48,12 +48,12 @@
                 <div class="modal-header">
                     <h4 class="modal-title">Dialog</h4>
                 </div>-->
-                <button type="button" id="album-select" class="btn btn-default"><span style="text-transform: lowercase;">{{_ "selectPicFromGallery"}}</span></button>
-                <button type="button" id="web-import" class="btn btn-default">{{_ "importFromPaster"}}</button>
+                <button type="button" id="album-select" class="btn btn-default"><span style="text-transform: capitalize;">{{_ "selectPicFromGallery"}}</span></button>
+                <button type="button" id="web-import" class="btn btn-default"><span style="text-transform: capitalize;">{{_ "importFromPaster"}}</span></button>
                 {{#if wait_import_count}}
-                <button type="button" id="share-import" class="btn btn-default">{{_ "importFromShareExtension"}}</button>
+                <button type="button" id="share-import" class="btn btn-default"><span style="text-transform: capitalize;">{{_ "importFromShareExtension"}}</span></button>
                 {{/if}}
-                <button type="button" id="photo-select" class="btn btn-default">{{_ "takePicture"}}</button>
+                <button type="button" id="photo-select" class="btn btn-default"><span style="text-transform: capitalize;">{{_ "takePicture"}}</span></button>
             </div>
         </div>
     </div>
