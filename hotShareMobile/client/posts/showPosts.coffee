@@ -206,7 +206,7 @@ if Meteor.isClient
       Router.go('/unpublish')
     if postContent.addontitle
       title=title+":"+postContent.addontitle
-    trackPage('http://cdn.tiegushi.com/posts/'+postContent._id,title)
+    trackPage('http://storyboard.tiegushi.com/posts/'+postContent._id,title)
     subscribeCommentAndViewers()
     browseTimes = 0
     Session.set("Social.LevelOne.Menu",'discover')

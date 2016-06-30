@@ -142,7 +142,7 @@ if Meteor.isClient
       $('.unpublishWebPage').fadeIn 0
     if postContent.addontitle
       title=title+":"+postContent.addontitle
-    trackPage('http://cdn.tiegushi.com/posts/'+postContent._id,title)
+    trackPage('http://storyboard.tiegushi.com/posts/'+postContent._id,title)
     Session.set("Social.LevelOne.Menu",'discover')
     Session.set("SocialOnButton",'postBtn')
     if not Meteor.isCordova
