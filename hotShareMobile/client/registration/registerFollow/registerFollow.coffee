@@ -37,7 +37,7 @@ Template.registerFollow.events
                  })._id
       Follower.remove(followerId)
     else
-      #匿名用户刚注册，系统就已经分配随机全名
+      #Storyteller用户刚注册，系统就已经分配随机全名
       if Meteor.user().profile and Meteor.user().profile.fullname
         username = Meteor.user().profile.fullname
       else

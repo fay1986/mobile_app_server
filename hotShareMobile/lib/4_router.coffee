@@ -119,9 +119,9 @@ if Meteor.isClient
             Session.set('postContent',post)
           Session.set('focusedIndex',undefined)
           if post and post.addontitle and (post.addontitle isnt '')
-            documentTitle = "『故事贴』" + post.title + "：" + post.addontitle
+            documentTitle = "『Storyboard』" + post.title + "：" + post.addontitle
           else if post
-            documentTitle = "『故事贴』" + post.title
+            documentTitle = "『Storyboard』" + post.title
           Session.set("DocumentTitle",documentTitle)
           if post
             this.render 'showPosts', {data: post}
@@ -139,14 +139,14 @@ if Meteor.isClient
         if post and Session.get('postContent') and post.owner isnt Meteor.userId() and post._id is Session.get('postContent')._id and String(post.createdAt) isnt String(Session.get('postContent').createdAt)
           Session.set('postContent',post)
           refreshPostContent()
-          toastr.info('作者修改了帖子内容.')
+          toastr.info('Storyteller reedit the story!')
         else
           Session.set('postContent',post)
         Session.set('focusedIndex',this.params._index)
         if post.addontitle and (post.addontitle isnt '')
-          documentTitle = "『故事贴』" + post.title + "：" + post.addontitle
+          documentTitle = "『Storyboard』" + post.title + "：" + post.addontitle
         else
-          documentTitle = "『故事贴』" + post.title
+          documentTitle = "『Storyboard』" + post.title
         Session.set("DocumentTitle",documentTitle)
         this.render 'showPosts', {data: post}
         Session.set('channel','posts/'+this.params._id+'/'+this.params._index)

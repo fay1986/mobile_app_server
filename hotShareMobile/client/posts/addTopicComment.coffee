@@ -41,7 +41,7 @@ if Meteor.isClient
            userId = user._id
            userIcon = user.profile.icon
          else
-           username = '匿名'
+           username = 'Storyteller'
            userId = 0
            userIcon = ''
          try
@@ -86,7 +86,7 @@ if Meteor.isClient
                userId = user._id
                userIcon = user.profile.icon
              else
-               username = '匿名'
+               username = 'Storyteller'
                userId = 0
                userIcon = ''
              unless TopicPosts.findOne({postId:topicPostId,topicId: topicId})

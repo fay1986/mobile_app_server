@@ -172,10 +172,10 @@ if Meteor.isClient
           ,100)
         else
           handleAddedLink(null)
-          window.plugins.toast.showLongCenter("粘贴板内容并非有效连接，请手动粘贴\n浏览器内容加载后，点击地址栏右侧\"导入\"按钮");
+          window.plugins.toast.showLongCenter("Not a valid URL. Please copy the URL and click \"Import\" again.");
       ,()->
         handleAddedLink(null)
-        window.plugins.toast.showLongCenter("无法获得粘贴板数据，请手动粘贴\n浏览器内容加载后，点击地址栏右侧\"导入\"按钮");
+        window.plugins.toast.showLongCenter("Cannot get the URL. Please manually copy it over and click \"Import\" to try again.");
     'click #share-import':(e)->
         window.plugins.shareExtension.getShareData ((data) ->
             if data

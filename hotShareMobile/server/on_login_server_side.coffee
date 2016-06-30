@@ -10,7 +10,7 @@ if Meteor.isServer
             randomI = parseInt(Math.random()*33+1)
             icon = 'http://data.tiegushi.com/anonymousIcon/anonymous_' + randomI + '.png'
             Meteor.users.update {_id:object.user._id},{$set:{'profile.icon':icon}}
-          if object.user.profile.fullname is '匿名'
+          if object.user.profile.fullname is 'Storyteller'
             newName = getRandomAnonymousName()
             if newName and newName isnt ''
               Meteor.users.update {_id:object.user._id},{$set:{'profile.fullname':newName}}

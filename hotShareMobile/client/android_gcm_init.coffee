@@ -16,7 +16,7 @@ if 0 #Meteor.isCordova
           #PUB.toast JSON.stringify(e.payload)
           if e.payload.message
             PUB.toast e.payload.message
-            window.plugin.notification.local.add {title: '故事贴',message: e.payload.message}
+            window.plugin.notification.local.add {title: 'Storyboard',message: e.payload.message}
           # on Android soundname is outside the payload.
           # On Amazon FireOS all custom attributes are contained within payload
           # soundfile = e.soundname || e.payload.sound;
