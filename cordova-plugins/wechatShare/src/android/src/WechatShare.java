@@ -55,7 +55,7 @@ public class WechatShare extends CordovaPlugin {
         @Override
         public void run() {
           IWXAPI api;
-          String APP_ID = "wxcfcf19c225a36351";
+          String APP_ID = "wxa15e21715746095d";
           api = WXAPIFactory.createWXAPI(context, APP_ID, false);
           if (!api.isWXAppInstalled()) {
 

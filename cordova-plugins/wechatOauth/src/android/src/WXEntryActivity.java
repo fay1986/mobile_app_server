@@ -32,7 +32,7 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
 	final String TAG = "com.oauth.wechat";
 
-	final String APP_ID = "wxcfcf19c225a36351";
+	final String APP_ID = "wxa15e21715746095d";
 	private IWXAPI api;
 
 	@Override
@@ -51,7 +51,7 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
 
 	public void getToken(String code) {
-		String url = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=" + APP_ID + "&secret=dbafa3cb0167bbb80bb201ba10127da4&code=" + code + "&grant_type=authorization_code";
+		String url = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=" + APP_ID + "&secret=c604190eae74533e27b664730e47b564&code=" + code + "&grant_type=authorization_code";
 		RequestQueue mQueue = Volley.newRequestQueue(getApplicationContext());
 		mQueue.add(new JsonObjectRequest(Method.GET, url, null, new Response.Listener<JSONObject>() {
 

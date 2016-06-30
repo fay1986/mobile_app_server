@@ -1,6 +1,6 @@
 if (Meteor.isServer) {
-  var WECHAT_APPID = 'wxcfcf19c225a36351';     // 移动应用的 APPID
-  var WECHAT_AppSecret = 'dbafa3cb0167bbb80bb201ba10127da4';
+  var WECHAT_APPID = 'wxa15e21715746095d';     // 移动应用的 APPID
+  var WECHAT_AppSecret = 'c604190eae74533e27b664730e47b564';
   var WEB_WECHAT_APPID = 'wx599196add0e17def'; // 网站应用的 APPID
   var WEB_WECHAT_AppSecret = '783e129bc26650acb5791f19c0e476fc';
   var Oauth2Result = new Meteor.Collection('oauth2Result');

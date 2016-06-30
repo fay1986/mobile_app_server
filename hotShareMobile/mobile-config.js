@@ -49,15 +49,15 @@ App.launchScreens({
 });
 
 App.configurePlugin('nl.x-services.plugins.socialsharing', {
-    APP_ID: 'wxcfcf19c225a36351'
+    APP_ID: 'wxa15e21715746095d'
 });
 
 App.configurePlugin('com.leon.cordova.wechat', {
-    APP_ID: 'wxcfcf19c225a36351',
+    APP_ID: 'wxa15e21715746095d',
     QQ_APP_ID: '1104127289'
 });
 App.configurePlugin('com.share.wechatShare', {
-    APP_ID: 'wxcfcf19c225a36351',
+    APP_ID: 'wxa15e21715746095d',
 });
 
 App.configurePlugin('org.zy.yuancheng.qq', {
@@ -122,15 +122,15 @@ App.icons({
  });
 
 App.configurePlugin('nl.x-services.plugins.socialsharing', {
-    APP_ID: 'wxcfcf19c225a36351'
+    APP_ID: 'wxa15e21715746095d'
 });
 
 App.configurePlugin('com.leon.cordova.wechat', {
-    APP_ID: 'wxcfcf19c225a36351',
+    APP_ID: 'wxa15e21715746095d',
     QQ_APP_ID: '1104127289'
 });
 App.configurePlugin('com.share.wechatShare', {
-    APP_ID: 'wxcfcf19c225a36351',
+    APP_ID: 'wxa15e21715746095d',
 });
 
 App.configurePlugin('org.zy.yuancheng.qq', {
