@@ -86,7 +86,7 @@ getFirstParagraph = function(){
       for (var i = 0; i < patagraphLength; i++){
         if(textArr[i].text == invalidString) {
         //   console.log(textArr[i].text);
-          var text = "来自故事贴";
+          var text = "From Storyboard";
           return text;
         }else if(textArr[i].text){
           return textArr[i].text.substring(0, 100);
@@ -128,9 +128,9 @@ shareToWechatSession = function (title, description, thumbData, url) {
           url: param.target_url
         }
       }, function() {
-        window.PUB.toast('分享成功!');
+        window.PUB.toast('Done!');
       }, function() {
-        window.PUB.toast('分享失败!你安装微信了吗？');
+        window.PUB.toast('Fail! Do you install WeChat?');
       });
     }
 }
@@ -160,9 +160,9 @@ shareToWechatTimeLine = function (title, description, thumbData, url) {
           url: param.target_url
         }
       }, function() {
-        window.PUB.toast('分享成功!');
+        window.PUB.toast('Done!');
       }, function() {
-        window.PUB.toast('分享失败!你安装微信了吗？');
+        window.PUB.toast('Fail! Do you install WeChat?');
       });
     }
  }
@@ -180,7 +180,7 @@ shareToWechat = function(title,description,thumbData,url,type) {
         thumbData: thumbData,
         url: url
     }, type, function () {
-        console.log('分享成功~');
+        console.log('Done!');
     }, function (reason) {
         // 分享失败
         if (reason === 'ERR_WECHAT_NOT_INSTALLED') {
@@ -285,10 +285,10 @@ shareTo = function(to,self,index){
         $('#blur_overlay').css('height','');
         $('#blur_overlay').css('z-index', -1);
         if(description){
-//            shareToQQ("分享『故事贴』中的一段文字：",description,self.mainImage,url);
+//            shareToQQ("分享『Storyboard』中的一段文字：",description,self.mainImage,url);
             shareToQQ(title,description,self.mainImage,url);
         } else if(firstParagraph){
-//            shareToQQ("分享『故事贴』中的一篇文章：",title,self.mainImage,url);
+//            shareToQQ("分享『Storyboard』中的一篇文章：",title,self.mainImage,url);
             shareToQQ(title,firstParagraph,self.mainImage,url);
         } else {
           shareToQQ(title,title,self.mainImage,url);
@@ -307,25 +307,25 @@ shareTo = function(to,self,index){
               } else if (firstParagraph) {
                     shareToWechatTimeLine( title, firstParagraph,result,url);
                } else{
-//                    shareToWXTimeLine("『故事贴』 "+ title,"『故事贴』 "+ title,result,url);
+//                    shareToWXTimeLine("『Storyboard』 "+ title,"『Storyboard』 "+ title,result,url);
                     shareToWechatTimeLine( title, title,result,url);
                 }
             } else if (to ==='WXSession'){
                 if(description){
-//                    shareToWXSession("分享『故事贴』中的一段文字：",description,result,url);
+//                    shareToWXSession("分享『Storyboard』中的一段文字：",description,result,url);
                     shareToWechatSession(title,description,result,url);
                 } else if (firstParagraph) {
                     shareToWechatSession( title, firstParagraph,result,url);
                }  else {
                     shareToWechatSession(title,title,result,url);
-//                    shareToWXSession("分享『故事贴』中的一篇文章：",title,result,url);
+//                    shareToWXSession("分享『Storyboard』中的一篇文章：",title,result,url);
                 }
             } else if (to ==='System'){
                 if(description){
                     shareToSystem(title, description, result, url)
-//                    shareToSystem("分享『故事贴』中的一段文字：", description, result, url)
+//                    shareToSystem("分享『Storyboard』中的一段文字：", description, result, url)
                 } else {
-//                    shareToSystem("『故事贴』 "+title, null, result, url)
+//                    shareToSystem("『Storyboard』 "+title, null, result, url)
                     shareToSystem(title, null, result, url)
                 }
             }
@@ -391,14 +391,14 @@ Template.shareTheReadingRoom.events({
     var url = 'http://'+chat_server_url+'/channel/'+ Session.get('postContent')._id+'/userid/'+Meteor.userId();
     var shareUrl = 'http://' + chat_server_url + '/channel/' + Session.get('postContent')._id;
     var imgUrl = Session.get('postContent').mainImage ? Session.get('postContent').mainImage : 'http://cdn.tiegushi.com/images/logo.png';
-    var title = Session.get('postContent').title ? Session.get('postContent').title + '－专属阅览室' : '故事贴专属阅览室';
+    var title = Session.get('postContent').title ? Session.get('postContent').title + '-- Reading Room' : 'Storyboard Reading Room';
     var type = Session.get("shareToWechatType");
     $('.shareTheReadingRoom,.shareAlertBackground').fadeOut(300);
     if (type === "WXTimeLine") {
         window.plugins.toast.showShortCenter(TAPi18n.__("preparePicAndWait"));
         return downloadFromBCS(imgUrl, function(result) {
             if (result) {
-                shareToWechatTimeLine(title, '来自故事贴', result, shareUrl);
+                shareToWechatTimeLine(title, 'From Storyboard', result, shareUrl);
             } else {
                 PUB.toast(TAPi18n.__('failToGetPicAndTryAgain'));
             }
@@ -407,22 +407,22 @@ Template.shareTheReadingRoom.events({
         window.plugins.toast.showShortCenter(TAPi18n.__("preparePicAndWait"));
         return downloadFromBCS(imgUrl, function(result) {
         if (result) {
-            shareToWechatSession(title, '来自故事贴', result, shareUrl);
+            shareToWechatSession(title, 'From Storyboard', result, shareUrl);
         } else {
             PUB.toast(TAPi18n.__('failToGetPicAndTryAgain'));
         }
       });
     } else if (type === "QQShare"){
         window.plugins.toast.showShortCenter(TAPi18n.__("preparePicAndWait"));
-        return shareToQQ(title, "来自故事贴",imgUrl,shareUrl);
+        return shareToQQ(title, "From Storyboard",imgUrl,shareUrl);
     } else if (type === "QQZoneShare"){
         window.plugins.toast.showShortCenter(TAPi18n.__("preparePicAndWait"));
-        return shareToQQZone(title, "来自故事贴",imgUrl,shareUrl);
+        return shareToQQZone(title, "From Storyboard",imgUrl,shareUrl);
     } else if (type === "System"){
         window.plugins.toast.showShortCenter(TAPi18n.__("preparePicAndWait"));
         return downloadFromBCS(imgUrl, function(result) {
             if (result) {
-                shareToSystem(title, '来自故事贴', result, shareUrl);
+                shareToSystem(title, 'From Storyboard', result, shareUrl);
             } else {
                 PUB.toast(TAPi18n.__('failToGetPicAndTryAgain'));
             }

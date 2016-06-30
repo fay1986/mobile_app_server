@@ -8,7 +8,7 @@ if Meteor.isClient
               username:uuid,
               password:'123456',
               'profile':{
-                fullname:'匿名',
+                fullname:'Storyteller',
                 icon:'/userPicture.png',
                 anonymous:true,
                 browser:true

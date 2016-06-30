@@ -125,7 +125,7 @@ if Meteor.isClient
       catch error
         console.log error
       event.target.comment.value = ""
-      $("#comment").attr("placeholder", "说点什么")
+      $("#comment").attr("placeholder", "Reply")
       $("#comment").css('height', 'auto')
 #      scrollHeight = document.getElementById("comment").scrollHeight
 #      height = scrollHeight + 10;

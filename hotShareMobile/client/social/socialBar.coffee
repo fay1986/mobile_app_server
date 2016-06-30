@@ -18,7 +18,7 @@ if Meteor.isClient
       #window.location.href = url
       shareUrl = 'http://'+chat_server_url+'/channel/'+ Session.get('postContent')._id
       imgUrl = if Session.get('postContent').mainImage then Session.get('postContent').mainImage else'http://cdn.tiegushi.com/images/logo.png'
-      title = if Session.get('postContent').title then Session.get('postContent').title+'－专属阅览室' else '故事贴专属阅览室'
+      title = if Session.get('postContent').title then Session.get('postContent').title+'-- Reading Room' else 'Storyboard Reading Room'
       ref = cordova.ThemeableBrowser.open(url,'_blank',{
           closeButton: {
             image: 'back',
@@ -30,16 +30,16 @@ if Meteor.isClient
             image: 'share',
             imagePressed: 'share_pressed',
             align: 'right',
-            cancel: '取消',
+            cancel: 'Cancel',
             items: [
               {
                 event: 'shareWechatFriend',
-                label: '微信好友',
+                label: 'WeChat Friends',
                 image:'share_weixin_friends'
               },
               {
                 event: 'shareWechatFriendField',
-                label: '微信朋友圈',
+                label: 'WeChat Moments',
                 image:'share_weixin_timeline'
               },
               {
@@ -82,7 +82,7 @@ if Meteor.isClient
         window.plugins.toast.showShortCenter(TAPi18n.__("preparePicAndWait"));
         downloadFromBCS imgUrl, (result) ->
           if result
-            shareToWechatSession title, '来自故事贴', result, shareUrl
+            shareToWechatSession title, 'From Storyboard', result, shareUrl
           else
             PUB.toast TAPi18n.__('failToGetPicAndTryAgain')
           return  
@@ -92,7 +92,7 @@ if Meteor.isClient
         window.plugins.toast.showShortCenter(TAPi18n.__("preparePicAndWait"));
         downloadFromBCS imgUrl, (result) ->
           if result
-            shareToWechatTimeLine title, '来自故事贴', result, shareUrl
+            shareToWechatTimeLine title, 'From Storyboard', result, shareUrl
           else
             PUB.toast TAPi18n.__('failToGetPicAndTryAgain')
           return 
@@ -100,19 +100,19 @@ if Meteor.isClient
       ref.addEventListener('shareQQ', (event) ->
         console.log("shareQQ Pressed！")
         window.plugins.toast.showShortCenter(TAPi18n.__("preparePicAndWait"));
-        shareToQQ(title, "来自故事贴",imgUrl,shareUrl);
+        shareToQQ(title, "From Storyboard",imgUrl,shareUrl);
       )
       ref.addEventListener('shareQQZone', (event) ->
         console.log("shareQQZone Pressed！")
         window.plugins.toast.showShortCenter(TAPi18n.__("preparePicAndWait"));
-        shareToQQZone(title, "来自故事贴",imgUrl,shareUrl);
+        shareToQQZone(title, "From Storyboard",imgUrl,shareUrl);
       )
       ref.addEventListener('shareMore', (event) ->
         console.log("shareMore Pressed！")
         window.plugins.toast.showShortCenter(TAPi18n.__("preparePicAndWait"));
         downloadFromBCS imgUrl, (result) ->
           if result
-            shareToSystem title, '来自故事贴', result, shareUrl
+            shareToSystem title, 'From Storyboard', result, shareUrl
           else
             PUB.toast TAPi18n.__('failToGetPicAndTryAgain')
           return 

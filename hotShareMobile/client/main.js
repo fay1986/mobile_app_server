@@ -132,7 +132,7 @@ if (Meteor.isCordova) {
 
       var currentRoute = Router.current().route.getName();
       if (currentRoute == undefined || currentRoute =="search" || currentRoute =="add" || currentRoute =="bell" || currentRoute =="user" || currentRoute == "authOverlay") {
-        window.plugins.toast.showShortBottom('再点击一次退出!');
+        window.plugins.toast.showShortBottom('Click it again to exit!');
         document.removeEventListener("backbutton", eventBackButton, false); // 注销返回键
         document.addEventListener("backbutton", exitApp, false);// 绑定退出事件
         // 3秒后重新注册
@@ -154,7 +154,7 @@ if (Meteor.isCordova) {
 }
 
 if (Meteor.isClient) {
-  Session.set("DocumentTitle",'故事贴');
+  Session.set("DocumentTitle",'Storyboard');
   Meteor.subscribe("topics")
   Meteor.subscribe("topicposts")
   Deps.autorun(function(){

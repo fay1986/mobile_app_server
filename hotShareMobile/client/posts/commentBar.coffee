@@ -108,7 +108,7 @@ if Meteor.isClient
         userId = Meteor.user()._id
         userIcon = Meteor.user().profile.icon
       else
-        username = '匿名'
+        username = 'Storyteller'
         userId = 0
         userIcon = ''
       try

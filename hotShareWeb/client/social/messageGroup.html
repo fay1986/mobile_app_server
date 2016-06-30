@@ -1,15 +1,15 @@
 <template name="messageGroup">
   <div class="contactsList"><div class="head" style="display:block;">
     <div class="socialTitle">
-      <div class="left-btn">&lt;联系人</div>
-      <span class="Contacts">群聊</span>
+      <div class="left-btn">&lt;Contacts</div>
+      <span class="Contacts">Group Chat</span>
     </div>
     </div></div>
   
   <div class="chatContent">    
     <div id="addNewFriends" class="eachViewer create">
       <img class="icon" src="/userPlus.png" width="30" height="30">
-      <span class="userName">发起群聊</span>
+      <span class="userName">Start chatting</span>
     </div>
     <div class="showPostsLine"></div>
     
@@ -27,12 +27,12 @@
   <div class="contactsList">
     <div class="head" style="display:block;">
       <div class="socialTitle">
-        <div class="left-btn">取消</div>
-        <span class="Contacts">选择好友</span>
+        <div class="left-btn">Cancel</div>
+        <span class="Contacts">Select Friends</span>
         {{#if exist}}
-        <div class="right-btn">确定</div>
+        <div class="right-btn">OK</div>
         {{else}}
-        <div class="right-btn disable">确定</div>
+        <div class="right-btn disable">OK</div>
         {{/if}}
       </div>
     </div>
@@ -67,13 +67,13 @@
 <template name="messageGroupCreateName">
   <div class="messageGroupCreateName">
     <div class="head">
-      <div class="left-btn">&lt;取消</div>
-      群名称
-      <div class="right-btn">确定</div>
+      <div class="left-btn">&lt;Cancel</div>
+      Group name
+      <div class="right-btn">OK</div>
     </div>
 
     <form class="message-group-create-name-form">
-      <input id="text" name="text" type="text" class="form-control" placeholder="群的名称，15个字符以内." value="{{name}}">
+      <input id="text" name="text" type="text" class="form-control" placeholder="Within 15 characters." value="{{name}}">
     </form>
   </div>
 </template>

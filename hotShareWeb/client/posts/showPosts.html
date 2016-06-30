@@ -1,6 +1,6 @@
 <template name="showPosts">
   <center class="unpublishWebPage" style="position: fixed;top: 0;color: grey;background-color: #111;bottom: 0;z-index: 3000;left: 0;right: 0;padding-top: 50%;display:none;">
-		抱歉，您访问的帖子已被删除。
+		Sorry,This story does not exist or has been deleted.
 	</center>
   <!--{{#if turnOnRandom}}
   <center class="turnOnRandom" style="position: fixed;top: 0;color: grey;background-color: #eee;bottom: 0;z-index: 3000;left: 0;right: 0;padding-top: 50%;">
@@ -23,13 +23,13 @@
             {{/if}}
             {{#if displayForwardBtn}}
             <i class="fa fa-angle-right fa-fw forward" style="padding: 0;margin-top: 3px;width: auto;font-size: 2em;float: right;"></i>
-            <div class="forward" style="float: right;font-size: 14px;margin-left: 10px;">前进</div>
+            <div class="forward" style="float: right;font-size: 14px;margin-left: 10px;">forward</div>
             {{/if}}
             {{#if displayBackBtn}}
-            <span class="back" style="font-size: 14px;color: grey;bottom: 5px;">后退</span>
+            <span class="back" style="font-size: 14px;color: grey;bottom: 5px;">back</span>
             {{/if}}
           </div>
-          <div class="rightButton" style="font-weight:bold; color: red;" onclick=" trackEvent('Download','from Post Header'); window.open('http://cdn.tiegushi.com', '_system');">点我创作</div>
+          <div class="rightButton" style="font-weight:bold; color: red;" onclick=" trackEvent('Download','from Post Header'); window.open('http://cdn.tiegushi.com', '_system');">click me to create</div>
         <div class="user">
           {{#if isMobile}}
             <img class="icon" src="{{ownerIcon}}" width='25' height='25'>
@@ -41,20 +41,20 @@
         {{#if isMobile}}
           <div class="rightDropMenu dropdown">
             {{#if isMyPost}}
-              <button class="dropdown-toggle btn btn-flat" id="menu1" data-toggle="dropdown" style="padding-right: 5px;">操作</button>
+              <button class="dropdown-toggle btn btn-flat" id="menu1" data-toggle="dropdown" style="padding-right: 5px;">...</button>
             {{else}}
-              <button class="dropdown-toggle btn btn-flat" id="menu1" data-toggle="dropdown" style="padding-right: 5px;">分享</button>
+              <button class="dropdown-toggle btn btn-flat" id="menu1" data-toggle="dropdown" style="padding-right: 5px;">...</button>
             {{/if}}
             <ul class="dropdown-menu" role="menu" aria-labelledby="menu1">
               {{#if isMyPost}}
-                <li role="presentation"><a id="unpublish" role="menuitem" tabindex="-1" ><i class="fa fa-file-o"></i>&nbsp;取消发表</a></li>
-                <li role="presentation"><a id="edit" role="menuitem" tabindex="-1" ><i class="fa fa-pencil fa-fw"></i>编辑</a></li>
+                <li role="presentation"><a id="unpublish" role="menuitem" tabindex="-1" ><i class="fa fa-file-o"></i>&nbsp;Cancel <publishing></publishing></a></li>
+                <li role="presentation"><a id="edit" role="menuitem" tabindex="-1" ><i class="fa fa-pencil fa-fw"></i>Edit</a></li>
                 <li role="presentation" class="divider"></li>
               {{/if}}
-              <li role="presentation"><a id="WXSessionShare" role="menuitem" tabindex="-1" ><i class="fa fa-weixin fa-fw"></i>分享给微信好友</a></li>
-              <li role="presentation"><a id="WXTimelineShare" role="menuitem" tabindex="-1" ><i class="fa fa-weixin fa-fw"></i>分享到微信朋友圈</a></li>
-              <li role="presentation"><a id="QQShare" role="menuitem" tabindex="-1" ><i class="fa fa-qq fa-fw"></i>分享到QQ</a></li>
-              <li role="presentation"><a id="socialShare" role="menuitem" tabindex="-1" ><i class="fa fa-share-alt fa-fw"></i>分享到更多应用</a></li>
+              <li role="presentation"><a id="WXSessionShare" role="menuitem" tabindex="-1" ><i class="fa fa-weixin fa-fw"></i>Share to WeChat Friend</a></li>
+              <li role="presentation"><a id="WXTimelineShare" role="menuitem" tabindex="-1" ><i class="fa fa-weixin fa-fw"></i>Share on WeChat Moment</a></li>
+              <li role="presentation"><a id="QQShare" role="menuitem" tabindex="-1" ><i class="fa fa-qq fa-fw"></i>Share to QQ</a></li>
+              <li role="presentation"><a id="socialShare" role="menuitem" tabindex="-1" ><i class="fa fa-share-alt fa-fw"></i>More Shares</a></li>
             </ul>
           </div>
         {{/if}}
@@ -64,7 +64,7 @@
               <div class="post_header">
                   <div class="post_abstract">
                       <div class="abstract_sentence"><span style="white-space: pre-wrap;">{{getAbstractSentence}}</span></div>
-                      <div class="abstract_chapter">――节选自 <a href="#" class="goChapter">第{{getAbstractSentenceIndex}}段 {{title}}{{#if addontitle}}：{{addontitle}}{{/if}}</a></div>
+                      <div class="abstract_chapter">--from paragraph <a href="#" class="goChapter">{{getAbstractSentenceIndex}} {{title}}{{#if addontitle}}：{{addontitle}}{{/if}}</a></div>
 <!--                      <div class="abstract_comment">
                         {{#if clickedCommentOverlayThumbsDown}}
                           <img class="abstract_thumbsDown" src="/thumbsDownBlue.png" width="20" height="20">
@@ -108,7 +108,7 @@
       </div>
     </div>
     {{#if haveUrl}}
-    <div id="ViewOnWeb"><i class="fa fa-globe"></i>     阅读原文</div>
+    <div id="ViewOnWeb"><i class="fa fa-globe"></i>     Saved from</div>
     {{/if}}
     {{#if withAfterPostIntroduce}}
       <div class="write">
@@ -117,40 +117,40 @@
       </div>
       <div class="nav"></div>
       <div class="hotitle">
-        <h2>热门文章<span>（下载“故事贴”查看更多精彩内容）</span></h2>
+        <h2>Popular stories<span>（Install Storyboard and read more stories）</span></h2>
       </div>
       <div class="hotcont">
         <dl>
           <dt><img src="/img/demo-1.jpg" width="100" height="100"> </dt>
-          <dd>哪些年，我们在一起</dd>
+          <dd>we are together those days</dd>
         </dl>
         <dl>
           <dt><img src="/img/demo-1.jpg" width="100" height="100"> </dt>
-          <dd>哪些年，我们在一起</dd>
+          <dd>we are together those days</dd>
         </dl>
         <dl>
           <dt><img src="/img/demo-1.jpg" width="100" height="100"> </dt>
-          <dd>哪些年，我们在一起</dd>
+          <dd>we are together those days</dd>
         </dl>
       </div>
       <a href="#" class="button-1"><img src="/img/icon-2.jpg" width="300"></a>
       <div class="writeBottom">
-        <p>本文由史上最好用的图文排版APP<span>故事贴</span>支持创作</p>
+        <p>this story is edited by this awesome App<span>Storyboard</span></p>
       </div>
     {{/if}}
     <div onclick="trackEvent('Download','from Post Tail');window.open('http://cdn.tiegushi.com', '_system');"><img src="/img/download.png" style="width:90%;margin-left:5%;"></div>
     {{#unless isMyPost}}
       <div class="showPostsFollowMe">
         {{#if inWeiXin}}
-        <p>更多精彩内容，敬请点击关注<span><a><i class="fa fa-weixin"></i>故事贴</a></span>微信公众号</p>
+        <p>for more, please click following<span><a><i class="fa fa-weixin"></i>Storyboard</a></span>WeChat Official Account</p>
         {{else}}
-        <p>更多精彩内容，请搜索关注<span><a><i class="fa fa-weixin"></i>故事贴</a></span>微信公众号</p>
+        <p>To make friend with more stroytellers, please search and follow<span><a><i class="fa fa-weixin"></i>Storyboard</a></span>WeChat Official Account</p>
         {{/if}}
       </div>
     {{/unless}}
     {{#if isCordova}}
     {{#unless isMyPost}}
-    <div id="report">举报</div>
+    <div id="report">report</div>
     {{/unless}}
     {{/if}}
     <div class="showPostsLine"></div>
@@ -158,7 +158,7 @@
       </div>
       {{#if withSocialBar}}
         <div class="superChatIntroduce">
-            <p>故事贴无法获得微信信息，请放心使用</p>
+            <p>Storyboard won't get your WeChat information</p>
         </div>
         {{> socialContent}}
       {{/if}}
@@ -169,26 +169,26 @@
   <div class="commentInputBox">
     <header class="bottomBorder">
       {{#if currentUser}}
-        <div class="title">评论</div>
+        <div class="title">reply</div>
       {{else}}
-        <div class="title">匿名评论</div>
+        <div class="title">Reply anonymously</div>
       {{/if}}
-      <div id="finish" class="leftButton">取消</div>
-      <div id="submit" class="rightButton">发送</div>
+      <div id="finish" class="leftButton">Cancel</div>
+      <div id="submit" class="rightButton">Send</div>
     </header>
     <form id="new-reply" name="new-reply" class="new-reply">
-      <textarea name="comment" class="commentArea" placeholder="说点什么..." type="text" value="{{refcomment}}"></textarea>
-      <div class="footer"><span class="change">换</span></div>
+      <textarea name="comment" class="commentArea" placeholder="Reply..." type="text" value="{{refcomment}}"></textarea>
+      <div class="footer"><span class="change">Change</span></div>
     </form>
   </div>
   {{/if}}
   {{#if withSectionMenu}}
       <div class="section-toolbar" id="{{_id}}" style='visibility: hidden;'>
           {{#if withSectionShare}}
-              <a href="#" class='section-forward' action="section-forward"><i>转发本段</i></a>
+              <a href="#" class='section-forward' action="section-forward"><i>Share this paragraph to</i></a>
           {{/if}}
           {{#if withPostTTS}}
-              <a href="#" class='post-tts' action="post-tts"><i>朗读</i></a>
+              <a href="#" class='post-tts' action="post-tts"><i>Read</i></a>
           {{/if}}
       </div>
   {{/if}}
@@ -206,9 +206,9 @@
       <span class="minHeart"><i class="fa fa-thumbs-up"></i>{{heart}}</span>
       <span class="minComment"><i class="fa fa-comment"></i>{{comment}}</span>
     </div>
-    <input readOnly name="comment" class="comment" placeholder="说点什么..." type="text" value="{{refcomment}}">
+    <input readOnly name="comment" class="comment" placeholder="Reply..." type="text" value="{{refcomment}}">
     <div class="buttons">
-      <span class="refresh">换</span>
+      <span class="refresh">Change</span>
       {{#if blueHeart}}
         <span class="blueHeart"><i class="fa fa-thumbs-up" style="color:#00c4ff;"></i></span>
       {{else}}
@@ -232,7 +232,7 @@
           </div>
          {{/each}}
        {{else}}
-         <div class="banner">快来抢沙发～～(￣▽￣)"</div>
+         <div class="banner">Come and take a position～～(￣▽￣)</div>
        {{/if}}
       </div>
       <div class="input-group">
@@ -255,7 +255,7 @@
   <div class="pcommentInput" style="display:none;">
       <div class="input-group">
         <input type="text" id="pcommitReport" autofocus="autofocus" class="form-control" maxlength="180" placeholder="评论" />
-        <div onclick="pcommitReport()" id="pcommitReportBtn">发送</div>
+        <div onclick="pcommitReport()" id="pcommitReportBtn">Send</div>
       </div>
   </div>
   <div onclick="hidePcomments()" class="alertBackground"></div>
@@ -273,7 +273,7 @@
           postId = Session.get("postContent")._id;
           post = Session.get("postContent").pub;
 
-          var mqtt_msg = {"type": "postcomment", "message": " 评论了此段 \"" + Session.get("postContent").pub[i].text + '": ' + content, "postid": Session.get('postContent')._id};
+          var mqtt_msg = {"type": "postcomment", "message": " Commented on this section \"" + Session.get("postContent").pub[i].text + '": ' + content, "postid": Session.get('postContent')._id};
 
           mqtt_msg.message = Meteor.user().profile.fullname + mqtt_msg.message;
 
@@ -357,15 +357,15 @@
 <template name="SectionReviewBox">
     {{#if displaySectionReviewBox}}
     <div class="commentOverlay">
-        <div class="banner">您对TA转发的这段文章有什么看法？</div>
+        <div class="banner">What do you think of the TA forwarding this article?</div>
         <div class="commentOverlayInputGroup">
           <div class="input-group">
             <input type="text" id="overlayPcommitReport" autofocus="autofocus" class="form-control" maxlength="180" placeholder="输入您的评论" />
-            <div  id="overlayPcommitReportBtn">点评</div>
+            <div  id="overlayPcommitReportBtn">Reply</div>
           </div>
         </div>
         <div class="commentOverlayBtn">
-          <span class="commentOverlayLater" style="color: #CACDD1;font-weight: bold;">稍后再评</span>
+          <span class="commentOverlayLater" style="color: #CACDD1;font-weight: bold;">reply later</span>
             {{#if clickedCommentOverlayThumbsUp}}
             <img style="margin:0 20%" class="thumbsUp" src="/thumbsUpPink.png" width="16" height="16">
             {{else}}
@@ -383,10 +383,10 @@
 
 <template name="shareTheReadingRoom">
   <div class="shareTheReadingRoom" style="display:none;">
-    <div class="title">分享阅览室，结交新朋友！</div>
+    <div class="title">Share to Reading room and meet new friends.</div>
     <div class="banner">
-      <div onclick="hideshareAlertBackground()" class="btnNo">不分享</div>
-      <span onclick="shareYestothereadingroom()" class="btnYes">继续分享</span>
+      <div onclick="hideshareAlertBackground()" class="btnNo">No</div>
+      <span onclick="shareYestothereadingroom()" class="btnYes">Share</span>
     </div>
   </div>
   <div onclick="hideshareAlertBackground()" class="shareAlertBackground"></div>
@@ -395,7 +395,7 @@
         WeixinJSBridge.invoke('sendAppMessage', {
           "title": title,
           "link": shareUrl,
-          "desc": "来自故事贴",
+          "desc": "from Storyboard",
           "img_url": imgUrl
         });
       }
@@ -403,7 +403,7 @@
         WeixinJSBridge.invoke('shareTimeline', {
           "title": title,
           "link": shareUrl,
-          "desc": "来自故事贴",
+          "desc": "from Storyboard",
           "img_url": imgUrl
         });
       }

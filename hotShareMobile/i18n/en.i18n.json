@@ -2,7 +2,7 @@
   //authOverlay.html
   "anonymous": "Log in anonymously",
   "anonymousAgree": "I agree to the Storyboard",
-
+  "gstServiceSpec": "Terms and Privacy",
   "anonymousWarn": "Anonymous user will not be able to get access to their posts after they log out.",
   "kownIt": "Accept",
   "funnyLogin": "Logging in",
@@ -235,7 +235,7 @@
   "aboutTitle": "About Storyboard",
   "ver": "v.",
   "logOut": "Logout",
-  "NewFriends": "New Friends",
+  "NewFriends": "Friends",
   "NickName": "Nick Name",
   "Gender": "Gender",
   "Save": "Save",
@@ -277,5 +277,5 @@
   //end
 
   "readMore": "More",
-  "readingRoom": "Reading Room"
+  "readingRoom": "ReadingRoom"
 }

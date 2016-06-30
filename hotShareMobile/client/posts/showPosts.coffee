@@ -379,12 +379,12 @@ if Meteor.isClient
         window.currentTTS = TTS
       else
         window.currentTTS = BaiduTTS
-        toRead.push('故事贴，"'+ Session.get('postContent').title + '"，全文朗读结束，感谢您的使用。')
+        toRead.push('Storyboard，"'+ Session.get('postContent').title + '"，全文朗读结束，感谢您的使用。')
       $('.tts-stoper').show()
       if Meteor.isCordova and device.platform is 'iOS'
         if window.remoteControls.updateMetas
           post = Session.get('postContent')
-          params = [post.ownerName, post.title, '故事贴', post.mainImage,0,0];
+          params = [post.ownerName, post.title, 'Storyboard', post.mainImage,0,0];
           window.remoteControls.updateMetas( (success)->
             console.log(success)
             hookRemoteEvent()
@@ -413,7 +413,7 @@ if Meteor.isClient
           toNextPost()
       );
     else
-      window.plugins.toast.showShortCenter("并未选中可读的段落");
+      window.plugins.toast.showShortCenter("You did not select the paragraph.");
   sectionToolbarClickHandler = (self,event,node)->
     console.log('Index ' + self.index + ' Action ' + $(node).attr('action') )
     action = $(node).attr('action')
@@ -421,10 +421,10 @@ if Meteor.isClient
       options = {
         'androidTheme': window.plugins.actionsheet.ANDROID_THEMES.THEME_HOLO_LIGHT, # default is THEME_TRADITIONAL
         'title': '分享',
-        'buttonLabels': ['分享给微信好友', '分享到微信朋友圈','分享到QQ','分享到QQ空间','分享到更多应用'],
+        'buttonLabels': ['Share to WeChat Friends', 'Share to WeChat Moments','Share to QQ','Share to QQ Zone','Share to more'],
         'androidEnableCancelButton' : true, #default false
         'winphoneEnableCancelButton' : true, #default false
-        'addCancelButtonWithLabel': '取消',
+        'addCancelButtonWithLabel': 'Cancel',
         #'position': [20, 40] # for iPad pass in the [x, y] position of the popover
       }
       window.plugins.actionsheet.show(options, (buttonIndex)->
@@ -496,8 +496,8 @@ if Meteor.isClient
       onUserProfile()
     "click .showPostsFollowMe span a":->
       if Meteor.isCordova
-        cordova.plugins.clipboard.copy('故事贴')
-        PUB.toast('请在微信中搜索关注公众号“故事贴”(已复制到粘贴板)')
+        cordova.plugins.clipboard.copy('Storyboard')
+        PUB.toast('Please follow “Storyboard” in WeChat Public Account!')
         return
       if isIOS
         window.location.href="http://mp.weixin.qq.com/s?__biz=MzAwMjMwODA5Mw==&mid=209526606&idx=1&sn=e8053772c8123501d47da0d136481583#rd"
@@ -543,7 +543,7 @@ if Meteor.isClient
         userId = Meteor.user()._id
         userIcon = Meteor.user().profile.icon
       else
-        username = '匿名'
+        username = 'Storyteller'
         userId = 0
         userIcon = ''
       try
@@ -559,7 +559,7 @@ if Meteor.isClient
       catch error
         console.log error
       event.target.comment.value = ""
-      $("#comment").attr("placeholder", "说点什么")
+      $("#comment").attr("placeholder", "Say something?")
       $("#comment").css('height', 'auto')
       $('.contactsList .head').fadeOut 300
       false
@@ -614,7 +614,7 @@ if Meteor.isClient
       Router.go('/add')
     'click #unpublish': (event)->
       self = this
-      # navigator.notification.confirm('取消发表的故事将会被转换为草稿。', (r)->
+      # navigator.notification.confirm('It will be saved as a draft.', (r)->
       #   if r isnt 2
       #     return
       #   #PUB.page('/user')
@@ -657,9 +657,9 @@ if Meteor.isClient
       blackerId = Session.get("postContent").owner
       FollowerId = Follower.findOne({userId: Meteor.userId(),followerId: blackerId})
       if BlackList.find({blackBy: Meteor.userId(), blacker:{$in: [blackerId]}}).count() > 0
-        menus = ['举报','从黑名单中移除']
+        menus = ['Report','Remove from Blacklist']
       else
-        menus = ['举报','拉黑']
+        menus = ['Report','Block']
       menuTitle = ''
       callback = (buttonIndex)->
         if buttonIndex is 1
@@ -870,7 +870,7 @@ if Meteor.isClient
           userId = Meteor.user()._id
           userIcon = Meteor.user().profile.icon
         else
-          username = '匿名'
+          username = 'Storyteller'
           userId = 0
           userIcon = ''
         if not post[i].pcomments or post[i].pcomments is undefined
@@ -891,7 +891,7 @@ if Meteor.isClient
             console.log("success");
         )
         $('#pcommitReport').val('')
-        $("#pcommitReport").attr("placeholder", "评论")
+        $("#pcommitReport").attr("placeholder", "Comment")
         $('.showBgColor').removeAttr('style')
         $(window).scrollTop(0-Session.get('backgroundTop'))
         $('.pcommentsList,.alertBackground').fadeOut 300
@@ -929,7 +929,7 @@ if Meteor.isClient
         postId = Session.get("postContent")._id
         post = Session.get("postContent").pub
 
-        mqtt_msg = {"type": "postcomment", "message": " 评论了此段 \"" + Session.get("postContent").pub[i].text + '": ' + content, "postid": Session.get('postContent')._id}
+        mqtt_msg = {"type": "postcomment", "message": " commented on this \"" + Session.get("postContent").pub[i].text + '": ' + content, "postid": Session.get('postContent')._id}
         mqtt_msg.message = Meteor.user().profile.fullname + mqtt_msg.message
         mqtt_connection=mqtt.connect('ws://rpcserver.raidcdn.com:80')
         mqtt_connection.on('connect',()->
@@ -959,7 +959,7 @@ if Meteor.isClient
           userId = Meteor.user()._id
           userIcon = Meteor.user().profile.icon
         else
-          username = '匿名'
+          username = 'Storyteller'
           userId = 0
           userIcon = ''
         if not post[i].pcomments or post[i].pcomments is undefined
@@ -980,7 +980,7 @@ if Meteor.isClient
             console.log("success");
         )
         $('#pcommitReport').val("")
-        $("#pcommitReport").attr("placeholder", "评论")
+        $("#pcommitReport").attr("placeholder", "Comment")
         #$('body').removeAttr('style')
         $('.showBgColor').removeAttr('style')
         $(window).scrollTop(0-Session.get('backgroundTop'))

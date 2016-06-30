@@ -5,21 +5,21 @@ if Meteor.isServer
   @pushnotification = (type, doc, userId)->
     console.log "type:"+type
     if type is "palsofavourite"
-      content = '有人也赞了此故事:\n《' + doc.title + '》'
+      content = 'Someone also likes this story:\n《' + doc.title + '》'
       extras = {
         type: "palsofavourite"
         postId: doc._id
       }
       toUserId = userId
     else if type is "palsocomment"
-      content = '有人也点评了此故事:\n《' + doc.title + '》'
+      content = 'Someone also replies to this story:\n《' + doc.title + '》'
       extras = {
         type: "palsocomment"
         postId: doc._id
       }
       toUserId = userId
     else if type is "pcommentowner"
-      content = '有人点评了您的故事:\n《' + doc.title + '》'
+      content = 'Someone replies to your story:\n《' + doc.title + '》'
       extras = {
         type: "pcommentowner"
         postId: doc._id
@@ -31,7 +31,7 @@ if Meteor.isServer
         #console.log "comment self post"
         return
       commentText = doc.content;
-      content = '您收到了新回复:\n'+commentText
+      content = 'You receive a new reply:\n'+commentText
       extras = {
         type: "comment"
         postId: doc.postId
@@ -41,28 +41,28 @@ if Meteor.isServer
       if doc.owner == userId
         #console.log "read self post"
         return
-      content = '有人正在阅读您的故事:\n《' + doc.title + '》'
+      content = 'Someone is readying your stroy:\n《' + doc.title + '》'
       extras = {
         type: "read"
         postId: doc._id
       }
       toUserId = doc.owner
     else if type is "recommand"
-      content = doc.recommander + '推荐您阅读' + doc.ownerName + '的故事\n《' + doc.postTitle + '》'
+      content = doc.recommander + 'recommands you' + doc.ownerName + '\'s story.\n《' + doc.postTitle + '》'
       extras = {
         type: "recommand"
         postId: doc.postId
       }
       toUserId = doc.followby
     else if type is "getrequest"
-      content = doc.requester + '邀请您加为好友!'
+      content = doc.requester + 'invites you to be a friend.'
       extras = {
         type: "getrequest"
         requesterId: doc.requesterId
       }
       toUserId = doc.followby
     else if type is "newpost"
-      content = doc.ownerName + '发布了新故事:\n《' + doc.title + '》'
+      content = doc.ownerName + 'publishes a new story:\n《' + doc.title + '》'
       extras = {
         type: "newpost"
         postId: doc._id
@@ -71,7 +71,7 @@ if Meteor.isServer
     else
       post = Posts.findOne({_id: doc.postId});
       commentText = doc.content;
-      content = '您参与讨论的故事有新回复:\n'+commentText
+      content = 'The story you have activities on has a new reply:\n'+commentText
       extras = {
         type: "recomment"
         postId: doc.postId
@@ -117,7 +117,7 @@ if Meteor.isServer
         #console.log 'JPUSH to ' + pushToken.token
         client.push().setPlatform 'ios', 'android'
           .setAudience JPush.registration_id(token)
-          .setNotification '回复通知',JPush.ios(content,null,null,null,extras),JPush.android(content, null, 1,extras)
+          .setNotification 'reply',JPush.ios(content,null,null,null,extras),JPush.android(content, null, 1,extras)
           #.setMessage(commentText)
           .setOptions null, 60
           .send (err, res)->

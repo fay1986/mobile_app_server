@@ -166,7 +166,7 @@ if Meteor.isClient
       type:'music',
       owner: Meteor.userId(),
       toTheEnd: true,
-      text:'您当前程序不支持音频播放，请分享到微信中欣赏',
+      text:'This is not supported. Please share it to WeChat!',
       musicInfo: musicInfo
       data_row:'1',
       data_col:'3',
@@ -182,7 +182,7 @@ if Meteor.isClient
       type:'video',
       owner: Meteor.userId(),
       toTheEnd: true,
-      text:'来自故事贴',
+      text:'From Storyboard',
       videoInfo: videoInfo
       data_row:'1',
       data_col:'3',
@@ -246,7 +246,7 @@ if Meteor.isClient
         inIframe:true,
         owner: Meteor.userId(),
         toTheEnd: true,
-        text:'您当前程序不支持视频观看',
+        text:'This video is not supported!',
         iframe: item.iframe,
         imgUrl:'http://data.tiegushi.com/res/video_old_version.jpg',
         data_row:'1',
@@ -377,7 +377,7 @@ if Meteor.isClient
             processTitleOfPost(data)
         ,200)
     else
-      PUB.toast('请粘贴需要引用的链接')
+      PUB.toast('Please copy the URL you want to import.')
   @handleExitBrowser = ()->
     window.iabHandle = null
   @handleHideBrowser = ()->
@@ -392,7 +392,7 @@ if Meteor.isClient
     iabHandle.removeEventListener 'loadstop',getURL
     iabHandle.addEventListener 'hide',handleHideBrowser
     console.log('Load Error' + JSON.stringify(e))
-    window.plugins.toast.showShortCenter("访问导入链接超时，请点击右上角\"导入\"再试一次。");
+    window.plugins.toast.showShortCenter("Import URL timeout! Please click \"Import\" and try again.");
     Meteor.setTimeout ()->
       iabHandle.show()
     ,500
@@ -889,7 +889,7 @@ if Meteor.isClient
       return
     'click .back':(event)->
       if Session.get('isReviewMode') is '2'
-        navigator.notification.confirm('这个操作无法撤销', (r)->
+        navigator.notification.confirm('It cannot be revoked.', (r)->
           console.log('r is ' + r)
           if r isnt 1
             return
@@ -906,7 +906,7 @@ if Meteor.isClient
             PUB.back()
           ,animatePageTrasitionTimeout
           return
-        , '您确定要放弃未保存的修改吗？', ['放弃修改','继续编辑']);
+        , 'Are you sure you want to cancel your editing?', ['Cancel','Keep Editing']);
       else
         Drafts.remove {owner: Meteor.userId()}
         $('.addPost').addClass('animated ' + animateOutUpperEffect);
@@ -918,7 +918,7 @@ if Meteor.isClient
       Session.set 'isReviewMode','0'
       return
     'click #delete':(event)->
-      navigator.notification.confirm('您是否要删除草稿？', (r)->
+      navigator.notification.confirm('Do you want to delete this draft？', (r)->
         if r isnt 2
           return
         Session.set 'isReviewMode','1'
@@ -938,12 +938,12 @@ if Meteor.isClient
           PUB.back()
         ,animatePageTrasitionTimeout
         return
-      , '删除草稿', ['取消','确定']);
+      , 'Delete Draft', ['Cancel','OK']);
 
       return
     'click .cancle':->
       if TempDrafts.find({}).count()>0
-        navigator.notification.confirm('这个操作无法撤销', (r)->
+        navigator.notification.confirm('It cannot be revoked.', (r)->
           console.log('r is ' + r)
           if r isnt 1
             return
@@ -957,9 +957,9 @@ if Meteor.isClient
             Router.go('/')
           ,animatePageTrasitionTimeout
           return
-        , '您确定要放弃未保存的修改吗？', ['放弃修改','继续编辑']);
+        , 'Are you sure you want to quit editing?', ['Quit','Keep Editing']);
       else
-        navigator.notification.confirm('这个操作无法撤销', (r)->
+        navigator.notification.confirm('It cannot be revoked.', (r)->
           console.log('r is ' + r)
           if r isnt 1
             return
@@ -978,7 +978,7 @@ if Meteor.isClient
             Router.go('/')
           ,animatePageTrasitionTimeout
           return
-        , '您确定要删除未保存的草稿吗？', ['删除故事','继续创作']);
+        , 'Are you sure you want to quit editing?', ['Quit','Keep Editing']);
     'click .cancleCrop':->
       $('#blur_overlay').css('height','')
       $('#blur_bottom').css('height','')
@@ -1079,7 +1079,7 @@ if Meteor.isClient
         $('.modal-backdrop.fade.in').remove()
 
       if Meteor.user() is null
-        window.plugins.toast.showShortBottom('请登录后发表您的故事')
+        window.plugins.toast.showShortBottom('Please publish your story after log in.')
         Router.go('/user')
         false
       else
@@ -1089,7 +1089,7 @@ if Meteor.isClient
         title = $("#title").val()
         if title is '' or title is '[空标题]'
           $("#title").val('')
-          window.plugins.toast.showShortBottom('请为您的故事加个标题')
+          window.plugins.toast.showShortBottom('Please add a title for your story.')
           return
         #get the images to be uploaded
         draftImageData = Drafts.find({type:'image'}).fetch()
@@ -1117,10 +1117,10 @@ if Meteor.isClient
         if draftToBeUploadedImageData.length > 0
           multiThreadUploadFileWhenPublishInCordova(draftToBeUploadedImageData, null, (err, result)->
             unless result
-              window.plugins.toast.showShortBottom('上传失败，请稍后重试')
+              window.plugins.toast.showShortBottom('Uploading Fails! Please retry it.')
               return
             if result.length < 1
-              window.plugins.toast.showShortBottom('上传失败，请稍后重试')
+              window.plugins.toast.showShortBottom('Uploading Fails! Please retry it.')
               return
             for item in result
               if item.uploaded and item._id
@@ -1131,7 +1131,7 @@ if Meteor.isClient
                 else if item.type is 'video' and item.videoInfo and item.videoInfo.imageUrl
                   Drafts.update({_id: item._id}, {$set: {"videoInfo.imageUrl":item.videoInfo.imageUrl}});
             if err
-              window.plugins.toast.showShortBottom('上传失败，请稍后重试')
+              window.plugins.toast.showShortBottom('Uploading Fails! Please retry it.')
               return
             publishPostHandle()
             removeImagesFromCache(draftImageData)

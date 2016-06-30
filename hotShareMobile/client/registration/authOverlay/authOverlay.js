@@ -45,7 +45,7 @@ if (Meteor.isClient) {
                 }
             });
         } else {
-            PUB.toast ('您的设备不支持匿名使用，请和我们联系');
+            PUB.toast ('您的设备不支持Storyteller使用，请和我们联系');
         }
     },
     'click #cancle': function () {
@@ -56,7 +56,7 @@ if (Meteor.isClient) {
                 'username':device.uuid,
                 'password':'123456',
                 'profile':{
-                    fullname:'匿名',
+                    fullname:'Storyteller',
                     icon:'/userPicture.png',
                     anonymous:true
                 }
@@ -68,7 +68,7 @@ if (Meteor.isClient) {
                     Router.go('/registerFollow');
                 } else {
                     $('.agreeDeal').css('display',"none");
-                    PUB.toast ('匿名服务暂时不可用，请稍后重试');
+                    PUB.toast ('Storyteller服务暂时不可用，请稍后重试');
                 }
             });
     },
