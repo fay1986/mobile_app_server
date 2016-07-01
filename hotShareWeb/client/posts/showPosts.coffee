@@ -33,7 +33,7 @@ if Meteor.isClient
         Session.set('displayUserProfileBox',true)
   @isWechatapi = ->
     if typeof WeixinJSBridge is 'undefined'
-      # alert('请先通过微信打开')
+      # alert('Please open it with WeChat.')
       Session.set('inWechatBrowser',false)
     else
       # alert('gooode')
@@ -71,7 +71,7 @@ if Meteor.isClient
           Session.set("postPageScrollTop", scrolltop)
           document.body.scrollTop = Session.get("postPageScrollTop")
         userName=Session.get("pcommentsName")
-        toastr.info(userName+"点评过的段落已为您用蓝色标注！")
+        toastr.info(userName+" commented this paragraph.")
       ,1000
   Template.showPosts.onDestroyed ->
     document.body.scrollTop = 0
@@ -122,8 +122,8 @@ if Meteor.isClient
         $('.showPosts').get(0).style.overflow = 'hidden'
         $('.showPosts').get(0).style.maxHeight = '1500px'
         $('.showPosts').get(0).style.position = 'relative'
-        # $showPosts.after('<div class="readmore">继续阅读<i class="fa fa-angle-double-down"></i><div>')
-        $showPosts.after('<div class="readmore"><div class="readMoreContent"><i class="fa fa-plus-circle"></i>继续阅读</div></div>')
+        # $showPosts.after('<div class="readmore">More<i class="fa fa-angle-double-down"></i><div>')
+        $showPosts.after('<div class="readmore"><div class="readMoreContent"><i class="fa fa-plus-circle"></i>More</div></div>')
     , 600
 
   Template.showPosts.created=->
@@ -417,11 +417,11 @@ if Meteor.isClient
       if Meteor.isCordova
         options = {
           'androidTheme': window.plugins.actionsheet.ANDROID_THEMES.THEME_HOLO_LIGHT, # default is THEME_TRADITIONAL
-          'title': '分享',
-          'buttonLabels': ['分享给微信好友', '分享到微信朋友圈','分享到QQ','分享到更多应用'],
+          'title': 'Share',
+          'buttonLabels': ['Share to WeChat Friends', 'Share to WeChat Moments','Share to QQ','More Shares'],
           'androidEnableCancelButton' : true, #default false
           'winphoneEnableCancelButton' : true, #default false
-          'addCancelButtonWithLabel': '取消',
+          'addCancelButtonWithLabel': 'Cancel',
           #'position': [20, 40] # for iPad pass in the [x, y] position of the popover
         }
         window.plugins.actionsheet.show(options, (buttonIndex)->
@@ -449,7 +449,7 @@ if Meteor.isClient
         )
       
         Session.set("doSectionForward",true)
-        toastr.success('将在微信分享时引用本段内容', '您选定了本段文字')
+        toastr.success('You will quote this paragraph when you share it to WeChat.', 'You select this paragraph.')
         console.log('Selected index '+self.index)
         Router.go('/posts/'+Session.get('postContent')._id+'/'+self.index)
   Template.showPosts.events
@@ -529,8 +529,8 @@ if Meteor.isClient
       onUserProfile()
     "click .showPostsFollowMe span a":->
       if Meteor.isCordova
-        cordova.plugins.clipboard.copy('故事贴')
-        PUB.toast('请在微信中搜索关注公众号“故事贴”(已复制到粘贴板)')
+        cordova.plugins.clipboard.copy('Storyboard')
+        PUB.toast('Please follow “Storyboard” in WeChat official account.')
         return
       if isIOS
         window.location.href="http://mp.weixin.qq.com/s?__biz=MzAwMjMwODA5Mw==&mid=209526606&idx=1&sn=e8053772c8123501d47da0d136481583#rd"
@@ -576,7 +576,7 @@ if Meteor.isClient
         userId = Meteor.user()._id
         userIcon = Meteor.user().profile.icon
       else
-        username = '匿名'
+        username = 'Anonymous'
         userId = 0
         userIcon = ''
       try
@@ -654,7 +654,7 @@ if Meteor.isClient
       Router.go('/add')
     'click #unpublish': (event)->
       self = this
-      navigator.notification.confirm('取消发表的故事将会被转换为草稿。', (r)->
+      navigator.notification.confirm('If you cancel your publish, this story will be saved as a draft.', (r)->
         if r isnt 2
           return
         #PUB.page('/user')
@@ -682,7 +682,7 @@ if Meteor.isClient
         Meteor.call 'unpublishPosts',postId,userId,drafts
         Router.go('/user')
         return
-      , '取消发表故事', ['取消','取消发表']);
+      , 'Cancel Publish', ['Undo','Cancel Publish']);
 
 
     'click #report': (event)->
@@ -1004,9 +1004,9 @@ if Meteor.isClient
             Session.set("clickedCommentOverlayThumbsDown",false)
           ,3000
         refreshPostContent()
-        toastr.success('您对本段文字引用的评价已生效')
+        toastr.success('You have commented on this paragraph.')
       else
-        toastr.success('请对此段文字进行评价')
+        toastr.success('Please comment on this story.')
     'click .commentOverlayLater' :(e)->
       amplify.store('section_'+Session.get('channel'),true)
       $('body').removeAttr('style')

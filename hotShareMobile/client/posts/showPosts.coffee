@@ -37,7 +37,7 @@ if Meteor.isClient
     toGo = '/posts/' + id
     Meteor.defer ()->
       BaiduTTS.speak({
-          text: '正在为您准备下一篇文章',
+          text: 'Preparing next stroy for you.',
           rate: 1.5
         }
       ,()->
@@ -150,7 +150,7 @@ if Meteor.isClient
           Session.set("postPageScrollTop", scrolltop)
           document.body.scrollTop = Session.get("postPageScrollTop")
         userName=Session.get("pcommentsName")
-        toastr.info(userName+"点评过的段落已为您用蓝色标注！")
+        toastr.info(userName+" commented on this paragraph!")
       ,1000
   Template.showPosts.onDestroyed ->
     document.body.scrollTop = 0
@@ -379,7 +379,7 @@ if Meteor.isClient
         window.currentTTS = TTS
       else
         window.currentTTS = BaiduTTS
-        toRead.push('Storyboard，"'+ Session.get('postContent').title + '"，全文朗读结束，感谢您的使用。')
+        toRead.push('Storyboard，"'+ Session.get('postContent').title + '"，finished reading. Thanks!')
       $('.tts-stoper').show()
       if Meteor.isCordova and device.platform is 'iOS'
         if window.remoteControls.updateMetas
@@ -649,7 +649,7 @@ if Meteor.isClient
         }
       Router.go('/user')
       return
-      # , '取消发表故事', ['依然发表','存为草稿']);
+      # , 'Cancel Publish', ['Undo','Cancel Publish']);
 
 
     'click #report': (e)->

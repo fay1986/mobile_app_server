@@ -66,7 +66,7 @@ if Meteor.isClient
       if Session.get('focusedIndex') isnt undefined
         description =Session.get('postContent').pub[Session.get('focusedIndex')].text.replace(/\s\s\s+/g, '');
         if !description || description is ''
-          description = Session.get("DocumentTitle").replace('『故事贴』','');
+          description = Session.get("DocumentTitle").replace('『Storyboard』','');
         else if(description.length > 100)
           description = description.substring(0, 100)
         section=parseInt(Session.get('focusedIndex'))
