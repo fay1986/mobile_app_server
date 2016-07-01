@@ -17,6 +17,8 @@ if Meteor.isClient
     Session.set('nextPostID',this.params._id)
     this.render 'redirect'
     return
+  Router.route '/import', ()->
+    this.render 'importPost'
   Router.route '/posts/:_id', {
       waitOn: ->
           [subs.subscribe("publicPosts",this.params._id),
@@ -162,6 +164,7 @@ if Meteor.isServer
     fastRender: true
   }
 
+  SSR.compileTemplate('post', Assets.getText('template/post.html'))
   Router.route '/posts/:_id', (req, res, next)->
     BOTS = [
       'googlebot',
@@ -185,7 +188,7 @@ if Meteor.isServer
     agentPattern = new RegExp(BOTS.join('|'), 'i')
     userAgent = req.headers['user-agent']
     if agentPattern.test(userAgent)
-      SSR.compileTemplate('post', Assets.getText('template/post.html'))
+      console.log('user Agent: '+userAgent);
       postItem = Posts.findOne({_id: this.params._id})
       postHtml = SSR.render('post', postItem)
 
@@ -194,10 +197,36 @@ if Meteor.isServer
       })
       res.end(postHtml)
     else
+      postItem = Posts.findOne({_id: this.params._id},{fields:{title:1,mainImage:1,addontitle:1}});
+      Inject.rawModHtml('addxmlns', (html) ->
+        return html.replace(/<html>/, '<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:fb="http://ogp.me/ns/fb#">');
+      )
+      Inject.rawHead("inject-image", "<meta property=\"og:image\" content=\"#{postItem.mainImage}\"/>", res);
+      Inject.rawHead("inject-description", "<meta property=\"og:description\" content=\"#{postItem.title} #{postItem.addontitle} Storyboard\"/>",res);
+      Inject.rawHead("inject-url", "<meta property=\"og:url\" content=\"http://#{server_domain_name}/posts/#{postItem._id}\"/>",res);
+      Inject.rawHead("inject-title", "<meta property=\"og:title\" content=\"#{postItem.title} - Storyboard\"/>",res);
+      Inject.rawHead("inject-width", "<meta property=\"og:image:width\" content=\"400\" />",res);
+      Inject.rawHead("inject-height", "<meta property=\"og:image:height\" content=\"300\" />",res);
+      Inject.rawHead("inject-height", "<meta property=\"fb:app_id\" content=\"1759413377637096\" />",res);
+
       injectSignData(req,res)
       next()
   , {where: 'server'}
   Router.route '/posts/:_id/:index', (req, res, next)->
+    postItem = Posts.findOne({_id: this.params._id},{fields:{title:1,mainImage:1,addontitle:1}});
+    Inject.rawModHtml('addxmlns', (html) ->
+      return html.replace(/<html>/, '<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:fb="http://ogp.me/ns/fb#">');
+    )
+    Inject.rawHead("inject-image", "<meta property=\"og:image\" content=\"#{postItem.mainImage}\"/>", res);
+    Inject.rawHead("inject-description", "<meta property=\"og:description\" content=\"#{postItem.title} #{postItem.addontitle} Storyboard\"/>",res);
+    Inject.rawHead("inject-url", "<meta property=\"og:url\" content=\"http://#{server_domain_name}/posts/#{postItem._id}\"/>",res);
+    Inject.rawHead("inject-title", "<meta property=\"og:title\" content=\"#{postItem.title} - Storyboard\"/>",res);
+    Inject.rawHead("inject-width", "<meta property=\"og:image:width\" content=\"400\" />",res);
+    Inject.rawHead("inject-height", "<meta property=\"og:image:height\" content=\"300\" />",res);
+    Inject.rawHead("inject-height", "<meta property=\"fb:app_id\" content=\"1759413377637096\" />",res);
+
     injectSignData(req,res)
     next()
   , {where: 'server'}

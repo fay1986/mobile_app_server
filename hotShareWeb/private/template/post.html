@@ -1,7 +1,15 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:fb="http://ogp.me/ns/fb#">
 <head>
     <meta charset="utf-8">
     <title>{{title}} - Storyboard</title>
     <meta name="description" content="{{title}}, {{addontitle}}, Storyboard">
+    <meta property="og:url" content="http://storyboard.tiegushi.com/posts/{{_id}}"/>
+    <meta property="og:title" content="{{title}} - Storyboard"/>
+    <meta property="og:image" content="{{mainImage}}"/>
+    <meta property="og:image:width" content="400" />
+    <meta property="og:image:height" content="300" />
+    <meta property="fb:app_id" content="1759413377637096" />
     <link rel="icon" href="{{mainImage}}">
     <style type="text/css">
         #content img {
@@ -13,6 +21,7 @@
     </style>
 </head>
 <div id="content">
+    <div><img src="{{mainImage}}" alt="{{siteTitle}}"></div>
     <h1>{{title}}</h1>
     <h2>{{addontitle}}</h2>
     {{#each pub}}
@@ -23,3 +32,4 @@
         {{/if}}
     {{/each}}
 </div>
+</html>
