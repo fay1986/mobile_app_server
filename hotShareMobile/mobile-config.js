@@ -75,7 +75,7 @@ App.configurePlugin('org.hotshare.baidutts', {
 
 App.info({
   id: 'org.hotshare.storeboard',
-  version: '0.0.3',
+  version: '0.0.4',
   name: 'Storeboard',
   description: 'Share everything with everyone',
   author: 'hotShare Design Team',
