@@ -18,6 +18,12 @@ if Meteor.isClient
             if (target.data("visible"))
                 target.data("visible", false);
   Template.bell.helpers
+    has_pcomment_count: (obj)->
+      return obj > 0;
+    pcomment_count: ()->
+      Feeds.find({isRead:{$ne: true}, eventType:'pcommentowner', checked:{$ne: true}}).count()
+    last_pcomment_count: ()->
+      return Feeds.findOne({isRead:{$ne: true}, eventType:'pcommentowner', checked:{$ne: true}}, {sort: {createdAt: -1}});
     notReadCount: ()->
       Feeds.find({isRead:{$ne: true}, checked:{$ne: true}}).count()
     notRead:(read, check, index, createAt)->
@@ -81,6 +87,8 @@ if Meteor.isClient
       else 
          return true
   Template.bell.events
+    'click .new-msg-box': ->
+      Router.go('/bell/pcomments')
     'click .closePersonalLetter': ()->
       Session.set('inPersonalLetterView',false)
       $('body').css('overflow-y','auto')

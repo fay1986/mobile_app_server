@@ -2874,6 +2874,7 @@ if(Meteor.isClient){
   var POST_ID = null;
   Session.setDefault('followpostsitemsLimit', FOLLOWPOSTS_ITEMS_INCREMENT);
   Session.setDefault('feedsitemsLimit', FEEDS_ITEMS_INCREMENT);
+  Session.setDefault('bell_pcomments_feedsitemsLimit', FEEDS_ITEMS_INCREMENT);
   Session.setDefault('followersitemsLimit', FOLLOWS_ITEMS_INCREMENT);
   Session.setDefault('followeesitemsLimit', FOLLOWS_ITEMS_INCREMENT);
   Session.setDefault('mypostsitemsLimit', MYPOSTS_ITEMS_INCREMENT);
@@ -3017,14 +3018,14 @@ if(Meteor.isClient){
   },2000);
 
   Tracker.autorun(function() {
-    if(Meteor.isCordova) {
+    if(Meteor.isClient) {
         Meteor.subscribe('versions');        
     }    
   });
 
   Tracker.autorun(function() {
     if (Meteor.userId()) {
-        if (Meteor.isCordova){
+        if (Meteor.isClient){
             console.log('Refresh Main Data Source when logon');
             window.refreshMainDataSource();
         }/*
