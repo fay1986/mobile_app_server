@@ -174,14 +174,20 @@
     };
     gushitie.showpost.initLazyload = function() {
       initLazyload();
-    }
+    };
+    gushitie.showpost.initLayout = function() {
+      $("#wrapper .mainImage").css("height", ($(window).height() * 0.55) + "px");
+      $('.textDiv1Link').linkify();
+
+      calcLayoutForEachPubElement();
+    };
     gushitie.showpost.init = function () {
         Session.set("postForward",[]);
         Session.set("postBack",[]);
-        $("#wrapper .mainImage").css("height", ($(window).height() * 0.55) + "px");
-        $('.textDiv1Link').linkify();
+        // $("#wrapper .mainImage").css("height", ($(window).height() * 0.55) + "px");
+        // $('.textDiv1Link').linkify();
 
-        calcLayoutForEachPubElement();
+        // calcLayoutForEachPubElement();
 
         // initLazyload();
 

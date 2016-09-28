@@ -85,11 +85,12 @@ if Meteor.isClient
     postId = this.data._id
     ownerId = this.data.ownerId
     setTimeout ()->
-      gushitie.showpost.init()
+      gushitie.showpost.initLayout()
     ,300
     setTimeout ()->
       $('.element').css('visibility','visible')
       gushitie.showpost.initLazyload()
+      gushitie.showpost.init()
     ,500
     Meteor.subscribe 'usersById', Session.get('postContent').owner
     # showFollowTips = ()->

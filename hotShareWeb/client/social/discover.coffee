@@ -6,6 +6,7 @@ if Meteor.isClient
       else
         false
     Template.discover.rendered=->
+      Meteor.subscribe "pcomments"
       if withDiscover
         spanOuterWidth = $(".discover .discover-top .discover-con span").outerWidth() || 0
         $(".discover .discover-top .discover-con").css({'width': (spanOuterWidth + 40) + 'px'});
@@ -184,9 +185,12 @@ if Meteor.isClient
         else
           # 设置段落蓝色标识
           scolor="#F30B44"
+          pclength = 0
           userId = this.owner
           pub = Session.get('postContent').pub
           self = pub[this.pindex]
+          if self.pcomments
+            pclength = self.pcomments.length
           if userId and userId isnt ""
             if self.likeUserId and self.likeUserId[userId] is true
               scolor="#304EF5"

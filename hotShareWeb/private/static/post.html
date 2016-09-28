@@ -56,17 +56,18 @@
             console.log('===post body length-==='+$('#postbody').length);
                 // $('.showPosts').html($('#postbody').html());
                 $('#postbody').remove();
-                gushitie.showpost.init();
+                // gushitie.showpost.initLayout();
                 
           } 
         }, 100);
-        var intCount = 0;
-        var initLayout = setInterval(function() {           
-            gushitie.showpost.init();
-            intCount++;
-            if(intCount > 20){
-                clearInterval(initLayout);  
-            } 
-        }, 300);
+        // var intCount = 0;
+        // var initLayout = setInterval(function() {           
+        //     gushitie.showpost.initLayout();
+        //     intCount++;
+        //     if(intCount > 20){
+        //         clearInterval(initLayout);  
+        //         gushitie.showpost.init();
+        //     } 
+        // }, 300);
     });
 </script>

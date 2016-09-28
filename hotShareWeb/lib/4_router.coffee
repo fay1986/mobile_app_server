@@ -23,8 +23,7 @@ if Meteor.isClient
       waitOn: ->
           [subs.subscribe("publicPosts", this.params._id),
            subs.subscribe("postViewCounter",this.params._id),
-           subs.subscribe("postsAuthor",this.params._id),
-           subs.subscribe "pcomments"]
+           subs.subscribe("postsAuthor",this.params._id)]
       loadingTemplate: 'loadingPost'
       action: ->
         post = Posts.findOne({_id: this.params._id})
@@ -66,8 +65,7 @@ if Meteor.isClient
       waitOn: ->
           [subs.subscribe("publicPosts", this.params._id),
            subs.subscribe("postViewCounter",this.params._id),
-           subs.subscribe("postsAuthor",this.params._id),
-           subs.subscribe "pcomments"]
+           subs.subscribe("postsAuthor",this.params._id)]
       loadingTemplate: 'loadingPost'
       action: ->
         post = Posts.findOne({_id: this.params._id})
@@ -107,8 +105,7 @@ if Meteor.isClient
     waitOn: ->
       [Meteor.subscribe("publicPosts",this.params._id),
        Meteor.subscribe("postViewCounter",this.params._id),
-       Meteor.subscribe("postsAuthor",this.params._id),
-       Meteor.subscribe "pcomments"]
+       Meteor.subscribe("postsAuthor",this.params._id)]
     loadingTemplate: 'loadingPost'
     action: ->
       if Session.get("doSectionForward") is true
@@ -394,8 +391,7 @@ if Meteor.isServer
           if params.length > 0
             return [subs.subscribe("publicPosts",params[0]),
             subs.subscribe("postViewCounter",params[0]),
-            subs.subscribe("postsAuthor",params[0]),
-            subs.subscribe "pcomments"]
+            subs.subscribe("postsAuthor",params[0])]
     fastRender: true
   }
 
