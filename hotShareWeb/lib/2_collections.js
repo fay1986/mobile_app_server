@@ -2508,19 +2508,23 @@ if(Meteor.isServer){
       doc.isReview = false;
 
      Meteor.defer(function(){
-        var postInfo = {
-            post:'http://cdn.tiegushi.com/posts/'+doc._id,
-            browse:doc.browse,
-            title:doc.title,
-            addontitle:doc.addontitle,
-            owner:doc.owner,
-            _id:doc._id,
-            ownerName:doc.ownerName,
-            createdAt:doc.createdAt,
-            mainImage:doc.mainImage,
-            status: '待审核'
+        try{
+            var postInfo = {
+                post:'http://cdn.tiegushi.com/posts/'+doc._id,
+                browse:doc.browse,
+                title:doc.title,
+                addontitle:doc.addontitle,
+                owner:doc.owner,
+                _id:doc._id,
+                ownerName:doc.ownerName,
+                createdAt:doc.createdAt,
+                mainImage:doc.mainImage,
+                status: '待审核'
+            }
+            postMessageToGeneralChannel(postInfo)
+        } catch(e){
+            console.log('get slack bot error.')
         }
-        postMessageToGeneralChannel(postInfo)
      });
 
       return true;
