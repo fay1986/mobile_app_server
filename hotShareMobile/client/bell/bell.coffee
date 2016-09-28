@@ -18,12 +18,14 @@ if Meteor.isClient
             if (target.data("visible"))
                 target.data("visible", false);
   Template.bell.helpers
-    has_pcomment_count: ()->
+    pcomment_new_count: ()->
       return Feeds.find({isRead:{$ne: true}, checked:{$ne: true}, eventType: {$in: ['pcomment', 'pfavourite', 'pcommentowner', 'recomment', 'comment']}}).count()
-    pcomment_count: ()->
+    pcomment_all_count: ()->
       Feeds.find({eventType: {$in: ['pcomment', 'pfavourite', 'pcommentowner', 'recomment', 'comment']}}).count()
-    last_pcomment_count: ()->
+    last_pcomment: ()->
       return Feeds.findOne({eventType: {$in: ['pcomment', 'pfavourite', 'pcommentowner', 'recomment', 'comment']}}, {sort: {createdAt: -1}});
+    has_val: (obj)->
+      return obj > 0
     notReadCount: ()->
       Feeds.find({isRead:{$ne: true}, checked:{$ne: true}}).count()
     notRead:(read, check, index, createAt)->

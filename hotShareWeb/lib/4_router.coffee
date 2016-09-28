@@ -462,7 +462,7 @@ if Meteor.isServer
       return return_result(false)
     
     # review
-    Posts.update {_id: this.params._postId}, {$set: {isReview: true}}, (err, num)->
+    Posts.update {_id: this.params._postId}, {$set: {isReview: true, reviewAt: new Date()}}, (err, num)->
       if err or num <= 0
         #console.log('sep3');
         return return_result(false)

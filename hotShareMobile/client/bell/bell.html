@@ -15,30 +15,32 @@
           <div>正在加载中...</div>
       {{/if}}
       -->
+      {{#if has_val pcomment_all_count}}
       <div class="new-msg-box">
-        <div class="new-msg-box-icon"><img src="{{last_pcomment_count.ownerIcon}}" /></div>
-        {{#if isAlsoComment last_pcomment_count.eventType}}
-        <div class="new-msg-box-text">{{last_pcomment_count.ownerName}} {{_ "alsoCommentThisStory"}} 《{{last_pcomment_count.postTitle}}》</div>
+        <div class="new-msg-box-icon"><img src="{{last_pcomment.ownerIcon}}" /></div>
+        {{#if isAlsoComment last_pcomment.eventType}}
+        <div class="new-msg-box-text">{{last_pcomment.ownerName}} {{_ "alsoCommentThisStory"}} 《{{last_pcomment.postTitle}}》</div>
         {{/if}}
-        {{#if isAlsoFavourite last_pcomment_count.eventType}}
-        <div class="new-msg-box-text">{{last_pcomment_count.ownerName}} {{_ "alsoFavouriteThisStory"}} 《{{last_pcomment_count.postTitle}}》</div>
+        {{#if isAlsoFavourite last_pcomment.eventType}}
+        <div class="new-msg-box-text">{{last_pcomment.ownerName}} {{_ "alsoFavouriteThisStory"}} 《{{last_pcomment.postTitle}}》</div>
         {{/if}}
-        {{#if isPcommentOwner last_pcomment_count.eventType}}
-        <div class="new-msg-box-text">{{last_pcomment_count.ownerName}} {{_ "commentYourStory"}} 《{{last_pcomment_count.postTitle}}》</div>
+        {{#if isPcommentOwner last_pcomment.eventType}}
+        <div class="new-msg-box-text">{{last_pcomment.ownerName}} {{_ "commentYourStory"}} 《{{last_pcomment.postTitle}}》</div>
         {{/if}}
-        {{#if isReComment last_pcomment_count.eventType}}
-        <div class="new-msg-box-text">{{last_pcomment_count.ownerName}} {{_ "replyStoryYouJoin"}} 《{{last_pcomment_count.postTitle}}》</div>
+        {{#if isReComment last_pcomment.eventType}}
+        <div class="new-msg-box-text">{{last_pcomment.ownerName}} {{_ "replyStoryYouJoin"}} 《{{last_pcomment.postTitle}}》</div>
         {{/if}}
-        {{#if isComment last_pcomment_count.eventType}}
-        <div class="new-msg-box-text">{{last_pcomment_count.ownerName}} {{_ "replyYourStory"}} 《{{last_pcomment_count.postTitle}}》</div>
+        {{#if isComment last_pcomment.eventType}}
+        <div class="new-msg-box-text">{{last_pcomment.ownerName}} {{_ "replyYourStory"}} 《{{last_pcomment.postTitle}}》</div>
         {{/if}}
-        <div class="new-msg-box-time">{{time_diff last_pcomment_count.createdAt}}</div>
-        {{#if has_pcomment_count pcomment_count}}
-        <div class="new-msg-box-count">{{pcomment_count}}</div>
+        <div class="new-msg-box-time">{{time_diff last_pcomment.createdAt}}</div>
+        {{#if has_val pcomment_new_count}}
+        <div class="new-msg-box-count">{{pcomment_new_count}}</div>
         {{else}}
         <div class="new-msg-box-more"><i class="fa fa-angle-right" aria-hidden="true"></i></div>
         {{/if}}
       </div>
+      {{/if}}
       {{#if loadError}}
           <div>{{_ "loadFailNotification"}}</div>
       {{else}}
