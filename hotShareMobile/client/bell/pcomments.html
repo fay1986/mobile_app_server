@@ -12,7 +12,21 @@
             <div class="readTips"></div>
             {{/if}}
             <img class="icon" src="{{ownerIcon}}" width='30' height='30'>
+            {{#if isAlsoComment eventType}}
+            <div id="{{postId}}" class="alarm">{{ownerName}} {{_ "alsoCommentThisStory"}} 《{{postTitle}}》</div>
+            {{/if}}
+            {{#if isAlsoFavourite eventType}}
+            <div id="{{postId}}" class="alarm">{{ownerName}} {{_ "alsoFavouriteThisStory"}} 《{{postTitle}}》</div>
+            {{/if}}
+            {{#if isPcommentOwner eventType}}
             <div id="{{postId}}" class="alarm">{{ownerName}} {{_ "commentYourStory"}} 《{{postTitle}}》</div>
+            {{/if}}
+            {{#if isReComment eventType}}
+            <div id="{{postId}}" class="alarm">{{ownerName}} {{_ "replyStoryYouJoin"}} 《{{postTitle}}》</div>
+            {{/if}}
+            {{#if isComment eventType}}
+            <div id="{{postId}}" class="alarm">{{ownerName}} {{_ "replyYourStory"}} 《{{postTitle}}》</div>
+            {{/if}}
             <div class="createAt">{{time_diff createdAt}}</div>
         </a>
         <div class="line">

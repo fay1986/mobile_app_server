@@ -35,7 +35,7 @@ Template.bell_pcomments.events({
 
 Template.bell_pcomments.helpers({
   eventFeeds: function(){
-    var feeds = Feeds.find({isRead:{$ne: true}, eventType:'pcommentowner', checked:{$ne: true}}, {sort: {createdAt: -1}})
+    var feeds = Feeds.find({eventType: {$in: ['pcomment', 'pfavourite', 'pcommentowner', 'recomment', 'comment']}}, {sort: {createdAt: -1}})
     if (feeds.count() > 0){
       Meteor.defer(function(){
         Session.setPersistent('bell_pcommentsFeedsForMe', feeds.fetch());
@@ -62,7 +62,34 @@ Template.bell_pcomments.helpers({
     return GetTime0(new Date() - created);
   },
   moreResults: function(){
-    return !(Feeds.find({isRead:{$ne: true}, eventType:'pcommentowner', checked:{$ne: true}}).count() < Session.get("bell_pcomments_feedsitemsLimit"));
+    return !(Feeds.find({eventType: {$in: ['pcomment', 'pfavourite', 'pcommentowner', 'recomment', 'comment']}}).count() < Session.get("bell_pcomments_feedsitemsLimit"));
+  },
+  isAlsoComment: function(eventType) {
+    return eventType === 'pcomment';
+  },
+  isAlsoFavourite: function(eventType) {
+    return eventType === 'pfavourite';
+  },
+  isPcommentOwner: function(eventType) {
+    return eventType === 'pcommentowner';
+  },
+  isPersonalletter: function(eventType) {
+    return eventType === 'personalletter';
+  },
+  isGetRequest: function(eventType) {
+    return eventType === 'getrequest';
+  },
+  isSendRequest: function(eventType) {
+    return eventType === 'sendrequest';
+  },
+  isRecommand: function(eventType) {
+    return eventType === 'recommand';
+  },
+  isReComment: function(eventType) {
+    return eventType === 'recomment';
+  },
+  isComment: function(eventType) {
+    return eventType === 'comment';
   }
 });
 
