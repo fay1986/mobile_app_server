@@ -3178,6 +3178,7 @@ if(Meteor.isClient){
   var POST_ID = null;
   Session.setDefault('followpostsitemsLimit', FOLLOWPOSTS_ITEMS_INCREMENT);
   Session.setDefault('feedsitemsLimit', FEEDS_ITEMS_INCREMENT);
+  Session.setDefault('bell_pcomments_feedsitemsLimit', FEEDS_ITEMS_INCREMENT);
   Session.setDefault('followersitemsLimit', FOLLOWS_ITEMS_INCREMENT);
   Session.setDefault('followeesitemsLimit', FOLLOWS_ITEMS_INCREMENT);
   Session.setDefault('mypostsitemsLimit', MYPOSTS_ITEMS_INCREMENT);
@@ -3465,7 +3466,7 @@ if(Meteor.isClient){
                             $('#' + newDoc.pub[newDoc.pindex]._id + ' .textDiv1').after(pcommentsHTML);
                             gushitie.showpost.init();
                         } 
-                    } catch (error) {console.log(error);}
+                    } catch (error) {}
                 }
             });
       }
