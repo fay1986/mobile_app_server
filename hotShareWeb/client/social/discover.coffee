@@ -199,14 +199,14 @@ if Meteor.isClient
             if scolor is "#F30B44" and pclength>0
               for icomment in self.pcomments
                 if icomment["userId"] is userId
-                  pcommentsTop = parseInt($('#'+self._id+' .textDiv1').css('top'))
                   scolor="#304EF5"
                   break
-          # $('.textDiv1').css('color',"#F30B44")
+          $('.textDiv1').css('color',"#F30B44")
+          Session.set('pcommentsTopAt',parseInt($('#'+self._id).css('top')))
           $('#'+self._id+' .textDiv1').css('color',scolor)
           Session.set("toasted",true)
           Session.set("needToast",true)
-          document.body.scrollTop = pcommentsTop
+          
     Template.recommends.helpers
       recommends: ()->
         Meteor.subscribe('list_recommends', Session.get("postContent")._id);

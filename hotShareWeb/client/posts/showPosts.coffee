@@ -86,6 +86,7 @@ if Meteor.isClient
     ownerId = this.data.ownerId
     setTimeout ()->
       gushitie.showpost.initLayout()
+      gushitie.showpost.init()
     ,300
     setTimeout ()->
       $('.element').css('visibility','visible')
@@ -1150,6 +1151,7 @@ if Meteor.isClient
         #$('.showBgColor').removeAttr('style')
         $(window).scrollTop(0-Session.get('backgroundTop'))
         $('.pcommentsList,.alertBackground').fadeOut 300
+        gushitie.showpost.initLayout()
         false
 
 

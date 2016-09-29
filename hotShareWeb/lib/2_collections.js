@@ -3465,7 +3465,7 @@ if(Meteor.isClient){
                             pcommentsHTML += '</div>';
                             $('#' + newDoc.pub[newDoc.pindex]._id + ' .pcomment').remove();
                             $('#' + newDoc.pub[newDoc.pindex]._id + ' .textDiv1').after(pcommentsHTML);
-                            gushitie.showpost.init();
+                            gushitie.showpost.initLayout();
                         } 
                     } catch (error) {}
                 }
@@ -3478,18 +3478,18 @@ if(Meteor.isClient){
     var scrolltop;
     if (Session.get("needToast") === true) {
         Session.set("needToast", false);
-        scrolltop = 0;
+        // scrolltop = 0;
         return Meteor.setTimeout(function() {
             var userName;
             $('.showPosts').get(0).style.overflow = '';
             $('.showPosts').get(0).style.maxHeight = '';
             $('.showPosts').get(0).style.position = '';
             $('.readmore').remove();
-            if ($('.dCurrent').length) {
-                scrolltop = $('.dCurrent').offset().top;
-                Session.set("postPageScrollTop", scrolltop);
-                document.body.scrollTop = Session.get("postPageScrollTop");
-            }
+            // if ($('.dCurrent').length) {
+            //     scrolltop = $('.dCurrent').offset().top;
+            //     Session.set("postPageScrollTop", scrolltop);
+                document.body.scrollTop = Session.get("pcommentsTopAt");
+            // }
             userName = Session.get("pcommentsName");
             return toastr.info(userName + "点评过的段落已为您用蓝色标注！");
         }, 1000);

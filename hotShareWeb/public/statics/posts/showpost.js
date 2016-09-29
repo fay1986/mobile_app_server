@@ -622,15 +622,26 @@
             $('#pcommitReport').focus();
             return Session.set("pcommentIndexNum", $(self).data('index'));            
         });
-        
+        $("#test .postTextItem").each(function() {
+          var self = this;
+          var index = $(self).attr('index');
+          var item = Session.get("postContent").pub[index];
+          if(item) {
+            if(item.likeSum > 0 || item.dislikeSum > 0) {
+              $(self).find(".textDiv1:eq(0)").get(0).style.color = "#F30B44";
+            } else {
+              $(self).find(".textDiv1:eq(0)").get(0).style.color = "#000000";
+            }
+          }
+        });
         $("#test .inlineScoring").each(function() {
           var self = this;
           var index = $(self).data('index');
           var item = Session.get("postContent").pub[index];
-
+          
           if (item && item.likeUserId && item.likeUserId[Meteor.userId()]) {
             $(self).find("i:eq(0)").get(0).className = "fa fa-thumbs-up thumbsUp";
-          }
+          } 
 
           if (item && item.dislikeUserId && item.dislikeUserId[Meteor.userId()]) {
             $(self).find("i:eq(1)").get(0).className = "fa fa-thumbs-down thumbsDown";
