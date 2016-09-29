@@ -142,6 +142,10 @@ if Meteor.isClient
     'click #user':(e)->
       PUB.page('/user')
     'click #album-select':(e)->
+      $('#level2-popup-menu').modal('hide')
+      if Meteor.user().profile.anonymous
+        window.plugins.toast.showLongCenter("匿名用户不能发帖！");
+        return
       Meteor.defer ()->
         $('.modal-backdrop.in').remove()
       prepareToEditorMode()
@@ -162,6 +166,9 @@ if Meteor.isClient
           )
     'click #web-import':(e)->
       $('#level2-popup-menu').modal('hide')
+      if Meteor.user().profile.anonymous
+        window.plugins.toast.showLongCenter("匿名用户不能发帖！");
+        return
       #if we choose to use server import
       if withServerImport is true
         Session.set('display_select_import_way',true)
@@ -189,6 +196,10 @@ if Meteor.isClient
           handleAddedLink(null)
           window.plugins.toast.showLongCenter("无法获得粘贴板数据，请手动粘贴\n浏览器内容加载后，点击地址栏右侧\"导入\"按钮");
     'click #share-import':(e)->
+        $('#level2-popup-menu').modal('hide')
+        if Meteor.user().profile.anonymous
+          window.plugins.toast.showLongCenter("匿名用户不能发帖！");
+          return
         window.plugins.shareExtension.getShareData ((data) ->
             if data
                 editFromShare(data)
@@ -202,6 +213,10 @@ if Meteor.isClient
             Session.set('wait_import_count',false)
             console.log 'getShareData was Error!'
     'click #photo-select':(e)->
+      $('#level2-popup-menu').modal('hide')
+      if Meteor.user().profile.anonymous
+        window.plugins.toast.showLongCenter("匿名用户不能发帖！");
+        return
       Meteor.defer ()->
         $('.modal-backdrop.in').remove()
       prepareToEditorMode()
