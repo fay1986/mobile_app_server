@@ -547,7 +547,7 @@ var insert_data = function(user, url, data, draftsObj, cb) {
         'ownerIcon':user.profile.icon || '/userPicture.png',
         'createdAt': new Date(),
         'publish': true,
-        "isReview": false
+        "isReview": true
         }];
 
       posts.insert(data_insert, function(err, result) {
