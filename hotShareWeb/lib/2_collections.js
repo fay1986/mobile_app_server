@@ -111,6 +111,28 @@ if (Meteor.isServer) {
   }
 }
 
+//Series push notifacation trigger
+if (Meteor.isServer) {
+  Series.find().observeChanges({
+    changed: function(id, fields) {
+      var item = null;
+      var needNotify = false;
+      for (item in fields) {
+        if (item == 'title' || item == 'postLists') {
+          needNotify = true;
+        }
+      }
+      if (needNotify) {
+        seriesFollow = SeriesFollow.findOne({seriesId: id});
+        if (seriesFollow) {
+          console.log('Series changed, pushnotification');
+          pushnotification('seriesChanged', seriesFollow, seriesFollow.owner);
+        }
+      }
+    }
+  });
+}
+
 // 为老版本计算默认 topicpost 数据
 if(Meteor.isServer){
   OldTopicPosts = [];

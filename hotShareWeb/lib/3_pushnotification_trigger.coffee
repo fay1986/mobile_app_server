@@ -43,7 +43,14 @@ if Meteor.isServer
   };`
 
   @_pushnotification = (type, doc, userId)->
-    if type is "palsofavourite"
+    if type is "seriesChanged"
+      content = '您关注的合辑:《' + doc.title + '》内容有更新'
+      extras = {
+        type: "seriesChanged"
+        seriesId: doc.seriesId
+      }
+      toUserId = userId
+    else if type is "palsofavourite"
       content = '有人也赞了此故事:《' + doc.title + '》'
       extras = {
         type: "palsofavourite"
@@ -147,7 +154,7 @@ if Meteor.isServer
             # push send logs
             removeTime = new Date((new Date()).getTime() - 1000*60*60*48) # 48 hour
             expireTime = new Date((new Date()).getTime() - 1000*60*10) # 10 minute
-            
+
             PushSendLogs.remove({createAt: {$lt: removeTime}})
             if(PushSendLogs.find({
               type: toUserToken.type
@@ -159,7 +166,7 @@ if Meteor.isServer
               createAt: {$gte: expireTime}
             }).count() > 0)
               return
-              
+
             pushReq = {
               toUserId: toUserId
               type: toUserToken.type
@@ -192,7 +199,7 @@ if Meteor.isServer
             tidyDoc.title = doc.title
         if doc.postId
             tidyDoc.postId = doc.postId
-        if doc.content 
+        if doc.content
             tidyDoc.content = doc.content
         if doc.userName
             tidyDoc.userName = doc.userName
@@ -207,9 +214,9 @@ if Meteor.isServer
             eventType:type,
             doc:tidyDoc,
             userId:userId,
-            content:content, 
-            extras:extras, 
-            toUserId:toUserId, 
+            content:content,
+            extras:extras,
+            toUserId:toUserId,
             pushToken:pushToken,
             waitReadCount:waitReadCount
         }
@@ -320,7 +327,7 @@ if Meteor.isServer
       if userId is null or userId is undefined
          return;
       toUserId = userId
-    
+
     toUserToken = Meteor.users.findOne({_id: toUserId})
 
     unless toUserToken is undefined or toUserToken.type is undefined or toUserToken.token is undefined
@@ -331,7 +338,7 @@ if Meteor.isServer
         # push send logs
         removeTime = new Date((new Date()).getTime() - 1000*60*60*48) # 48 hour
         expireTime = new Date((new Date()).getTime() - 1000*60*10) # 10 minute
-        
+
         PushSendLogs.remove({createAt: {$lt: removeTime}})
         if(PushSendLogs.find({
           type: toUserToken.type
@@ -343,7 +350,7 @@ if Meteor.isServer
           createAt: {$gte: expireTime}
         }).count() > 0)
           return
-          
+
         pushReq = {
           toUserId: toUserId
           type: toUserToken.type
@@ -353,7 +360,7 @@ if Meteor.isServer
           createAt: new Date()
         }
         PushSendLogs.insert pushReq
-    
+
       pushToken = {type: toUserToken.type, token: toUserToken.token}
       #console.log "toUserToken.type:"+toUserToken.type+";toUserToken.token:"+toUserToken.token
       try
