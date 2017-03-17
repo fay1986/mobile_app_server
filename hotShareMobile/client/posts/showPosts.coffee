@@ -201,6 +201,11 @@ if Meteor.isClient
     Session.set("content_loadedCount", 0)
     getHotPostsData()
   Template.showPosts.onDestroyed ->
+    if window._music
+      document.getElementById('audio_' + window._music_id).pause()
+      window._music = null
+      window._music_id = null
+
     document.body.scrollTop = 0
     Session.set("postPageScrollTop", 0)
     Session.set("showSuggestPosts",false)

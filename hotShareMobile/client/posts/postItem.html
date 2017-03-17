@@ -20,10 +20,10 @@
                 <span class="musicContainer">
                     <span class="music_bd">
                         <span class="play_area">
-                            <i class="icon_music_switch"></i>
+                            <i class="icon_music_switch" id="music_switch_{{_id}}"></i>
                             <img src="/music_pic_default.png" alt="" class="pic_music_default">
                             <img src="{{musicInfo.image}}" class="music_thumb" alt="">
-                            <audio preload="auto">
+                            <audio preload="auto" id="audio_{{_id}}">
                                 <source src="{{musicInfo.playUrl}}">
                             </audio>
                         </span>
