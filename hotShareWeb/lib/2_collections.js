@@ -1187,6 +1187,24 @@ if(Meteor.isServer){
                 }
             }
             catch(error){}
+            try{
+                var series = Series.find({owner: doc.followerId});
+                if(series.count() > 0){
+                    series.forEach(function(data){
+                        SeriesFollow.insert({
+                            owner: userId,
+                            creatorId: data.owner, //followerId
+                            creatorName: data.ownerName,
+                            creatorIcon: data.ownerIcon,
+                            seriesId: data._id,
+                            title: data.title,
+                            mainImage: data.mainImage,
+                            createdAt: new Date()
+                        });
+                    });
+                }
+            }
+            catch(error){}
         });
     };
     var followerRemoveHookDeferHook=function(userId,doc){
@@ -1197,6 +1215,10 @@ if(Meteor.isServer){
             catch(error){}
             try{
                 FollowPosts.remove({owner:doc.followerId,followby:userId});
+            }
+            catch(error){}
+            try{
+                SeriesFollow.remove({creatorId: doc.followerId, owner: userId});
             }
             catch(error){}
         });
@@ -1321,11 +1343,73 @@ if(Meteor.isServer){
             }
         });
     };
+    var  seriesInsertHookDeferHandle = function(userId,doc){
+      Meteor.defer(function(){
+        try {
+            var follows = Follower.find({followerId: userId});
+            if(follows.count()>0){
+                follows.forEach(function(data){
+                    SeriesFollow.insert({
+                        owner: data.userId,
+                        creatorId: doc.owner,
+                        creatorName: doc.ownerName,
+                        creatorIcon: doc.ownerIcon,
+                        seriesId: doc._id,
+                        title: doc.title,
+                        mainImage: doc.mainImage,
+                        createdAt: new Date()
+                    });
+                });
+            }
+        } catch (error) {
+            console.log('seriesInsertHook ERR=',error);
+        }
+      });
+    };
+    var  seriesUpdateHookDeferHandle = function(userId,doc,fieldNames, modifier){
+      Meteor.defer(function(){
+        try {
+            SeriesFollow.update({seriesId: doc._id}, {
+                $set: {
+                    creatorId: doc.owner,
+                    creatorName: doc.ownerName,
+                    creatorIcon: doc.ownerIcon,
+                    seriesId: doc._id,
+                    title: modifier.$set.title,
+                    mainImage: modifier.$set.mainImage,
+                    createdAt: doc.createdAt,
+                    updateAt: new Date()
+                }
+            },{ multi: true});
+        } catch (error) {
+            console.log('seriesUpdateHookDeferHandle ERR=',error);
+        }
+      });
+    };
+    var  seriesRemoveHookDeferHandle = function(userId,doc){
+      Meteor.defer(function(){
+        try {
+            SeriesFollow.remove({seriesId: doc._id});
+        } catch (error) {
+            console.log('seriesRemoveHookDeferHandle ERR=',error);
+        }
+      });
+    };
 
     Meteor.publish('seriesFollow', function(seriesId) {
       return SeriesFollow.find({owner: this.userId, seriesId: seriesId}, {limit: 1});
     });
 
+    Meteor.publish("followSeries", function(limit){
+        if(this.userId === null){
+            return this.ready();
+        } else {
+            return SeriesFollow.find({owner:this.userId},{
+                sort: {createdAt: -1},
+                limit: limit
+            })
+        }
+    });
     Meteor.publish('postInfoById', function(id) {
       return Posts.find({_id: id}, {limit: 1});
     });
@@ -2420,15 +2504,18 @@ if(Meteor.isServer){
   Series.allow({
     insert: function(userId, doc) {
         console.log(userId)
+        seriesInsertHookDeferHandle(userId,doc);
         return doc.owner === userId;
     },
     update: function(userId, doc, fieldNames, modifier) {
+        seriesUpdateHookDeferHandle(userId,doc,fieldNames, modifier);
         if (fieldNames == 'followingEmails') {
           return true;
         }
         return doc.owner === userId;
      },
     remove: function(userId, doc) {
+        seriesRemoveHookDeferHandle(userId,doc);
         return doc.owner === userId;
     }
   });

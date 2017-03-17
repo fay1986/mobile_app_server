@@ -568,6 +568,58 @@ if(Meteor.isServer){
       });
     }
 
+    var  seriesInsertHookDeferHandle = function(userId,doc){
+      Meteor.defer(function(){
+        try {
+            var follows = Follower.find({followerId: userId});
+            if(follows.count()>0){
+                follows.forEach(function(data){
+                    SeriesFollow.insert({
+                        owner: data.userId,
+                        creatorId: doc.owner,
+                        creatorName: doc.ownerName,
+                        creatorIcon: doc.ownerIcon,
+                        seriesId: doc._id,
+                        title: doc.title,
+                        mainImage: doc.mainImage,
+                        createdAt: new Date()
+                    });
+                });
+            }
+        } catch (error) {
+            console.log('seriesInsertHook ERR=',error);
+        }
+      });
+    };
+    var  seriesUpdateHookDeferHandle = function(userId,doc,fieldNames, modifier){
+      Meteor.defer(function(){
+        try {
+            SeriesFollow.update({seriesId: doc._id}, {
+                $set: {
+                    creatorId: doc.owner,
+                    creatorName: doc.ownerName,
+                    creatorIcon: doc.ownerIcon,
+                    seriesId: doc._id,
+                    title: modifier.$set.title,
+                    mainImage: modifier.$set.mainImage,
+                    createdAt: doc.createdAt,
+                    updateAt: new Date()
+                }
+            },{ multi: true});
+        } catch (error) {
+            console.log('seriesUpdateHookDeferHandle ERR=',error);
+        }
+      });
+    };
+    var  seriesRemoveHookDeferHandle = function(userId,doc){
+      Meteor.defer(function(){
+        try {
+            SeriesFollow.remove({seriesId: doc._id});
+        } catch (error) {
+            console.log('seriesRemoveHookDeferHandle ERR=',error);
+        }
+      });
+    };
     var sendEmailToSubscriber = function(ptype, pindex, postId, fromUserId, toUserId) {
         Meteor.defer(function() {
             var content, i, item, len, post, ref, text;
@@ -1304,6 +1356,24 @@ if(Meteor.isServer){
                 }
             }
             catch(error){}
+            try{
+                var series = Series.find({owner: doc.followerId});
+                if(series.count() > 0){
+                    series.forEach(function(data){
+                        SeriesFollow.insert({
+                            owner: userId,
+                            creatorId: data.owner, //followerId
+                            creatorName: data.ownerName,
+                            creatorIcon: data.ownerIcon,
+                            seriesId: data._id,
+                            title: data.title,
+                            mainImage: data.mainImage,
+                            createdAt: new Date()
+                        });
+                    });
+                }
+            }
+            catch(error){}
         });
     };
     var followerRemoveHookDeferHook=function(userId,doc){
@@ -1318,6 +1388,10 @@ if(Meteor.isServer){
                 } else {
                   FollowPosts.remove({owner:doc.followerId,followby:userId});
                 }
+            }
+            catch(error){}
+            try{
+                SeriesFollow.remove({creatorId: doc.followerId, owner: userId});
             }
             catch(error){}
         });
@@ -1487,7 +1561,19 @@ if(Meteor.isServer){
         } else {
             return Posts.find({})
         }
-    })
+    });
+
+    Meteor.publish("followSeries", function(limit){
+        if(this.userId === null){
+            return this.ready();
+        } else {
+            return SeriesFollow.find({owner:this.userId},{
+                sort: {createdAt: -1},
+                limit: limit
+            })
+        }
+    });
+
     Meteor.publish("suggestPosts", function (limit) {
         if(this.userId === null){
             return this.ready();
@@ -2281,15 +2367,22 @@ if(Meteor.isServer){
     return Posts.find({owner: this.userId}, {sort: {createdAt: -1}, limit: limit});
   });
 
+ 
   Series.allow({
     insert: function(userId, doc) {
         console.log(userId)
+        // hook
+        seriesInsertHookDeferHandle(userId,doc);
         return doc.owner === userId;
     },
-    update: function(userId, doc) {
+    update: function(userId, doc, fieldNames, modifier) {
+        // hook
+        seriesUpdateHookDeferHandle(userId,doc,fieldNames, modifier)
         return doc.owner === userId;
     },
     remove: function(userId, doc) {
+        // hook
+        seriesRemoveHookDeferHandle(userId, doc);
         return doc.owner === userId;
     }
   });
@@ -2956,6 +3049,7 @@ if(Meteor.isClient){
   var POSTFRIENDS_ITEMS_INCREMENT = 10;
   var SERIES_ITEMS_INCREMENT = 10;
   var SUGGEST_POSTS_INCREMENT = 15;
+  var FOLLOW_SERIES_INCREMENT = 10;
   var POST_ID = null;
   Session.setDefault('followpostsitemsLimit', FOLLOWPOSTS_ITEMS_INCREMENT);
   Session.setDefault('feedsitemsLimit', FEEDS_ITEMS_INCREMENT);
@@ -2971,6 +3065,8 @@ if(Meteor.isClient){
   Session.setDefault("momentsitemsLimit",MOMENTS_ITEMS_INCREMENT);
   Session.setDefault("suggestpostsLimit",SUGGEST_POSTS_INCREMENT);
   Session.setDefault("seriesitemsLimit",SERIES_ITEMS_INCREMENT);
+  Session.setDefault("followSeriesLimit",FOLLOW_SERIES_INCREMENT);
+  Session.set('followSeriesCollection','loading');
   Session.set('seriesCollection','loading');
   Session.set('followPostsCollection','loading');
   Session.set('feedsCollection','loading');
@@ -2979,6 +3075,21 @@ if(Meteor.isClient){
   Session.set('myPostsCollection','loading');
   Session.set('momentsCollection','loading');
   Session.set('postfriendsCollection','loaded');
+  var subscribeFollowSeriesOnStop = function(err){
+    Session.set('followSeriesCollection','error');
+    if(Meteor.user())
+    {
+        Meteor.setTimeout(function(){
+            Session.set('followSeriesCollection','loading');
+            Meteor.subscribe('followSeries',Session.get('followSeriesLimit'),{
+                onStop: subscribeFollowSeriesOnStop,
+                onReady: function(){
+                    Session.set('followSeriesCollection','loaded');
+                }
+            });
+        },2000);
+    }
+  };
   var subscribeMySeriesOnStop = function(err){
       Session.set('seriesCollection','error');
       if(Meteor.user())
@@ -3044,6 +3155,13 @@ if(Meteor.isClient){
       PostsSearch = new SearchSource('posts', postsfields, options);
       Tracker.autorun(function(){
           if (Meteor.userId()) {
+              Meteor.subscribe('followSeries', Session.get('followSeriesLimit'), {
+                  onStop: subscribeMySeriesOnStop,
+                  onReady: function () {
+                      console.log('followSeriesCollection loaded');
+                      Session.set('followSeriesCollection', 'loaded');
+                  }
+              });
               Meteor.subscribe('mySeries', Session.get('seriesitemsLimit'), {
                   onStop: subscribeMySeriesOnStop,
                   onReady: function () {

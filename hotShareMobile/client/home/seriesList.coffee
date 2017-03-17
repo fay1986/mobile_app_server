@@ -9,24 +9,24 @@ Template.seriesList.rendered=->
       if target.offset().top < threshold
           if (!target.data("visible"))
               target.data("visible", true);
-              Session.set("seriesitemsLimit", Session.get("seriesitemsLimit") + SERIES_ITEMS_INCREMENT);
+              Session.set("followSeriesLimit", Session.get("followSeriesLimit") + FOLLOW_SERIES_INCREMENT);
       else
           if (target.data("visible"))
               target.data("visible", false);
 Template.seriesList.helpers
   noSeries:()->
-    !(Series.find().count() > 0)
+    !(SeriesFollow.find().count() > 0)
   mySeries:()->
     # mySeries = Series.find({owner:Meteor.userId(),publish:{"$ne":false}}, {sort: {createdAt: -1}})
-    mySeries = Series.find({owner:Meteor.userId()}, {sort: {createdAt: -1}})
-    Session.setPersistent('persistentMySeries', mySeries.fetch())
+    mySeries = SeriesFollow.find({owner:Meteor.userId()}, {sort: {createdAt: -1}})
+    Session.setPersistent('persistentFollowSeries', mySeries.fetch())
     return mySeries
   moreResults:->
-    !(Series.find().count() < Session.get("seriesitemsLimit"))
+    !(SeriesFollow.find().count() < Session.get("followSeriesLimit"))
   loading:->
-    Session.equals('seriesCollection','loading')
+    Session.equals('followSeriesCollection','loading')
   loadError:->
-    Session.equals('seriesCollection','error')
+    Session.equals('followSeriesCollection','error')
   showSeriesHint:->
     return !localStorage.getItem('seriesHint');
 Template.seriesList.events
