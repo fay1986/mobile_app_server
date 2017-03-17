@@ -73,3 +73,5 @@ if Meteor.isServer
     Recommends._ensureIndex({relatedPostId: 1})
     SeriesFollow._ensureIndex({owner: 1, seriesId: 1})
     SeriesFollow._ensureIndex({seriesId: 1})
+    SeriesFollow._ensureIndex({owner: 1})
+    SeriesFollow._ensureIndex({creatorId: 1, owner: 1})
