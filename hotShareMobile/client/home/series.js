@@ -218,7 +218,8 @@ Template.series.helpers({
 Template.series.events({
   'click .series-follow': function(e){
     series = Session.get('seriesContent');
-    SeriesFollow.insert({owner: Meteor.userId(), seriesId: series._id, title: series.title, mainImage: series.mainImage, createdAt: new Date()});
+    SeriesFollow.insert({owner: Meteor.userId(), creatorId: series.owner, creatorName: series.ownerName, creatorIcon: series.ownerIcon, seriesId: series._id, title: series.title, mainImage: series.mainImage, createdAt: new Date()});
+    PUB.toast('合辑关注成功！')
   },
   'click .share-btn': function(e){
     console.log('will share');
