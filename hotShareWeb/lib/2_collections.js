@@ -1563,6 +1563,8 @@ if(Meteor.isServer){
         else
           return Series.find({owner: this.userId}, {sort: {createdAt: -1}, limit:limit});
     });
+    /*for unknown reason, this changed callback is triggered several times, to prevent this behavior, use this variable */
+    var firstOneSeriesChangedEvent = true;
     Meteor.publish("oneSeries", function(seriesId){
         if(this.userId === null)
             return this.ready();
@@ -1570,15 +1572,19 @@ if(Meteor.isServer){
             var cursor = Series.find({_id: seriesId});
             cursor.observeChanges({
               changed:function (id,fields){
-                  var item = null;
-                  var needNotify = false;
-                  for (item in fields) {
-                    if (item == 'title' || item == 'postLists') {
-                      needNotify = true;
+                  if (firstOneSeriesChangedEvent) {
+                    firstOneSeriesChangedEvent = false;
+                    Meteor.setTimeout(function() { firstOneSeriesChangedEvent = true; }, 500);
+                    var item = null;
+                    var needNotify = false;
+                    for (item in fields) {
+                      if (item == 'title' || item == 'postLists') {
+                        needNotify = true;
+                      }
                     }
-                  }
-                  if (needNotify) {
-                    sendEmailToSeriesFollower(seriesId);
+                    if (needNotify) {
+                      sendEmailToSeriesFollower(seriesId);
+                    }
                   }
               }
             });
