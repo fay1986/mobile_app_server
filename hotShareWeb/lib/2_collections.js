@@ -1385,6 +1385,12 @@ if(Meteor.isServer){
     var  seriesUpdateHookDeferHandle = function(userId,doc,fieldNames, modifier){
       Meteor.defer(function(){
         try {
+            // 发送邮件通知
+            if(modifier.$set.title || modifier.$set.mainImage || modifier.$set.postLists || fieldNames.indexOf('postLists') >= 0){
+                console.log('send series email:', doc._id);
+                try{sendEmailToSeriesFollower(doc._id)}catch(ex){}
+            }
+
             SeriesFollow.update({seriesId: doc._id}, {
                 $set: {
                     creatorId: doc.owner,
@@ -1585,25 +1591,25 @@ if(Meteor.isServer){
         if(this.userId === null)
             return this.ready();
         else {
-            var cursor = Series.find({_id: seriesId});
-            cursor.observeChanges({
-              changed:function (id,fields){
-                  if (firstOneSeriesChangedEvent) {
-                    firstOneSeriesChangedEvent = false;
-                    Meteor.setTimeout(function() { firstOneSeriesChangedEvent = true; }, 500);
-                    var item = null;
-                    var needNotify = false;
-                    for (item in fields) {
-                      if (item == 'title' || item == 'postLists') {
-                        needNotify = true;
-                      }
-                    }
-                    if (needNotify) {
-                      sendEmailToSeriesFollower(seriesId);
-                    }
-                  }
-              }
-            });
+            var cursor = Series.find({_id: seriesId}, {limit: 1});
+            // cursor.observeChanges({
+            //   changed:function (id,fields){
+            //       if (firstOneSeriesChangedEvent) {
+            //         firstOneSeriesChangedEvent = false;
+            //         Meteor.setTimeout(function() { firstOneSeriesChangedEvent = true; }, 500);
+            //         var item = null;
+            //         var needNotify = false;
+            //         for (item in fields) {
+            //           if (item == 'title' || item == 'postLists') {
+            //             needNotify = true;
+            //           }
+            //         }
+            //         if (needNotify) {
+            //           sendEmailToSeriesFollower(seriesId);
+            //         }
+            //       }
+            //   }
+            // });
             return cursor;
         }
     });
@@ -2525,19 +2531,23 @@ if(Meteor.isServer){
 
   Series.allow({
     insert: function(userId, doc) {
-        console.log(userId)
-        seriesInsertHookDeferHandle(userId,doc);
+        if(doc.owner === userId){
+            console.log(userId)
+            seriesInsertHookDeferHandle(userId,doc);
+        }
         return doc.owner === userId;
     },
     update: function(userId, doc, fieldNames, modifier) {
-        seriesUpdateHookDeferHandle(userId,doc,fieldNames, modifier);
+        if(doc.owner === userId)
+            seriesUpdateHookDeferHandle(userId,doc,fieldNames, modifier);
         if (fieldNames == 'followingEmails') {
           return true;
         }
         return doc.owner === userId;
      },
     remove: function(userId, doc) {
-        seriesRemoveHookDeferHandle(userId,doc);
+        if(doc.owner === userId)
+            seriesRemoveHookDeferHandle(userId,doc);
         return doc.owner === userId;
     }
   });
