@@ -12,14 +12,16 @@
     <div id="SubscribeSeries"><i class="fa fa-plus"></i> 关注</div>
   </div>-->
   <div class="series-container">
-     <div class="series-title" style="background: url({{mainImage}}) no-repeat;background-size: cover;" data-image="{{mainImage}}">
-       <img src="{{mainImage}}" style="width: 0;" />
+     <div class="series-title" data-image="{{mainImage}}">
+        {{>padding}}
+       <img class="lazy" data-original="{{mainImage}}" style="height: 300px; width: 100%; object-fit: cover;" />
        <h1>{{seriesTitle}}</h1>
        <div class="series-head">
           {{#if hasLeftBtn}}
           <div class="back"><i class="fa fa-chevron-left"></i></div>
           <div class="series-head-owner" style="left: 40px;">
-            <img src="{{ownerIcon}}"/>
+            {{>padding}}
+            <img class="lazy" data-original="{{ownerIcon}}"/>
             <div class="series-head-infos">
               <p>{{ownerName}}</p>
               <p style="font-weight: normal;">{{#if postCounts}}{{postCounts}}个故事 · {{/if}}{{formatTime updateAt createdAt}}</p>
@@ -27,7 +29,8 @@
           </div>
           {{else}}
           <div class="series-head-owner">
-            <img src="{{ownerIcon}}"/>
+            {{>padding}}
+            <img class="lazy" data-original="{{ownerIcon}}"/>
             <div class="series-head-infos">
               <p>{{ownerName}}</p>
               <p style="font-weight: normal;">{{#if postCounts}}{{postCounts}}个故事 · {{/if}}{{formatTime updateAt createdAt}}</p>
@@ -46,7 +49,8 @@
       {{#each postsLists}}
       <li id="{{postId}}"  onclick="goposts({{postId}})" class="series-post-item viewModal" data-index="{{postIndex}}">
         <div class="series-img-helper">
-          <img src="{{postMainImage}}" />
+          {{>padding}}
+          <img class="lazy" data-original="{{postMainImage}}"/>
         </div>
         <div class="series-post-info">
           <h2>{{postTitle}}</h2>

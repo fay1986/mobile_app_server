@@ -1345,6 +1345,22 @@ if(Meteor.isServer){
     };
     var  seriesInsertHookDeferHandle = function(userId,doc){
       Meteor.defer(function(){
+        // 1. 将合辑添加到自己的followSeries
+        try{
+            SeriesFollow.insert({
+                owner: userId,
+                creatorId: doc.owner,
+                creatorName: doc.ownerName,
+                creatorIcon: doc.ownerIcon,
+                seriesId: doc._id,
+                title: doc.title,
+                mainImage: doc.mainImage,
+                createdAt: new Date()
+            });
+        } catch (error){
+            console.log('Insert Series to self followSeries ERR=',error);
+        }
+        // 2. 将自己的合辑添加到关注者的followSeries
         try {
             var follows = Follower.find({followerId: userId});
             if(follows.count()>0){

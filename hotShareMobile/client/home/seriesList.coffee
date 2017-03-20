@@ -28,7 +28,7 @@ Template.seriesList.helpers
   loadError:->
     Session.equals('followSeriesCollection','error')
   showSeriesHint:->
-    return !localStorage.getItem('seriesHint') and Series.find({owner:Meteor.userId()}).count() is 0;
+    return !localStorage.getItem('seriesHint')
 Template.seriesList.events
     'click .top-home-btn': (event)->
       Router.go '/'
@@ -42,7 +42,8 @@ Template.seriesList.events
       Router.go '/series/' + seriesId
 Template.seriesFooter.helpers
   haveSeries:()->
-    Series.find({owner:Meteor.userId()}).count() > 0
+    # Series.find({owner:Meteor.userId()}).count() > 0
+    return false
 Template.seriesFooter.events
     'click #user':(e)->
       PUB.page('/mySeries')
