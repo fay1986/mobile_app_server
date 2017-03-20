@@ -58,19 +58,28 @@ if Meteor.isClient
       window._music_id = this.data._id
       audio = document.getElementById('audio_' + this.data._id)
       $node=$('#'+this.data._id+' .play_area')
-      auto_fun = (e)->
-        $('.showBgColor')[0].removeEventListener('touchstart', auto_fun)
-        touches = e.targetTouches
-        if touches.length > 0
-          for i in [0..touches.length-1]
-            touch = touches.item(i)
-            if touch.target.id is 'music_switch_'+window._music_id
-              return
-        audio.play()
+
+      if Media?
+        media = new Media(this.data.musicInfo.playUrl)
+        window._media = media
+        media.play()
         $audio=$node.find('audio')
         $node.addClass('music_playing')
         $audio.trigger('play')
-      $('.showBgColor')[0].addEventListener('touchstart', auto_fun, false)
+      else
+        auto_fun = (e)->
+          $('.showBgColor')[0].removeEventListener('touchstart', auto_fun)
+          touches = e.targetTouches
+          if touches.length > 0
+            for i in [0..touches.length-1]
+              touch = touches.item(i)
+              if touch.target.id is 'music_switch_'+window._music_id
+                return
+          audio.play()
+          $audio=$node.find('audio')
+          $node.addClass('music_playing')
+          $audio.trigger('play')
+        $('.showBgColor')[0].addEventListener('touchstart', auto_fun, false)
 
     this.$('img.lazy').lazyload()
     element=this.find('.element')
@@ -170,14 +179,20 @@ if Meteor.isClient
       $('#pcommitReport').focus()
 
     'click .play_area': (e)->
+      if window._media
+        window._media.stop()
       $node=$(e.currentTarget)
       $audio=$node.find('audio')
       if $node.hasClass('music_playing')
         $node.removeClass('music_playing')
         $audio.trigger('pause')
+        if window._media and $audio.attr('id') is window._music_id
+          document.getElementById('audio_' + window._music_id).pause()
       else
         $node.addClass('music_playing')
         $audio.trigger('play')
+        if window._media and $audio.attr('id') is window._music_id
+          document.getElementById('audio_' + window._music_id).play()
 
       $video = $node.find("video")
       if $video.get(0)
