@@ -4,7 +4,7 @@ subs = new SubsManager({
   # any subscription will be expire after 30 days, if it's not subscribed again
   expireIn: 60*24*30
 });
-
+countA = 0
 if Meteor.isClient
   Session.setDefault("postPageScrollTop", 0)
   @refreshPostContent=()->
@@ -386,6 +386,16 @@ if Meteor.isServer
 
       refreshPostsCDNCaches(doc._id);
       globalPostsInsertHookDeferHandle(doc.owner,doc._id);
+      # #####test globalPostsInsertHookDeferHandle
+      
+      # postinsertInterval = Meteor.setInterval ()->
+      #     globalPostsInsertHookDeferHandle(doc.owner,doc._id);
+      #     countA = countA + 1;
+      #     console.log('countA is ' + countA)
+      #     if countA is 10000
+      #       Meteor.clearInterval(postinsertInterval)
+      #   , 0
+      
       #console.log('sep4');
       return_result(true)
 

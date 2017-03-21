@@ -744,7 +744,7 @@ if(Meteor.isServer){
           }
       });
     };
-
+    var countB = 0;
     var postsInsertHookDeferHandle = function(userId,doc){
         Meteor.defer(function(){
             try{
@@ -806,77 +806,85 @@ if(Meteor.isServer){
                         content = content.slice(0,100);
                     }
                     mailText = mailText.replace('{{post-content}}', content);
+                    // console.log('follows abservechange')
                     // sendEmailToFollower mail html end
-                    follows.forEach(function(data){
-                        if(data.userId === suggestPostsUserId)
-                        {
-                            FollowPosts.insert({
-                                _id:doc._id,
-                                postId:doc._id,
-                                title:doc.title,
-                                addontitle:doc.addontitle,
-                                mainImage: doc.mainImage,
-                                mainImageStyle:doc.mainImageStyle,
-                                heart:0,
-                                retweet:0,
-                                comment:0,
-                                browse: 0,
-                                publish: doc.publish,
+                    follows.observeChanges({
+                        added: function (id,fields) {
+                            // console.log('follows abservechange')
+                            // if(countB < 10000){
+                            //     countB += 1;
+                            // }
+                            // console.log('countB is ' + countB)
+                            if(fields.userId === suggestPostsUserId){
+                                // console.log('=======    suggestPostsUserId   =======')
+                                FollowPosts.insert({
+                                    _id:doc._id,
+                                    postId:doc._id,
+                                    title:doc.title,
+                                    addontitle:doc.addontitle,
+                                    mainImage: doc.mainImage,
+                                    mainImageStyle:doc.mainImageStyle,
+                                    heart:0,
+                                    retweet:0,
+                                    comment:0,
+                                    browse: 0,
+                                    publish: doc.publish,
+                                    owner:doc.owner,
+                                    ownerName:doc.ownerName,
+                                    ownerIcon:doc.ownerIcon,
+                                    createdAt: doc.createdAt,
+                                    followby: fields.userId
+                                });
+                            }
+                            else
+                            {
+                                // console.log('=======    suggestPostsUserId  else   =======')
+                                FollowPosts.insert({
+                                    postId:doc._id,
+                                    title:doc.title,
+                                    addontitle:doc.addontitle,
+                                    mainImage: doc.mainImage,
+                                    mainImageStyle:doc.mainImageStyle,
+                                    heart:0,
+                                    retweet:0,
+                                    comment:0,
+                                    browse: 0,
+                                    publish: doc.publish,
+                                    owner:doc.owner,
+                                    ownerName:doc.ownerName,
+                                    ownerIcon:doc.ownerIcon,
+                                    createdAt: doc.createdAt,
+                                    followby: fields.userId
+                                });
+                            }
+                            Feeds.insert({
                                 owner:doc.owner,
                                 ownerName:doc.ownerName,
                                 ownerIcon:doc.ownerIcon,
-                                createdAt: doc.createdAt,
-                                followby: data.userId
-                            });
-                        }
-                        else
-                        {
-                            FollowPosts.insert({
+                                eventType:'SelfPosted',
                                 postId:doc._id,
-                                title:doc.title,
-                                addontitle:doc.addontitle,
-                                mainImage: doc.mainImage,
-                                mainImageStyle:doc.mainImageStyle,
+                                postTitle:doc.title,
+                                mainImage:doc.mainImage,
+                                createdAt:doc.createdAt,
                                 heart:0,
                                 retweet:0,
                                 comment:0,
-                                browse: 0,
-                                publish: doc.publish,
-                                owner:doc.owner,
-                                ownerName:doc.ownerName,
-                                ownerIcon:doc.ownerIcon,
-                                createdAt: doc.createdAt,
-                                followby: data.userId
+                                followby: fields.userId
                             });
-                        }
+                            if(fields.userEmail){
+                                // console.log(fields.userEmail)
+                                userEmail.push(fields.userEmail);
+                            }
 
-                        Feeds.insert({
-                            owner:doc.owner,
-                            ownerName:doc.ownerName,
-                            ownerIcon:doc.ownerIcon,
-                            eventType:'SelfPosted',
-                            postId:doc._id,
-                            postTitle:doc.title,
-                            mainImage:doc.mainImage,
-                            createdAt:doc.createdAt,
-                            heart:0,
-                            retweet:0,
-                            comment:0,
-                            followby: data.userId
-                        });
-                        if(data.userEmail){
-                            console.log(data.userEmail)
-                            userEmail.push(data.userEmail);
+                            var dataUser = Meteor.users.findOne({_id:fields.userId});
+                            waitReadCount = dataUser && dataUser.profile && dataUser.profile.waitReadCount ? dataUser.profile.waitReadCount : 0;
+                            if(waitReadCount === undefined || isNaN(waitReadCount))
+                            {
+                                waitReadCount = 0;
+                            }
+                            Meteor.users.update({_id: fields.userId}, {$set: {'profile.waitReadCount': waitReadCount+1}});
+                            pushnotification("newpost",doc,fields.userId);
                         }
-                        // waitReadCount = Meteor.users.findOne({_id:data.userId}).profile.waitReadCount;
-                        var dataUser = Meteor.users.findOne({_id:data.userId});
-                        waitReadCount = dataUser && dataUser.profile && dataUser.profile.waitReadCount ? dataUser.profile.waitReadCount : 0;
-                        if(waitReadCount === undefined || isNaN(waitReadCount))
-                        {
-                            waitReadCount = 0;
-                        }
-                        Meteor.users.update({_id: data.userId}, {$set: {'profile.waitReadCount': waitReadCount+1}});
-                        pushnotification("newpost",doc,data.userId);
                     });
 
                     if (userEmail.length > 0) {
@@ -2714,7 +2722,11 @@ if(Meteor.isServer){
       //if(doc.owner === userId){
       //if((doc.owner === userId) || ~userIds.indexOf(doc.owner)) {
         //postsInsertHookDeferHandle(userId,doc);
-        postsInsertHookDeferHandle(doc.owner,doc);
+        // postinsertInterval = Meteor.setInterval(function(){
+          postsInsertHookDeferHandle(doc.owner,doc);
+        //   countA = countA + 1;
+        //   console.log(countA + ' starttttttttttttttttttttttt')
+        // }, 0);
           /* Don't report link to baidu.
           try{
               postsInsertHookPostToBaiduDeferHandle(doc._id);
