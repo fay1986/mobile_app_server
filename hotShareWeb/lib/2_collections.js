@@ -437,10 +437,13 @@ if(Meteor.isServer){
             });
             if (viewposts.count() > 0 && currentpost && userinfo) {
                 try {
-                viewposts.forEach(function (pdata) {
-                    if(pdata.postId !== postId)
+                // console.log('----- updateMomentsDeferHandle 1------');
+                viewposts.observeChanges({
+                added: function (id, fields) {
+                    // console.log('----- updateMomentsDeferHandle 2------');
+                    if(fields.postId !== postId)
                     {
-                        var readpost = Posts.findOne(pdata.postId);
+                        var readpost = Posts.findOne(fields.postId);
                         if (currentpost && readpost) {
                             //1. 给当前帖子，增加所有看过的帖子
                             if (Moments.find({currentPostId: currentpost._id, readPostId: readpost._id}).count() === 0) {
@@ -453,7 +456,7 @@ if(Meteor.isServer){
                                     mainImage: readpost.mainImage,
                                     title: readpost.title,
                                     addontitle: readpost.addontitle,
-                                    createdAt: pdata.createdAt
+                                    createdAt: fields.createdAt
                                 });
                             } else {
                                 Moments.update({currentPostId: currentpost._id, readPostId: readpost._id}, {
@@ -464,7 +467,7 @@ if(Meteor.isServer){
                                         mainImage: readpost.mainImage,
                                         title: readpost.title,
                                         addontitle: readpost.addontitle,
-                                        createdAt: pdata.createdAt
+                                        createdAt: fields.createdAt
                                     }
                                 });
                             }
@@ -496,7 +499,68 @@ if(Meteor.isServer){
                             }
                         }
                     }
+                }
                 });
+                // viewposts.forEach(function (pdata) {
+                //     if(pdata.postId !== postId)
+                //     {
+                //         var readpost = Posts.findOne(pdata.postId);
+                //         if (currentpost && readpost) {
+                //             //1. 给当前帖子，增加所有看过的帖子
+                //             if (Moments.find({currentPostId: currentpost._id, readPostId: readpost._id}).count() === 0) {
+                //                 Moments.insert({
+                //                     currentPostId: currentpost._id,
+                //                     userId: userId,
+                //                     userIcon: userinfo.profile.icon,
+                //                     username: userinfo.profile.fullname ? userinfo.profile.fullname : userinfo.username,
+                //                     readPostId: readpost._id,
+                //                     mainImage: readpost.mainImage,
+                //                     title: readpost.title,
+                //                     addontitle: readpost.addontitle,
+                //                     createdAt: pdata.createdAt
+                //                 });
+                //             } else {
+                //                 Moments.update({currentPostId: currentpost._id, readPostId: readpost._id}, {
+                //                     $set: {
+                //                         userId: userId,
+                //                         userIcon: userinfo.profile.icon,
+                //                         username: userinfo.profile.fullname ? userinfo.profile.fullname : userinfo.username,
+                //                         mainImage: readpost.mainImage,
+                //                         title: readpost.title,
+                //                         addontitle: readpost.addontitle,
+                //                         createdAt: pdata.createdAt
+                //                     }
+                //                 });
+                //             }
+                //             //2. 给所有看过的帖子，增加当前帖子
+                //             if (Moments.find({currentPostId: readpost._id, readPostId: currentpost._id}).count() === 0) {
+                //                 Moments.insert({
+                //                     currentPostId: readpost._id,
+                //                     userId: userId,
+                //                     userIcon: userinfo.profile.icon,
+                //                     username: userinfo.profile.fullname ? userinfo.profile.fullname : userinfo.username,
+                //                     readPostId: currentpost._id,
+                //                     mainImage: currentpost.mainImage,
+                //                     title: currentpost.title,
+                //                     addontitle: currentpost.addontitle,
+                //                     createdAt: new Date()
+                //                 });
+                //             } else {
+                //                 Moments.update({currentPostId: readpost._id, readPostId: currentpost._id}, {
+                //                     $set: {
+                //                         userId: userId,
+                //                         userIcon: userinfo.profile.icon,
+                //                         username: userinfo.profile.fullname ? userinfo.profile.fullname : userinfo.username,
+                //                         mainImage: currentpost.mainImage,
+                //                         title: currentpost.title,
+                //                         addontitle: currentpost.addontitle,
+                //                         createdAt: new Date()
+                //                     }
+                //                 });
+                //             }
+                //         }
+                //     }
+                // });
                 } catch (error) {
                     console.log("Exception: viewposts.forEach, error="+error);
                 }
@@ -545,8 +609,11 @@ if(Meteor.isServer){
             try{
                 var views=Viewers.find({postId:postId},{limit:100});
                 if(views.count()>0){
-                    views.forEach(function(data){
-                        var meetItemOne = Meets.findOne({me:userId,ta:data.userId});
+                    // console.log('----- publicPostsPublisherDeferHandle 1------');
+                    views.observeChanges({
+                    added: function (id, fields) {
+                        // console.log('----- publicPostsPublisherDeferHandle 2------');
+                        var meetItemOne = Meets.findOne({me:userId,ta:fields.userId});
                         if(meetItemOne){
                             var meetCount = meetItemOne.count;
                             if(meetCount === undefined || isNaN(meetCount))
@@ -554,16 +621,16 @@ if(Meteor.isServer){
                             if ( needUpdateMeetCount ){
                                 meetCount = meetCount+1;
                             }
-                            if(data.userId === userId)
+                            if(fields.userId === userId)
                                 Meets.remove({_id:meetItemOne._id});
                             else
-                                Meets.update({me:userId,ta:data.userId},{$set:{count:meetCount,meetOnPostId:postId}});
+                                Meets.update({me:userId,ta:fields.userId},{$set:{count:meetCount,meetOnPostId:postId}});
                         }else{
-                            if(userId !== data.userId)
+                            if(userId !== fields.userId)
                             {
                                 Meets.insert({
                                     me:userId,
-                                    ta:data.userId,
+                                    ta:fields.userId,
                                     count:1,
                                     meetOnPostId:postId,
                                     createdAt: new Date()
@@ -571,22 +638,22 @@ if(Meteor.isServer){
                             }
                         }
 
-                        var meetItemTwo = Meets.findOne({me:data.userId,ta:userId});
+                        var meetItemTwo = Meets.findOne({me:fields.userId,ta:userId});
                         if(meetItemTwo){
                             var meetCount = meetItemTwo.count;
                             if(meetCount === undefined || isNaN(meetCount))
                                 meetCount = 0;
                             if ( needUpdateMeetCount ){
                                 meetCount = meetCount+1;
-                                if(data.userId === userId)
+                                if(fields.userId === userId)
                                     Meets.remove({_id:meetItemTwo._id});
                                 else
-                                    Meets.update({me:data.userId,ta:userId},{$set:{count:meetCount,meetOnPostId:postId,createdAt: new Date()}});
+                                    Meets.update({me:fields.userId,ta:userId},{$set:{count:meetCount,meetOnPostId:postId,createdAt: new Date()}});
                             }
                         }else{
-                            if(userId !== data.userId) {
+                            if(userId !== fields.userId) {
                                 Meets.insert({
-                                    me: data.userId,
+                                    me: fields.userId,
                                     ta: userId,
                                     count: 1,
                                     meetOnPostId: postId,
@@ -594,7 +661,58 @@ if(Meteor.isServer){
                                 });
                             }
                         }
+                    }
                     });
+                    // views.forEach(function(data){
+                    //     var meetItemOne = Meets.findOne({me:userId,ta:data.userId});
+                    //     if(meetItemOne){
+                    //         var meetCount = meetItemOne.count;
+                    //         if(meetCount === undefined || isNaN(meetCount))
+                    //             meetCount = 0;
+                    //         if ( needUpdateMeetCount ){
+                    //             meetCount = meetCount+1;
+                    //         }
+                    //         if(data.userId === userId)
+                    //             Meets.remove({_id:meetItemOne._id});
+                    //         else
+                    //             Meets.update({me:userId,ta:data.userId},{$set:{count:meetCount,meetOnPostId:postId}});
+                    //     }else{
+                    //         if(userId !== data.userId)
+                    //         {
+                    //             Meets.insert({
+                    //                 me:userId,
+                    //                 ta:data.userId,
+                    //                 count:1,
+                    //                 meetOnPostId:postId,
+                    //                 createdAt: new Date()
+                    //             });
+                    //         }
+                    //     }
+
+                    //     var meetItemTwo = Meets.findOne({me:data.userId,ta:userId});
+                    //     if(meetItemTwo){
+                    //         var meetCount = meetItemTwo.count;
+                    //         if(meetCount === undefined || isNaN(meetCount))
+                    //             meetCount = 0;
+                    //         if ( needUpdateMeetCount ){
+                    //             meetCount = meetCount+1;
+                    //             if(data.userId === userId)
+                    //                 Meets.remove({_id:meetItemTwo._id});
+                    //             else
+                    //                 Meets.update({me:data.userId,ta:userId},{$set:{count:meetCount,meetOnPostId:postId,createdAt: new Date()}});
+                    //         }
+                    //     }else{
+                    //         if(userId !== data.userId) {
+                    //             Meets.insert({
+                    //                 me: data.userId,
+                    //                 ta: userId,
+                    //                 count: 1,
+                    //                 meetOnPostId: postId,
+                    //                 createdAt: new Date()
+                    //             });
+                    //         }
+                    //     }
+                    // });
                 }
             }
             catch(error){}
@@ -745,6 +863,7 @@ if(Meteor.isServer){
       });
     };
     var countB = 0;
+    var countC = 0;
     var postsInsertHookDeferHandle = function(userId,doc){
         Meteor.defer(function(){
             try{
@@ -808,6 +927,12 @@ if(Meteor.isServer){
                     mailText = mailText.replace('{{post-content}}', content);
                     // console.log('follows abservechange')
                     // sendEmailToFollower mail html end
+
+                    // test setInterval
+                    // Meteor.setInterval(function(){
+                    //   countC += 1;
+                    //   console.log(countC + ' setInterval')
+                    // }, 0);
                     follows.observeChanges({
                         added: function (id,fields) {
                             // console.log('follows abservechange')
@@ -950,12 +1075,22 @@ if(Meteor.isServer){
 
             try {
                 var recommendUserIds = [];
-                Recommends.find({relatedUserId: doc.owner, relatedPostId: {$exists: false}}).forEach(function(item) {
-                    if (!~recommendUserIds.indexOf(item.recommendUserId)) {
-                        recommendUserIds.push(item.recommendUserId);
-                        Recommends.update({_id: item._id}, {$set: {relatedPostId: doc._id}});
+                // console.log('----- Recommends 1------');
+                Recommends.find({relatedUserId: doc.owner, relatedPostId: {$exists: false}}).observeChanges({
+                added: function (id, fields) {
+                    // console.log('----- Recommends 2------');
+                    if (!~recommendUserIds.indexOf(fields.recommendUserId)) {
+                        recommendUserIds.push(fields.recommendUserId);
+                        Recommends.update({_id: fields._id}, {$set: {relatedPostId: doc._id}});
+                        }
                     }
                 });
+                // Recommends.find({relatedUserId: doc.owner, relatedPostId: {$exists: false}}).forEach(function(item) {
+                //     if (!~recommendUserIds.indexOf(item.recommendUserId)) {
+                //         recommendUserIds.push(item.recommendUserId);
+                //         Recommends.update({_id: item._id}, {$set: {relatedPostId: doc._id}});
+                //     }
+                // });
             }
             catch(error) {}
         });
@@ -974,17 +1109,32 @@ if(Meteor.isServer){
                 });
                 var TPs=TopicPosts.find({postId:doc._id})
                 if(TPs.count()>0){
-                    TPs.forEach(function(data){
-                        PostsCount = Topics.findOne({_id:data.topicId}).posts;
+                    // console.log('----- postsRemoveHookDeferHandle 1------');
+                    TPs.observeChanges({
+                    added: function (id, fields) {
+                        // console.log('----- postsRemoveHookDeferHandle 2------');
+                        PostsCount = Topics.findOne({_id:fields.topicId}).posts;
                         if(PostsCount === 1)
                         {
-                            Topics.remove({_id:data.topicId});
+                            Topics.remove({_id:fields.topicId});
                         }
                         else if(PostsCount > 1)
                         {
-                            Topics.update({_id: data.topicId}, {$set: {'posts': PostsCount-1}});
+                            Topics.update({_id: fields.topicId}, {$set: {'posts': PostsCount-1}});
+                        }
                         }
                     });
+                    // TPs.forEach(function(data){
+                    //     PostsCount = Topics.findOne({_id:data.topicId}).posts;
+                    //     if(PostsCount === 1)
+                    //     {
+                    //         Topics.remove({_id:data.topicId});
+                    //     }
+                    //     else if(PostsCount > 1)
+                    //     {
+                    //         Topics.update({_id: data.topicId}, {$set: {'posts': PostsCount-1}});
+                    //     }
+                    // });
                 }
                 TopicPosts.remove({
                     postId:doc._id
@@ -1001,14 +1151,17 @@ if(Meteor.isServer){
                     followerId: postOwner
                 });
                 if (follows.count() > 0) {
-                    follows.forEach(function(data) {
+                    // console.log('----- postsUpdateHookDeferHandle 1------');
+                    follows.observeChanges({
+                    added: function (id, fields) {
+                        // console.log('----- postsUpdateHookDeferHandle 2------');
                         var followPost = FollowPosts.findOne({
                             postId: doc._id,
-                            followby: data.userId
+                            followby: fields.userId
                         })
                         if (followPost) {
                             FollowPosts.update({
-                                followby: data.userId,
+                                followby: fields.userId,
                                 postId: doc._id
                             }, {
                                 $set: {
@@ -1039,13 +1192,58 @@ if(Meteor.isServer){
                                 ownerName: modifier.$set.ownerName,
                                 ownerIcon: modifier.$set.ownerIcon,
                                 createdAt: modifier.$set.createdAt,
-                                followby: data.userId
+                                followby: fields.userId
                             }, function(error, _id) {
                                 console.log('error: ' + error);
-                                // console.log('_id: ' + _id);
                             });
                         }
+                        }
                     });
+                    // follows.forEach(function(data) {
+                    //     var followPost = FollowPosts.findOne({
+                    //         postId: doc._id,
+                    //         followby: data.userId
+                    //     })
+                    //     if (followPost) {
+                    //         FollowPosts.update({
+                    //             followby: data.userId,
+                    //             postId: doc._id
+                    //         }, {
+                    //             $set: {
+                    //                 title: modifier.$set.title,
+                    //                 addontitle: modifier.$set.addontitle,
+                    //                 mainImage: modifier.$set.mainImage,
+                    //                 mainImageStyle: modifier.$set.mainImageStyle,
+                    //                 publish: modifier.$set.publish,
+                    //                 owner: modifier.$set.owner,
+                    //                 ownerName: modifier.$set.ownerName,
+                    //                 ownerIcon: modifier.$set.ownerIcon,
+                    //                 createdAt: modifier.$set.createdAt,
+                    //             }
+                    //         });
+                    //     } else {
+                    //         FollowPosts.insert({
+                    //             postId: doc._id,
+                    //             title: modifier.$set.title,
+                    //             addontitle: modifier.$set.addontitle,
+                    //             mainImage: modifier.$set.mainImage,
+                    //             mainImageStyle: modifier.$set.mainImageStyle,
+                    //             heart: 0,
+                    //             retweet: 0,
+                    //             comment: 0,
+                    //             browse: 0,
+                    //             publish: modifier.$set.publish,
+                    //             owner: modifier.$set.owner,
+                    //             ownerName: modifier.$set.ownerName,
+                    //             ownerIcon: modifier.$set.ownerIcon,
+                    //             createdAt: modifier.$set.createdAt,
+                    //             followby: data.userId
+                    //         }, function(error, _id) {
+                    //             console.log('error: ' + error);
+                    //             // console.log('_id: ' + _id);
+                    //         });
+                    //     }
+                    // });
                 }
 
                 var followPost = FollowPosts.findOne({
@@ -1157,59 +1355,114 @@ if(Meteor.isServer){
             try{
                 var posts=Posts.find({owner: doc.followerId});
                 if(posts.count()>0){
-                    posts.forEach(function(data){
+                    // console.log('----- followerInsertHookDeferHook 1------');
+                    posts.observeChanges({
+                    added: function (id, fields) {
+                        // console.log('----- followerInsertHookDeferHook 2------');
                         if(doc.userId === suggestPostsUserId)
                         {
                             FollowPosts.insert({
-                                _id:data._id,
-                                postId:data._id,
-                                title:data.title,
-                                addontitle:data.addontitle,
-                                mainImage: data.mainImage,
-                                mainImageStyle: data.mainImageStyle,
-                                publish: data.publish,
-                                owner:data.owner,
-                                ownerName:data.ownerName,
-                                ownerIcon:data.ownerIcon,
-                                createdAt: data.createdAt,
+                                _id:fields._id,
+                                postId:fields._id,
+                                title:fields.title,
+                                addontitle:fields.addontitle,
+                                mainImage: fields.mainImage,
+                                mainImageStyle: fields.mainImageStyle,
+                                publish: fields.publish,
+                                owner:fields.owner,
+                                ownerName:fields.ownerName,
+                                ownerIcon:fields.ownerIcon,
+                                createdAt: fields.createdAt,
                                 followby: doc.userId
                             });
                         }
                         else
                         {
                             FollowPosts.insert({
-                                postId:data._id,
-                                title:data.title,
-                                addontitle:data.addontitle,
-                                mainImage: data.mainImage,
-                                mainImageStyle:data.mainImageStyle,
-                                owner: data.owner,
-                                publish: data.publish,
-                                ownerName:data.ownerName,
-                                ownerIcon:data.ownerIcon,
-                                createdAt: data.createdAt,
+                                postId:fields._id,
+                                title:fields.title,
+                                addontitle:fields.addontitle,
+                                mainImage: fields.mainImage,
+                                mainImageStyle:fields.mainImageStyle,
+                                owner: fields.owner,
+                                publish: fields.publish,
+                                ownerName:fields.ownerName,
+                                ownerIcon:fields.ownerIcon,
+                                createdAt: fields.createdAt,
                                 followby: doc.userId
                             });
                         }
+                    }
                     });
+                    // posts.forEach(function(data){
+                    //     if(doc.userId === suggestPostsUserId)
+                    //     {
+                    //         FollowPosts.insert({
+                    //             _id:data._id,
+                    //             postId:data._id,
+                    //             title:data.title,
+                    //             addontitle:data.addontitle,
+                    //             mainImage: data.mainImage,
+                    //             mainImageStyle: data.mainImageStyle,
+                    //             publish: data.publish,
+                    //             owner:data.owner,
+                    //             ownerName:data.ownerName,
+                    //             ownerIcon:data.ownerIcon,
+                    //             createdAt: data.createdAt,
+                    //             followby: doc.userId
+                    //         });
+                    //     }
+                    //     else
+                    //     {
+                    //         FollowPosts.insert({
+                    //             postId:data._id,
+                    //             title:data.title,
+                    //             addontitle:data.addontitle,
+                    //             mainImage: data.mainImage,
+                    //             mainImageStyle:data.mainImageStyle,
+                    //             owner: data.owner,
+                    //             publish: data.publish,
+                    //             ownerName:data.ownerName,
+                    //             ownerIcon:data.ownerIcon,
+                    //             createdAt: data.createdAt,
+                    //             followby: doc.userId
+                    //         });
+                    //     }
+                    // });
                 }
             }
             catch(error){}
             try{
                 var series = Series.find({owner: doc.followerId});
                 if(series.count() > 0){
-                    series.forEach(function(data){
+                    // console.log('----- Series 1------');
+                    series.observeChanges({
+                    added: function (id, fields) {
+                        // console.log('----- Series 2------');
                         SeriesFollow.insert({
                             owner: userId,
-                            creatorId: data.owner, //followerId
-                            creatorName: data.ownerName,
-                            creatorIcon: data.ownerIcon,
-                            seriesId: data._id,
-                            title: data.title,
-                            mainImage: data.mainImage,
+                            creatorId: fields.owner, //followerId
+                            creatorName: fields.ownerName,
+                            creatorIcon: fields.ownerIcon,
+                            seriesId: fields._id,
+                            title: fields.title,
+                            mainImage: fields.mainImage,
                             createdAt: new Date()
                         });
+                    }
                     });
+                    // series.forEach(function(data){
+                    //     SeriesFollow.insert({
+                    //         owner: userId,
+                    //         creatorId: data.owner, //followerId
+                    //         creatorName: data.ownerName,
+                    //         creatorIcon: data.ownerIcon,
+                    //         seriesId: data._id,
+                    //         title: data.title,
+                    //         mainImage: data.mainImage,
+                    //         createdAt: new Date()
+                    //     });
+                    // });
                 }
             }
             catch(error){}
@@ -1372,9 +1625,12 @@ if(Meteor.isServer){
         try {
             var follows = Follower.find({followerId: userId});
             if(follows.count()>0){
-                follows.forEach(function(data){
+                // console.log('----- seriesInsertHookDeferHandle 1------');
+                follows.observeChanges({
+                added: function (id, fields) {
+                    // console.log('----- seriesInsertHookDeferHandle 2------');
                     SeriesFollow.insert({
-                        owner: data.userId,
+                        owner: fields.userId,
                         creatorId: doc.owner,
                         creatorName: doc.ownerName,
                         creatorIcon: doc.ownerIcon,
@@ -1383,7 +1639,20 @@ if(Meteor.isServer){
                         mainImage: doc.mainImage,
                         createdAt: new Date()
                     });
+                }
                 });
+                // follows.forEach(function(data){
+                //     SeriesFollow.insert({
+                //         owner: data.userId,
+                //         creatorId: doc.owner,
+                //         creatorName: doc.ownerName,
+                //         creatorIcon: doc.ownerIcon,
+                //         seriesId: doc._id,
+                //         title: doc.title,
+                //         mainImage: doc.mainImage,
+                //         createdAt: new Date()
+                //     });
+                // });
             }
         } catch (error) {
             console.log('seriesInsertHook ERR=',error);
@@ -2725,7 +2994,7 @@ if(Meteor.isServer){
         // postinsertInterval = Meteor.setInterval(function(){
           postsInsertHookDeferHandle(doc.owner,doc);
         //   countA = countA + 1;
-        //   console.log(countA + ' starttttttttttttttttttttttt')
+        //   console.log(countA + ' log')
         // }, 0);
           /* Don't report link to baidu.
           try{
