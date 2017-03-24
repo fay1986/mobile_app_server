@@ -67,7 +67,8 @@ var uploadSeriesImage = function(data) {
           Session.set('seriesId','');
           Session.set('seriesContent','');
           Session.set('isSeriesEdit',false);
-          Router.go('/seriesList');
+          // Router.go('/seriesList');
+          Router.go(Session.get('seriesFromPage'));
         }
       }
     }
@@ -150,7 +151,8 @@ var updateOrInsertSeries = function(isNewSeries,publish){
     Session.set('seriesId','');
     Session.set('seriesContent','');
     Session.set('isSeriesEdit',false);
-    Router.go('/seriesList');
+    // Router.go('/seriesList');
+    Router.go(Session.get('seriesFromPage'));
   }else{
     uploadSeriesImage(Session.get('seriesContent').imageData)
   }
@@ -232,19 +234,21 @@ Template.series.events({
           if(r !== 1){
             updateOrInsertSeries(false,true);
           } else {
-            Router.go('/seriesList');
+            // Router.go('/seriesList');
+            Router.go(Session.get('seriesFromPage'));
           }
         },'您确定要放弃未保存的修改吗？', ['放弃修改','保存修改']);
        } else {
         navigator.notification.confirm('这个操作无法撤销', function(r){
           if(r == 1){
             Session.set('seriesContent','');
-            Router.go('/seriesList');
+            // Router.go('/seriesList');
+            Router.go(Session.get('seriesFromPage'));
           }
         },'您确定要放弃未保存的修改吗？', ['放弃修改','继续编辑']);
        }
     }else{
-      Router.go('/seriesList');
+      Router.go(Session.get('seriesFromPage'));
     }
   },
   'click #edit': function(e,t){

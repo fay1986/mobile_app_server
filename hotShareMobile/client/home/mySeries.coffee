@@ -1,5 +1,8 @@
 Template.mySeries.rendered=->
   $('.content').css 'min-height',$(window).height()
+  if Session.get('mySeriesScrollTop') and  Session.get('mySeriesScrollTop') > 0
+    $(document).scrollTop(Session.get('mySeriesScrollTop'))
+    Session.set('mySeriesScrollTop',0)
   $(window).scroll (event)->
       target = $("#showMoreResults");
       SERIES_ITEMS_INCREMENT = 10;
@@ -34,4 +37,6 @@ Template.mySeries.events
     'click .seriesImages ul li':(e)->
       seriesId = e.currentTarget.id
       Session.set('isSeriesEdit',false)
+      Session.set('mySeriesScrollTop',$(document).scrollTop())
+      Session.set('seriesFromPage','/mySeries')
       Router.go '/series/' + seriesId

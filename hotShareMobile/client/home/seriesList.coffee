@@ -1,5 +1,8 @@
 Template.seriesList.rendered=->
   $('.content').css 'min-height',$(window).height()
+  if Session.get('followSeriesScrollTop') and Session.get('followSeriesScrollTop')>0
+    $(document).scrollTop(Session.get('followSeriesScrollTop'))
+    Session.set('followSeriesScrollTop',0)
   $(window).scroll (event)->
       target = $("#showMoreResults");
       FOLLOW_SERIES_INCREMENT = 6;
@@ -39,14 +42,21 @@ Template.seriesList.events
     'click .seriesImages ul li':(e)->
       seriesId = e.currentTarget.id
       Session.set('isSeriesEdit',false)
+      Session.set('followSeriesScrollTop',$(document).scrollTop())
+      Session.set('seriesFromPage','/seriesList')
       Router.go '/series/' + seriesId
 Template.seriesFooter.helpers
   haveSeries:()->
     Series.find({owner:Meteor.userId()}).count() > 0
 Template.seriesFooter.events
     'click #user':(e)->
+      Session.set('followSeriesScrollTop',$(document).scrollTop())
+      $(document).scrollTop(0)
+      Session.set('seriesFromPage','/seriesList')
       PUB.page('/mySeries')
     'click #album-select':(e)->
+      Session.set('followSeriesScrollTop',$(document).scrollTop())
+      Session.set('seriesFromPage','/seriesList')
       Meteor.defer ()->
         $('.modal-backdrop.in').remove()
       Session.set('isSeriesEdit',true)
@@ -62,6 +72,8 @@ Template.seriesFooter.events
             Session.set('seriesContent',{imageData:data, postLists: [],publish: false})
             TempDrafts.remove({})
     'click #photo-select':(e)->
+      Session.set('followSeriesScrollTop',$(document).scrollTop())
+      Session.set('seriesFromPage','/seriesList')
       Meteor.defer ()->
         $('.modal-backdrop.in').remove()
       Session.set('isSeriesEdit',true)
