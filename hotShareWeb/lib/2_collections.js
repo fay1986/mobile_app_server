@@ -847,10 +847,12 @@ if(Meteor.isServer){
               var text = Assets.getText('email/series-notify.html');
               var series = Series.findOne({_id: seriesId});
               if (series && series.followingEmails && series.followingEmails.length > 0) {
+                text = text.replace('{{series._id}}', seriesId);
+                text = text.replace('{{series.title}}', series.title);
                 Email.send({
                     to: series.followingEmails.toString(),
                     from: '故事贴<notify@mail.tiegushi.com>',
-                    subject: '合辑变更通知',
+                    subject: '您关注的合辑：' +series.title + '  内容有变化, 请访问查看！',
                     body: '您关注的合辑：' +series.title + '  内容有变化, 请访问查看！',
                     html: text
                 });
