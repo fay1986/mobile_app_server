@@ -261,8 +261,12 @@ Template.series.events({
   'click #seriesTitle':function(e,t){
     e.preventDefault();
     e.stopPropagation();
+    $('.series-container').scrollTop(200);
     $(this).focus();
     Session.set('seriesIsSaved',false);
+  },
+  'blur #seriesTitle': function(){
+    $('.series-container').scrollTop(0);
   },
   'click .series-title':function(){
     $('.mainImageTools').toggle();

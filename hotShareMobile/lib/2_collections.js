@@ -3068,7 +3068,7 @@ if(Meteor.isClient){
   var POSTFRIENDS_ITEMS_INCREMENT = 10;
   var SERIES_ITEMS_INCREMENT = 10;
   var SUGGEST_POSTS_INCREMENT = 15;
-  var FOLLOW_SERIES_INCREMENT = 10;
+  var FOLLOW_SERIES_INCREMENT = 6;
   var POST_ID = null;
   Session.setDefault('followpostsitemsLimit', FOLLOWPOSTS_ITEMS_INCREMENT);
   Session.setDefault('feedsitemsLimit', FEEDS_ITEMS_INCREMENT);

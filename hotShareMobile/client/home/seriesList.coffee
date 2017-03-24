@@ -2,7 +2,7 @@ Template.seriesList.rendered=->
   $('.content').css 'min-height',$(window).height()
   $(window).scroll (event)->
       target = $("#showMoreResults");
-      SERIES_ITEMS_INCREMENT = 10;
+      FOLLOW_SERIES_INCREMENT = 6;
       if (!target.length)
           return;
       threshold = $(window).scrollTop() + $(window).height() - target.height();
