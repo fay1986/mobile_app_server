@@ -99,6 +99,17 @@ if Meteor.isServer
       FavouritePosts.insert({postId: postId, userId: userId, createdAt: new Date(), updateAt: new Date()})
   Meteor.startup ()->
     Meteor.methods
+      'updateFollowSeriesInfo':(userId,options)->
+        Meteor.defer ()->
+          try 
+            if options.name
+              Series.update({owner: userId},{$set:{ownerName: options.name}},{multi: true})
+              SeriesFollow.update({creatorId: userId},{$set:{creatorName:options.name}},{multi: true})
+            if options.icon
+              Series.update({owner: userId},{$set:{ownerIcon: options.icon}},{multi: true})
+              SeriesFollow.update({creatorId: userId},{$set:{creatorIcon:options.icon}},{multi: true})
+          catch error
+            console.log('updateFollowSeriesInfo ERR=',error)
       'clearDiscoverMSG': (userId,postId)->
         if !Match.test(userId, String) or !Match.test(postId, String)
           return {msg: 'failed'}

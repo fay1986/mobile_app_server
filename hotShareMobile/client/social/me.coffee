@@ -121,6 +121,7 @@ if Meteor.isClient
           console.log 'Change Nick Name to ' + $('#my_edit_nickname').val()
           Meteor.users.update({_id: Meteor.user()._id}, {$set: {'profile.fullname': e.target.text.value}})
           Meteor.call 'updateFollower',Meteor.userId(),{name:e.target.text.value}
+          Meteor.call 'updateFollowSeriesInfo',Meteor.userId(),{name:e.target.text.value}
           Session.set("Social.LevelTwo.Me.Menu","information")
           quitInformationEdit()
       false
