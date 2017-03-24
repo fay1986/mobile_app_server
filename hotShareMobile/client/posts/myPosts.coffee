@@ -78,15 +78,14 @@ if Meteor.isClient
       if (myHotPosts)
         for item in myHotPosts
           itemPostId = item.postId || item._id
-          if (itemPostId == postId) 
+          if (itemPostId == postId)
             return true
       return false
   @isHotPostsChanged = ()->
     Session.get("myHotPostsChanged")
   @saveHotPosts = ()->
-    if (Session.get("myHotPostsChanged"))
-      myHotPosts = Session.get("myHotPosts")
-      Meteor.users.update({_id: Meteor.userId()}, {$set: {'myHotPosts': myHotPosts}});
+    myHotPosts = Session.get("myHotPosts")
+    Meteor.users.update({_id: Meteor.userId()}, {$set: {'myHotPosts': myHotPosts}});
   addPostToMyHotPosts = (postId, title, addontitle, mainImage)->
     myHotPost = {postId: postId, title: title, addontitle: addontitle, mainImage: mainImage}
     hotPostArray = Session.get("myHotPosts")
