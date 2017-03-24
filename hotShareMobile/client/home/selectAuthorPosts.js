@@ -53,6 +53,7 @@ Template.selectAuthorPosts.events({
     })
     $('#editSeriesList').append(selectPosts)
     Session.set('seriesAuthorPostsCount',0);
+    $('.author-post-item-select').removeClass('author-post-item-select');
     return $('.author-self-posts').hide();
   },
   'click .author-post-item': function(e,t){
