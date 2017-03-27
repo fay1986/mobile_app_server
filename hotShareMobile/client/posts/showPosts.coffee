@@ -201,13 +201,13 @@ if Meteor.isClient
     Session.set("content_loadedCount", 0)
     getHotPostsData()
   Template.showPosts.onDestroyed ->
-    if window._music
-      document.getElementById('audio_' + window._music_id).pause()
-      if window._media
-        window._media.stop()
-      window._music = null
-      window._music_id = null
-      window._media = null
+    # if window._music
+    #   document.getElementById('audio_' + window._music_id).pause()
+    #   if window._media
+    #     window._media.stop()
+    #   window._music = null
+    #   window._music_id = null
+    #   window._media = null
 
     document.body.scrollTop = 0
     Session.set("postPageScrollTop", 0)
