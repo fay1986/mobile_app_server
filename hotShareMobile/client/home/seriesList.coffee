@@ -31,7 +31,7 @@ Template.seriesList.helpers
   loadError:->
     Session.equals('followSeriesCollection','error')
   showSeriesHint:->
-    return !localStorage.getItem('seriesHint') and Series.find({owner:Meteor.userId()}).count() > 0
+    return !localStorage.getItem('seriesHint') and Series.find({owner:Meteor.userId()}).count() is 0
 Template.seriesList.events
     'click .top-home-btn': (event)->
       Router.go '/'

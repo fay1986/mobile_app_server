@@ -22,12 +22,8 @@ Template.selectAuthorPosts.helpers({
   userPostsLists: function(){
     var ids = Session.get('selectedPostIds');
     if (!ids)
-      ids = [];
-    if(ids.length > 0){
-      var posts = Posts.find({owner:Meteor.userId(),_id:{"$nin":ids},publish:{"$ne":false}}, {sort: {createdAt: -1}}, {limit:Session.get('seriesAuthorPostsLimit')});
-    } else {
-      var posts = Posts.find({owner:Meteor.userId(),publish:{"$ne":false}}, {sort: {createdAt: -1}}, {limit:Session.get('seriesAuthorPostsLimit')});
-    }
+    ids = [];
+    var posts = Posts.find({owner:Meteor.userId(),_id:{"$nin":ids},publish:{"$ne":false}}, {sort: {createdAt: -1}}, {limit:Session.get('seriesAuthorPostsLimit')});
     return posts;
   },
   showLoadingElem: function(){

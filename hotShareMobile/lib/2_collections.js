@@ -1953,6 +1953,15 @@ if(Meteor.isServer){
       }
   });
 
+  Meteor.publish("authorPostsWithLimit", function(limit) {
+      if(this.userId === null|| !Match.test(limit, Number)) {
+          return this.ready();
+      }
+      else{
+          return Posts.find({owner: this.userId, publish: {$ne: false}},{sort: {createdAt: -1},limit:limit,fields:{mainImage:1,title:1,addontitle:1,publish:1,owner:1,createdAt:1}});
+      }
+  });
+
   /*
   Meteor.publish("mypostedposts", function(postId) {
       if(this.userId === null) {
@@ -2383,7 +2392,7 @@ if(Meteor.isServer){
     return Posts.find({owner: this.userId}, {sort: {createdAt: -1}, limit: limit});
   });
 
- 
+
   Series.allow({
     insert: function(userId, doc) {
         console.log(userId)
@@ -3398,7 +3407,7 @@ if(Meteor.isClient){
 
   Tracker.autorun(function() {
     if (Meteor.userId()) {
-        Meteor.subscribe('webUserPublishPosts',Session.get('seriesAuthorPostsLimit'),{
+        Meteor.subscribe('authorPostsWithLimit',Session.get('seriesAuthorPostsLimit'),{
             onReady: function(){
                 console.log('author publish posts loaded');
                 count = Posts.find({owner:Meteor.userId(),publish:{"$ne":false}}).count();
