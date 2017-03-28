@@ -44,7 +44,13 @@ Template.seriesList.events
       Session.set('isSeriesEdit',false)
       Session.set('followSeriesScrollTop',$(document).scrollTop())
       Session.set('seriesFromPage','/seriesList')
-      Router.go '/series/' + seriesId
+      # Router.go '/series/' + seriesId
+      history = Session.get('history_view') || []
+      history.push({
+        view: 'seriesList'
+      })
+      Session.set('history_view',history)
+      PUB.page('/series/' + seriesId)
 Template.seriesFooter.helpers
   haveSeries:()->
     Series.find({owner:Meteor.userId()}).count() > 0

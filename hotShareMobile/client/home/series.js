@@ -68,7 +68,8 @@ var uploadSeriesImage = function(data) {
           Session.set('seriesContent','');
           Session.set('isSeriesEdit',false);
           // Router.go('/seriesList');
-          Router.go(Session.get('seriesFromPage'));
+          // Router.go(Session.get('seriesFromPage'));
+          PUB.back()
         }
       }
     }
@@ -79,7 +80,7 @@ var uploadSeriesImage = function(data) {
     return removeImagesFromCache(data);
   });
 }
-var updateOrInsertSeries = function(isNewSeries,publish){
+updateOrInsertSeries = function(isNewSeries,publish){
   if($('#seriesTitle').val() === ''){
     return PUB.toast('请输入标题');
   }
@@ -152,7 +153,8 @@ var updateOrInsertSeries = function(isNewSeries,publish){
     Session.set('seriesContent','');
     Session.set('isSeriesEdit',false);
     // Router.go('/seriesList');
-    Router.go(Session.get('seriesFromPage'));
+    // Router.go(Session.get('seriesFromPage'));
+    PUB.back()
   }else{
     uploadSeriesImage(Session.get('seriesContent').imageData)
   }
@@ -235,7 +237,8 @@ Template.series.events({
             updateOrInsertSeries(false,true);
           } else {
             // Router.go('/seriesList');
-            Router.go(Session.get('seriesFromPage'));
+            // Router.go(Session.get('seriesFromPage'));
+            PUB.back();
           }
         },'您确定要放弃未保存的修改吗？', ['放弃修改','保存修改']);
        } else {
@@ -243,12 +246,14 @@ Template.series.events({
           if(r == 1){
             Session.set('seriesContent','');
             // Router.go('/seriesList');
-            Router.go(Session.get('seriesFromPage'));
+            // Router.go(Session.get('seriesFromPage'));
+            PUB.back();
           }
         },'您确定要放弃未保存的修改吗？', ['放弃修改','继续编辑']);
        }
     }else{
-      Router.go(Session.get('seriesFromPage'));
+      // Router.go(Session.get('seriesFromPage'));
+      PUB.back();
     }
   },
   'click #edit': function(e,t){
@@ -265,12 +270,14 @@ Template.series.events({
   'click #seriesTitle':function(e,t){
     e.preventDefault();
     e.stopPropagation();
-    $('.series-container').scrollTop(200);
-    $(this).focus();
+    $('#seriesTitle').focus();
     Session.set('seriesIsSaved',false);
   },
+  'focus #seriesTitle':function(e,t){
+    $('.series-title').css('height','160px')
+  },
   'blur #seriesTitle': function(){
-    $('.series-container').scrollTop(0);
+     $('.series-title').css('height','300px')
   },
   'click .series-title':function(){
     $('.mainImageTools').toggle();
@@ -339,7 +346,8 @@ Template.series.events({
   },
   'click #del':function(e,t){
     Series.remove({_id: Session.get('seriesId')});
-    Router.go ('/seriesList');
+    // Router.go ('/seriesList');
+    PUB.back()
   },
   'click .publish':function(e,t){
     if(Session.get('seriesId') && Session.get('seriesId') !== ''){
@@ -351,6 +359,7 @@ Template.series.events({
 });
 
 Template.series.onRendered(function(){
+    $('.series').css('min-height',$(window).height());
     $('.series').click(function(e){
       var target = $(e.target);
       if(target.closest('.series-dropdown').length == 0){

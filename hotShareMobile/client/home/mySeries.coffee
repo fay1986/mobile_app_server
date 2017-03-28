@@ -38,5 +38,9 @@ Template.mySeries.events
       seriesId = e.currentTarget.id
       Session.set('isSeriesEdit',false)
       Session.set('mySeriesScrollTop',$(document).scrollTop())
-      Session.set('seriesFromPage','/mySeries')
-      Router.go '/series/' + seriesId
+      history = Session.get('history_view') || []
+      history.push({
+        view: 'mySeries'
+      })
+      Session.set('history_view',history)
+      PUB.page('/series/' + seriesId)

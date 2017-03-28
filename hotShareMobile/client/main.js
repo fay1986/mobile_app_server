@@ -222,6 +222,27 @@ if (Meteor.isCordova) {
         }
       } else if (currentRoute == "recoveryForm"){
         Router.go('/loginForm');
+      } else if (currentRoute == "series"){
+        if(!Session.get('seriesIsSaved') && Session.get('isSeriesEdit')){
+          if(Session.get('seriesId') && Session.get('seriesId') !== ''){
+            navigator.notification.confirm('这个操作无法撤销', function(r){
+              if(r !== 1){
+                updateOrInsertSeries(false,true);
+              } else {
+                PUB.back();
+              }
+            },'您确定要放弃未保存的修改吗？', ['放弃修改','保存修改']);
+          } else {
+            navigator.notification.confirm('这个操作无法撤销', function(r){
+              if(r == 1){
+                Session.set('seriesContent','');
+                PUB.back();
+              }
+            },'您确定要放弃未保存的修改吗？', ['放弃修改','继续编辑']);
+          }
+        }else{
+          PUB.back();
+        }
       } else if (currentRoute == undefined || currentRoute =="search" || currentRoute =="add" || currentRoute =="bell" || currentRoute =="user" || currentRoute == "authOverlay") {
         window.plugins.toast.showShortBottom('再点击一次退出!');
         document.removeEventListener("backbutton", eventBackButton, false); // 注销返回键
