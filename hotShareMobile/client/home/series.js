@@ -6,7 +6,14 @@ var updatePostsLatestSeries = function(postLists, seriesId, seriesTitle) {
     Posts.update({_id: postLists[i].postId}, {$set: {latestSeries: {seriesId: seriesId, seriesTitle: seriesTitle}}});
   }
 };
-
+var removePostsLatestSeries = function(seriesId){
+  if (!seriesId)
+    return false;
+  var postLists = Series.findOne({_id: seriesId});
+  for (var i=0; i < postLists.length; i++){
+    Posts.update({_id: postLists[i].postId},{$set: {latestSeries:undefined }})
+  }
+}
 var uploadSeriesImage = function(data) {
   multiThreadUploadFileWhenPublishInCordova(data, null, function(err, result) {
     var i, item, len;
@@ -346,6 +353,7 @@ Template.series.events({
   },
   'click #del':function(e,t){
     Series.remove({_id: Session.get('seriesId')});
+    removePostsLatestSeries(Session.get('seriesId'));
     // Router.go ('/seriesList');
     PUB.back()
   },
