@@ -5,6 +5,20 @@ if Meteor.isServer
   console.log("process.env.HTTP_FORWARDED_COUNT="+process.env.HTTP_FORWARDED_COUNT);
   Meteor.startup ()->
     Meteor.methods
+      'clearDiscoverMSG': (userId,postId)->
+        if !Match.test(userId, String) or !Match.test(postId, String)
+          return {msg: 'failed'}
+        console.log('user='+userId+', post=='+postId)
+        Feeds.update({followby:userId,checked:false, eventType: {$nin: ['share','personalletter']}},{$set: {checked: true}},{multi: true})
+        recommendPosts = Recommends.find({relatedPostId: postId}).fetch()
+        if recommendPosts and recommendPosts.length > 0
+          userLists = []
+          recommendPosts.forEach (item)->
+            if item.readUsers
+              userLists = item.readUsers
+            userLists.push(userId)
+            Recommends.update({_id:item._id},{$set: {readUsers: userLists}})
+        return {msg: 'success'}
       "updateFollowSeriesInfo":(userId,options)->
         Meteor.defer ()->
           try 
