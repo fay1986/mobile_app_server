@@ -159,17 +159,23 @@ shareSeriesToSystem = function(title,description,thumbData,url) {
 
 serieShareTo = function(to,self){
   var title = self.ownerName +'的合辑《'+ self.title +'》';
-  var description = ''
+  var description = '';
+  if(self.postLists && self.postLists[0]){
+    description = self.postLists.length + '个故事:'+ self.postLists[0].postTitle;
+    description = description.slice(0,90) + '...';
+  } else {
+    description = '来自故事贴';
+  }
   var imageUrl = self.mainImage;
   var url = getSeriesSharingPath(self);
   if(to === 'QQShare'){
-    return shareSeriesToQQ(title,title,imageUrl,url);
+    return shareSeriesToQQ(title,description,imageUrl,url);
   }
   if(to === 'QQzoneShare'){
-    return shareSeriesToQQZone(title,title,imageUrl,url);
+    return shareSeriesToQQZone(title,description,imageUrl,url);
   }
   if(to === 'system'){
-    return shareSeriesToSystem(title,title,imageUrl,url);
+    return shareSeriesToSystem(title,description,imageUrl,url);
   }
 
   window.plugins.toast.showShortCenter(TAPi18n.__("preparePicAndWait"));
