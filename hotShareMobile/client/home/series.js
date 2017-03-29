@@ -352,8 +352,8 @@ Template.series.events({
     return Router.go('/posts/'+e.currentTarget.id);
   },
   'click #del':function(e,t){
-    Series.remove({_id: Session.get('seriesId')});
     removePostsLatestSeries(Session.get('seriesId'));
+    Series.remove({_id: Session.get('seriesId')});
     // Router.go ('/seriesList');
     PUB.back()
   },

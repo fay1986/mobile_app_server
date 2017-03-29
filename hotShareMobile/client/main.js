@@ -222,7 +222,7 @@ if (Meteor.isCordova) {
         }
       } else if (currentRoute == "recoveryForm"){
         Router.go('/loginForm');
-      } else if (currentRoute == "series"){
+      } else if (currentRoute == "series" || currentRoute == "series.:_id"){
         if(!Session.get('seriesIsSaved') && Session.get('isSeriesEdit')){
           if(Session.get('seriesId') && Session.get('seriesId') !== ''){
             navigator.notification.confirm('这个操作无法撤销', function(r){
