@@ -185,7 +185,7 @@ if Meteor.isClient
         $('.showPosts').get(0).style.maxHeight = '1500px'
         $('.showPosts').get(0).style.position = 'relative'
         # $showPosts.after('<div class="readmore">继续阅读<i class="fa fa-angle-double-down"></i><div>')
-        $showPosts.after('<div class="readmore"><div class="readMoreContent"><i class="fa fa-chevron-down"></i>继续阅读</div></div>')
+        $showPosts.after('<div class="readmore" onclick="readMoreHide()"><div class="readMoreContent"><i class="fa fa-chevron-down"></i>继续阅读</div></div>')
     , 600
 
   Template.showPosts.created=->

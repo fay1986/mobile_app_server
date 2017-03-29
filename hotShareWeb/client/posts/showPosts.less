@@ -348,17 +348,17 @@
     position: relative;
     top: 5px;
  }
- 
- 
- 
+
 .pcommentInput{
-  position: fixed;
+  position: absolute;
   z-index: 99999;
+  width: 98%;
+  bottom: 0;
 }
 .pcommentInput .pcomment .banner{
-    text-align: center;
-    padding-bottom: 25px;
-    color: #aaa;
+  text-align: center;
+  padding-bottom: 25px;
+  color: #aaa;
 }
 .pcommentInput .pcomment{
   position: relative;
@@ -424,9 +424,7 @@
 
 .pcommentInput .input-group{
   font-size: larger;
-  bottom: 0px;
-  z-index: 999999;
-  position: fixed;
+  position: relative;
   width: 100%;
   left: 0;
   height: 50px;
@@ -445,6 +443,8 @@
     margin-top: 4px;
     background-color: #9b9b9b;
     margin-right: 5px;
+    font-size: 16px;
+    color: black;
     width: 15%;
     height: 36px;
     float: right;
@@ -589,6 +589,16 @@
     background: #111;
     display: none;
     opacity: 0.6;
+}
+.newalertBackground{
+  width:100%;
+  height:100%;
+  position:fixed;
+  top:0px;
+  left:0px;
+  z-index: 99998;
+  background: #777777;
+  opacity: 0;
 }
 
 .alertBackground{

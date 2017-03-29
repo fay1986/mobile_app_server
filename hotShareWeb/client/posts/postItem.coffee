@@ -18,6 +18,23 @@ if Meteor.isClient
   updateLayoutData=(helper,col,sizeX,bottom)->
     for i in [col..(col+sizeX-1)]
       helper[(i-1)]=bottom
+  otherElementShowOrHidden=(status)->
+    if status is false
+      $('.show-or-hidden').hide()
+    else
+      $('.show-or-hidden').show()
+  getPcommentPlaceHolder=()->
+    placeHolderText = '评论'
+    if Session.get("pcommetsReply")
+       i = Session.get "pcommentIndexNum"
+       post = Session.get("postContent").pub
+       selectedIndex = Session.get("pcommentSelectedIndex")
+       if post and post[i] and post[i].pcomments isnt undefined
+          pcomments = post[i].pcomments
+          if pcomments[selectedIndex] isnt undefined
+            toUsername = pcomments[selectedIndex].username
+            placeHolderText = '回复'+toUsername+':'
+     return placeHolderText
   
   # Template.postItem.onRendered ()->
   #   if this.data.type is 'music' and !window._music
@@ -91,6 +108,7 @@ if Meteor.isClient
       thumbsDownHandler(e,this)
       Session.set('postPageScrollTop',document.body.scrollTop)
     'click .pcomments': (e)->
+      otherElementShowOrHidden(false)
       #console.log($(e.currentTarget).parent().parent().parent())
       Session.set("pcommetsReply",false)
       $(e.currentTarget).parent().parent().parent().addClass('post-pcomment-current-pub-item').attr('data-height': $(e.currentTarget).parent().parent().parent().height())
@@ -101,14 +119,22 @@ if Meteor.isClient
       Session.set("pcommetsId","")
       backgroundTop = 0-$(window).scrollTop()
       Session.set('backgroundTop', backgroundTop);
+      Meteor.setTimeout ()->
+          if Session.get('pcommentsValue') isnt ''
+            $('#pcommitReport').val(Session.get('pcommentsValue'))
+        ,100
       #$('body').attr('style','position:fixed;top:'+Session.get('backgroundTop')+'px;')
-      $('.pcommentInput,.alertBackground').fadeIn 300, ()->
-        $('#pcommitReport').focus()
-      $('#pcommitReport').focus()
-
+      # $('.pcommentInput,.alertBackground').fadeIn 300, ()->
+      #   $('#pcommitReport').focus()
+      # $('#pcommitReport').focus()
+      pcommentPlaceHolderText = getPcommentPlaceHolder()
+      $pcommentInput = $(e.currentTarget).parent()
+      $pcommentInput.after('<div id="pcommentInput" class="pcommentInput"><div class="input-group"><form onsubmit="return" class="pcommentInput-form"><input type="text" id="pcommitReport" autofocus="autofocus" class="form-control" maxlength="180" placeholder="' + pcommentPlaceHolderText + '" /></form><div onclick="pcommitReport()" id="pcommitReportBtn">发送</div></div></div><div onclick="hidePcomments()" class="newalertBackground"></div>')
+      
       # $('.showBgColor').css('min-width',$(window).width())
       Session.set "pcommentIndexNum", this.index
     'click .bubble':(e)->
+      otherElementShowOrHidden(false)
       Session.set "pcommentIndexNum", $(e.currentTarget).parent().parent().parent().index(".element")
       pcommentSelectedIndex = $(e.currentTarget).parent().index()
       console.log 'pcommentSelectedIndex >>>'+pcommentSelectedIndex
@@ -125,10 +151,13 @@ if Meteor.isClient
       Session.set("pcommetsId","")
       backgroundTop = 0-$(window).scrollTop()
       Session.set('backgroundTop', backgroundTop);
+      pcommentPlaceHolderText = getPcommentPlaceHolder()
+      $pcommentInput = $(e.currentTarget).parent()
+      $pcommentInput.after('<div id="pcommentInput" class="pcommentInput"><div class="input-group"><form onsubmit="return" class="pcommentInput-form"><input type="text" id="pcommitReport" autofocus="autofocus" class="form-control" maxlength="180" placeholder="' + pcommentPlaceHolderText + '" /></form><div onclick="pcommitReport()" id="pcommitReportBtn">发送</div></div></div><div onclick="hidePcomments()" class="newalertBackground"></div>')
       #$('body').attr('style','position:fixed;top:'+Session.get('backgroundTop')+'px;')
-      $('.pcommentInput,.alertBackground').fadeIn 300, ()->
-        $('#pcommitReport').focus()
-      $('#pcommitReport').focus()
+      # $('.pcommentInput,.alertBackground').fadeIn 300, ()->
+      #   $('#pcommitReport').focus()
+      # $('#pcommitReport').focus()
 
     'click .play_area': (e)->
       $node=$(e.currentTarget)

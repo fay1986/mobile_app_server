@@ -8,7 +8,7 @@
     <div class="showPostsBox">
     <div class="showPosts">
 
-      <div id="blur_overlay" style="position: absolute; opacity: 0.5; z-index: -1; width:100%; background-color:white;">
+      <div id="blur_overlay" class="show-or-hidden" style="position: absolute; opacity: 0.5; z-index: -1; width:100%; background-color:white;">
           {{> spinner}}
       </div>
       <div class="head">
@@ -113,7 +113,7 @@
         </div>
       </div>
     </div>
-    <div class="globe-envelope-box">
+    <div class="globe-envelope-box show-or-hidden">
       {{#if haveUrl}}
       <div id="ViewOnWeb" class="ripple"><i class="fa fa-globe"></i>     阅读原文</div>
       {{else}}
@@ -125,7 +125,7 @@
       {{/if}}
     </div>
     {{#if browse}}
-    <div class="recommendstory"  id="shareStoryBtn">
+    <div class="recommendstory show-or-hidden"  id="shareStoryBtn">
         <div class="description">{{browse}}人读过，分享您的故事给他们吧！<span class="shareStoryBtn ripple" style="position: relative;">分享</span></div>
     </div>
     {{/if}}
@@ -157,19 +157,19 @@
         <p>本文由史上最好用的图文排版APP<span>故事贴</span>支持创作</p>
       </div>
     {{/if}}
-    <div style="padding: 16px;font-size: 16px;">点击左上角
+    <div class="show-or-hidden" style="padding: 16px;font-size: 16px;">点击左上角
       <span style="display:inline-block; font-size:14px; color:#00c4ff; border: 1px solid #00c4ff; border-radius:4px;padding: 0px 8px;">关注</span>
       按钮，订阅<strong>{{ownerName}}</strong>的故事
     </div>
     <!--<div onclick="trackEvent('Download','from Post Tail');window.open('http://cdn.tiegushi.com', '_system');"><img src="/img/download.png" style="width:90%;margin-left:5%;"></div>-->
-    <div onclick="if(isIOS){trackEvent('Download','from Post Tail, IOS')}else if(isAndroidFunc()){trackEvent('Download','from Post Tail, Android')}else {trackEvent('Download','from Post Tail, Outside Wechat')}
+    <div class="show-or-hidden" onclick="if(isIOS){trackEvent('Download','from Post Tail, IOS')}else if(isAndroidFunc()){trackEvent('Download','from Post Tail, Android')}else {trackEvent('Download','from Post Tail, Outside Wechat')}
           window.open('http://a.app.qq.com/o/simple.jsp?pkgname=org.hotshare.everywhere', '_system')"
     style="background-color:#2d95bb; color: #fff; border-radius:8px; margin:16px; text-align:center;height: 40px;line-height: 40px; font-size:16px;">
       <img src="/img/download_icon.png" width="28" style="margin-top: -4px; margin-right: 4px;">下载故事贴，你也能写这样的图文
     </div>
-    <div class="showPostsLine"></div>
+    <div class="showPostsLine show-or-hidden"></div>
     <!--authorInfo Start-->
-    <div class="authorInfos">
+    <div class="authorInfos show-or-hidden">
       <div class="icon authorInfoIcon">
         <img src="{{authorInfo.authorIcon}}" width="70" height="70"/>
       </div>
@@ -191,7 +191,7 @@
     <!--<div class="showPostsLine"></div>-->
     <!--authorInfo End-->
     {{#unless isMyPost}}
-      <div class="showPostsFollowMe">
+      <div class="showPostsFollowMe show-or-hidden">
         {{#if inWeiXin}}
         <p style="padding: 0 10px;">更多精彩内容，敬请点击关注<span><a><i class="fa fa-weixin"></i>故事贴</a></span>微信公众号</p>
         {{else}}
@@ -201,17 +201,17 @@
     {{/unless}}
     {{#if isCordova}}
     {{#unless isMyPost}}
-    <div id="report">举报</div>
+    <div id="report" class="show-or-hidden">举报</div>
     {{/unless}}
     {{/if}}
     <!--<div class="showPostsLine"></div>-->
-      {{> commentContent}}
+      <div class="show-or-hidden">{{> commentContent}}</div>
       </div>
       {{#if withSocialBar}}
         <!--<div class="superChatIntroduce">
             <p style="padding:0 10px;">故事贴无法获得微信信息，请放心使用</p>
         </div>-->
-        {{> socialContent}}
+        <div class="show-or-hidden">{{> socialContent}}</div>
       {{/if}}
     </div>
 <!--    {{> postFooter}}-->
@@ -415,23 +415,33 @@
 </template>
 
 <template name="pcommentInput">
-  <div class="pcommentInput" style="display:none;">
+  <!-- <div class="pcommentInput" style="display:none;">
       <div class="input-group">
         <form onsubmit="return pcommitSubmit();" class="pcommentInput-form"><input type="text" id="pcommitReport" autofocus="autofocus" class="form-control" maxlength="180" placeholder="{{placeHolder}}" /></form>
         <div onclick="pcommitReport()" id="pcommitReportBtn">发送</div>
       </div>
   </div>
-  <div onclick="hidePcomments()" class="alertBackground"></div>
+  <div onclick="hidePcomments()" class="alertBackground"></div> -->
     <script>
        function pcommitSubmit(){
+         $('.show-or-hidden').show();
          $('#pcommitReport').blur();
          setTimeout(pcommitReport, 0);
          return false;
        }
+       function readMoreHide(){
+        $showPosts = $('.showPosts')
+        $('.showPosts').get(0).style.overflow = ''
+        $('.showPosts').get(0).style.maxHeight = ''
+        $('.showPosts').get(0).style.position = ''
+        $('.readmore').remove()
+       }
        function hidePcomments(){
+         Session.set('pcommentsValue', $('#pcommitReport').val());
+         $('.show-or-hidden').show();
          $('.showBgColor').removeAttr('style');
          $(window).scrollTop(0-Session.get('backgroundTop'));
-         $('.pcommentInput,.alertBackground').fadeOut(300);
+         $('.pcommentInput,.newalertBackground').remove();
          Session.set('backgroundTop','');
          
          var postItem = $('.post-pcomment-current-pub-item');
@@ -439,7 +449,6 @@
          postItem.removeClass('post-pcomment-current-pub-item');
        }
        function pcommitReport(e, t) {
-          console.log(">>>")
           var content, i, pcommentJson, pcomments, position, post, postId, userIcon, userId, username;
           i = Session.get("pcommentIndexNum");
           content = $('#pcommitReport').val();
@@ -465,7 +474,7 @@
           if (content === "") {
             $('.showBgColor').removeAttr('style');
             $(window).scrollTop(0 - Session.get('backgroundTop'));
-            $('.pcommentInput,.alertBackground').fadeOut(300);
+            $('.pcommentInput,.newalertBackground').remove();
             return false;
           }
           if (Meteor.user()) {
@@ -535,11 +544,13 @@
               return console.log("success");
             }
           });
+          $('.show-or-hidden').show();
           $('#pcommitReport').val('');
+          Session.set('pcommentsValue', '');
           $("#pcommitReport").attr("placeholder", "评论");
           $('.showBgColor').removeAttr('style');
           $(window).scrollTop(0 - Session.get('backgroundTop'));
-          $('.pcommentInput,.alertBackground').fadeOut(300);
+          $('.pcommentInput,.newalertBackground').remove();
           
           //refreshPostContent();
           return false;
