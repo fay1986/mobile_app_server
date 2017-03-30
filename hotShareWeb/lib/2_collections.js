@@ -113,24 +113,24 @@ if (Meteor.isServer) {
 
 //Series push notifacation trigger
 if (Meteor.isServer) {
-  Series.find().observeChanges({
-    changed: function(id, fields) {
-      var item = null;
-      var needNotify = false;
-      for (item in fields) {
-        if (item == 'title' || item == 'postLists') {
-          needNotify = true;
-        }
-      }
-      if (needNotify) {
-        seriesFollow = SeriesFollow.findOne({seriesId: id});
-        if (seriesFollow) {
-          console.log('Series changed, pushnotification');
-          pushnotification('seriesChanged', seriesFollow, seriesFollow.owner);
-        }
-      }
-    }
-  });
+//   Series.find().observeChanges({
+//     changed: function(id, fields) {
+//       var item = null;
+//       var needNotify = false;
+//       for (item in fields) {
+//         if (item == 'title' || item == 'postLists') {
+//           needNotify = true;
+//         }
+//       }
+//       if (needNotify) {
+//         seriesFollow = SeriesFollow.findOne({seriesId: id});
+//         if (seriesFollow) {
+//           console.log('Series changed, pushnotification');
+//           pushnotification('seriesChanged', seriesFollow, seriesFollow.owner);
+//         }
+//       }
+//     }
+//   });
 }
 
 // 为老版本计算默认 topicpost 数据
@@ -863,6 +863,25 @@ if(Meteor.isServer){
               console.log("Exception: sendEmailToSeriesFollower: error=%s", error);
           }
       });
+    };
+    var sendNotificationToSeriesFollower = function(seriesId) {
+        Meteor.defer(function(){
+            try {
+                var seriesFollow = SeriesFollow.find({seriesId: seriesId}).fetch();
+                forEachAsynWait(seriesFollow,1,100,function(item, index,callback) {
+                    if (item.owner !== item.creatorId) {
+                        console.log(JSON.stringify(item))
+                        console.log('Series changed, pushnotification, to==',item.owner);
+                        pushnotification('seriesChanged', item, item.owner);
+                    }
+                    return callback && callback();
+                },function(){
+                    console.log('>>> this is callback')
+                });
+            } catch (error) {
+                console.log('sendNotificationToSeriesFollower ERR=',error);
+            }
+        });
     };
     var countB = 0;
     var countC = 0;
@@ -1668,6 +1687,7 @@ if(Meteor.isServer){
             if(modifier.$set.title || modifier.$set.mainImage || modifier.$set.postLists || fieldNames.indexOf('postLists') >= 0){
                 console.log('send series email:', doc._id);
                 try{sendEmailToSeriesFollower(doc._id)}catch(ex){}
+                try{sendNotificationToSeriesFollower(doc._id)}catch(error){}
             }
 
             SeriesFollow.update({seriesId: doc._id}, {
