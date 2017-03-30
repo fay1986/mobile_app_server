@@ -281,10 +281,12 @@ Template.series.events({
     Session.set('seriesIsSaved',false);
   },
   'focus #seriesTitle':function(e,t){
-    $('.series-title').css('height','160px')
+    if(isAndroidFunc()){
+      $('.series-title').css('height','160px');
+    }
   },
   'blur #seriesTitle': function(){
-     $('.series-title').css('height','300px')
+     $('.series-title').css('height','300px');
   },
   'click .series-title':function(){
     $('.mainImageTools').toggle();
@@ -367,7 +369,9 @@ Template.series.events({
 });
 
 Template.series.onRendered(function(){
-    $('.series').css('min-height',$(window).height());
+    if(isAndroidFunc()){
+      $('.series').css('min-height',$(window).height());
+    }
     $('.series').click(function(e){
       var target = $(e.target);
       if(target.closest('.series-dropdown').length == 0){
