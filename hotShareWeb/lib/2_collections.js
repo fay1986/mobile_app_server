@@ -1437,16 +1437,18 @@ if(Meteor.isServer){
                     series.observeChanges({
                     added: function (id, fields) {
                         // console.log('----- Series 2------');
-                        SeriesFollow.insert({
-                            owner: userId,
-                            creatorId: fields.owner, //followerId
-                            creatorName: fields.ownerName,
-                            creatorIcon: fields.ownerIcon,
-                            seriesId: fields._id,
-                            title: fields.title,
-                            mainImage: fields.mainImage,
-                            createdAt: new Date()
-                        });
+                        if(fields && fields._id && fields.title && fields.mainImage){
+                            SeriesFollow.insert({
+                                owner: userId,
+                                creatorId: fields.owner, //followerId
+                                creatorName: fields.ownerName,
+                                creatorIcon: fields.ownerIcon,
+                                seriesId: fields._id,
+                                title: fields.title,
+                                mainImage: fields.mainImage,
+                                createdAt: new Date()
+                            });
+                        }
                     }
                     });
                     // series.forEach(function(data){
@@ -1604,56 +1606,58 @@ if(Meteor.isServer){
     };
     var  seriesInsertHookDeferHandle = function(userId,doc){
       Meteor.defer(function(){
-        // 1. 将合辑添加到自己的followSeries
-        try{
-            SeriesFollow.insert({
-                owner: userId,
-                creatorId: doc.owner,
-                creatorName: doc.ownerName,
-                creatorIcon: doc.ownerIcon,
-                seriesId: doc._id,
-                title: doc.title,
-                mainImage: doc.mainImage,
-                createdAt: new Date()
-            });
-        } catch (error){
-            console.log('Insert Series to self followSeries ERR=',error);
-        }
-        // 2. 将自己的合辑添加到关注者的followSeries
-        try {
-            var follows = Follower.find({followerId: userId});
-            if(follows.count()>0){
-                // console.log('----- seriesInsertHookDeferHandle 1------');
-                follows.observeChanges({
-                added: function (id, fields) {
-                    // console.log('----- seriesInsertHookDeferHandle 2------');
-                    SeriesFollow.insert({
-                        owner: fields.userId,
-                        creatorId: doc.owner,
-                        creatorName: doc.ownerName,
-                        creatorIcon: doc.ownerIcon,
-                        seriesId: doc._id,
-                        title: doc.title,
-                        mainImage: doc.mainImage,
-                        createdAt: new Date()
-                    });
-                }
+        if(doc && doc._id && doc.title && doc.mainImage){
+            // 1. 将合辑添加到自己的followSeries
+            try{
+                SeriesFollow.insert({
+                    owner: userId,
+                    creatorId: doc.owner,
+                    creatorName: doc.ownerName,
+                    creatorIcon: doc.ownerIcon,
+                    seriesId: doc._id,
+                    title: doc.title,
+                    mainImage: doc.mainImage,
+                    createdAt: new Date()
                 });
-                // follows.forEach(function(data){
-                //     SeriesFollow.insert({
-                //         owner: data.userId,
-                //         creatorId: doc.owner,
-                //         creatorName: doc.ownerName,
-                //         creatorIcon: doc.ownerIcon,
-                //         seriesId: doc._id,
-                //         title: doc.title,
-                //         mainImage: doc.mainImage,
-                //         createdAt: new Date()
-                //     });
-                // });
+            } catch (error){
+                console.log('Insert Series to self followSeries ERR=',error);
             }
-        } catch (error) {
-            console.log('seriesInsertHook ERR=',error);
+            // 2. 将自己的合辑添加到关注者的followSeries
+            try {
+                var follows = Follower.find({followerId: userId});
+                if(follows.count()>0){
+                    // console.log('----- seriesInsertHookDeferHandle 1------');
+                    follows.observeChanges({
+                    added: function (id, fields) {
+                        // console.log('----- seriesInsertHookDeferHandle 2------');
+                        SeriesFollow.insert({
+                            owner: fields.userId,
+                            creatorId: doc.owner,
+                            creatorName: doc.ownerName,
+                            creatorIcon: doc.ownerIcon,
+                            seriesId: doc._id,
+                            title: doc.title,
+                            mainImage: doc.mainImage,
+                            createdAt: new Date()
+                        });
+                    }
+                    });
+                    // follows.forEach(function(data){
+                    //     SeriesFollow.insert({
+                    //         owner: data.userId,
+                    //         creatorId: doc.owner,
+                    //         creatorName: doc.ownerName,
+                    //         creatorIcon: doc.ownerIcon,
+                    //         seriesId: doc._id,
+                    //         title: doc.title,
+                    //         mainImage: doc.mainImage,
+                    //         createdAt: new Date()
+                    //     });
+                    // });
+                }
+            } catch (error) {
+                console.log('seriesInsertHook ERR=',error);
+            }
         }
       });
     };
@@ -1665,18 +1669,18 @@ if(Meteor.isServer){
                 console.log('send series email:', doc._id);
                 try{sendEmailToSeriesFollower(doc._id)}catch(ex){}
             }
-
+            var setObject = {
+                updateAt: new Date()
+            }
+            if(modifier.$set.title){
+                setObject.title = modifier.$set.title;
+            }
+            if(modifier.$set.mainImage){
+                setObject.mainImage = modifier.$set.mainImage;
+            }
+            console.log(JSON.stringify(setObject))
             SeriesFollow.update({seriesId: doc._id}, {
-                $set: {
-                    creatorId: doc.owner,
-                    creatorName: doc.ownerName,
-                    creatorIcon: doc.ownerIcon,
-                    seriesId: doc._id,
-                    title: modifier.$set.title,
-                    mainImage: modifier.$set.mainImage,
-                    createdAt: doc.createdAt,
-                    updateAt: new Date()
-                }
+                $set: setObject
             },{ multi: true});
         } catch (error) {
             console.log('seriesUpdateHookDeferHandle ERR=',error);

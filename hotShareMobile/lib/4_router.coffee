@@ -113,7 +113,26 @@ if Meteor.isClient
       Session.set('seriesId','')
       this.render 'series'
       return
-    Router.route '/series/:_id',()->
+    Router.route '/series/:_id',{
+      loadingTemplate: 'loadingPost'
+      waitOn: ->
+        [Meteor.subscribe("oneSeries",this.params._id),
+        Meteor.subscribe("seriesFollow", this.params._id)]
+      action: ->
+        self = this
+        if this.params._id is 'null'
+          this.render 'seriesUnPublish'
+        else
+          seriesContent = Series.findOne({_id: this.params._id})
+          if seriesContent
+            Session.set('seriesId',this.params._id)
+            Session.set('seriesContent',seriesContent)
+            this.render 'series'
+          else
+            this.render 'seriesUnPublish'
+        return
+    }
+    Router.route '/series2/:_id',()->
       Meteor.subscribe("oneSeries",this.params._id)
       Meteor.subscribe("seriesFollow", this.params._id)
       console.log(this.params._id)
