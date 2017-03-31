@@ -9,9 +9,13 @@ var updatePostsLatestSeries = function(postLists, seriesId, seriesTitle) {
 var removePostsLatestSeries = function(seriesId){
   if (!seriesId)
     return false;
-  var postLists = Series.findOne({_id: seriesId}).postLists;
-  for (var i=0; i < postLists.length; i++){
-    Posts.update({_id: postLists[i].postId},{$set: {latestSeries:null }})
+  var series = Series.findOne({_id: seriesId});
+  var postLists = [];
+  if(series && series.postLists){
+    postLists = series.postLists;
+    for (var i=0; i < postLists.length; i++){
+      Posts.update({_id: postLists[i].postId},{$set: {latestSeries:null }})
+    }
   }
 }
 var uploadSeriesImage = function(data) {
