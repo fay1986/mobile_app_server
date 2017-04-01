@@ -1079,7 +1079,7 @@ if(Meteor.isServer){
                     // console.log('----- Recommends 2------');
                     if (!~recommendUserIds.indexOf(fields.recommendUserId)) {
                         recommendUserIds.push(fields.recommendUserId);
-                        Recommends.update({_id: fields._id}, {$set: {relatedPostId: doc._id}});
+                        Recommends.update({_id: id}, {$set: {relatedPostId: doc._id}});
                         }
                     }
                 });
@@ -1353,19 +1353,19 @@ if(Meteor.isServer){
             try{
                 var posts=Posts.find({owner: doc.followerId});
                 if(posts.count()>0){
-                    console.log('----- followerInsertHookDeferHook 1------');
+                    // console.log('----- followerInsertHookDeferHook 1------');
                     posts.observeChanges({
                     added: function (id, fields) {
-                        console.log('----- followerInsertHookDeferHook 2------');
-                        console.log('postId is ' + fields._id)
-                        console.log('id is ' + id)
-                        console.log('fields is ')
-                        console.log(fields)
+                        // console.log('----- followerInsertHookDeferHook 2------');
+                        // console.log('postId is ' + fields._id)
+                        // console.log('id is ' + id)
+                        // console.log('fields is ')
+                        // console.log(fields)
                         if(doc.userId === suggestPostsUserId)
                         {
                             FollowPosts.insert({
-                                _id:fields._id,
-                                postId:fields._id,
+                                _id:id,
+                                postId:id,
                                 title:fields.title,
                                 addontitle:fields.addontitle,
                                 mainImage: fields.mainImage,
@@ -1381,7 +1381,7 @@ if(Meteor.isServer){
                         else
                         {
                             FollowPosts.insert({
-                                postId:fields._id,
+                                postId:id,
                                 title:fields.title,
                                 addontitle:fields.addontitle,
                                 mainImage: fields.mainImage,
@@ -1441,13 +1441,13 @@ if(Meteor.isServer){
                     series.observeChanges({
                     added: function (id, fields) {
                         // console.log('----- Series 2------');
-                        if(fields && fields._id && fields.title && fields.mainImage){
+                        if(fields && id && fields.title && fields.mainImage){
                             SeriesFollow.insert({
                                 owner: userId,
                                 creatorId: fields.owner, //followerId
                                 creatorName: fields.ownerName,
                                 creatorIcon: fields.ownerIcon,
-                                seriesId: fields._id,
+                                seriesId: id,
                                 title: fields.title,
                                 mainImage: fields.mainImage,
                                 createdAt: new Date()
