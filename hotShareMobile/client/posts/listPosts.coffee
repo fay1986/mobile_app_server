@@ -31,7 +31,7 @@ if Meteor.isClient
       Session.setPersistent('persistentMyFollowedPosts',myFollowedPosts.fetch())
       return myFollowedPosts #Session.get('persistentMyFollowedPosts')
     isfollowerpost:(postId)->
-      if FollowPosts.find({postId:postId}).count() > 1
+      if FollowPosts.find({postId:postId}).count() > 1 and postId isnt null
         followPostsId = FollowPosts.findOne({postId: postId})._id
         FollowPosts.remove({_id:followPostsId})
         myFollowedPosts = FollowPosts.find({followby:Meteor.userId(),publish:{"$ne":false}}, {sort: {createdAt: -1}})
