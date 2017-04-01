@@ -1353,10 +1353,14 @@ if(Meteor.isServer){
             try{
                 var posts=Posts.find({owner: doc.followerId});
                 if(posts.count()>0){
-                    // console.log('----- followerInsertHookDeferHook 1------');
+                    console.log('----- followerInsertHookDeferHook 1------');
                     posts.observeChanges({
                     added: function (id, fields) {
-                        // console.log('----- followerInsertHookDeferHook 2------');
+                        console.log('----- followerInsertHookDeferHook 2------');
+                        console.log('postId is ' + fields._id)
+                        console.log('id is ' + id)
+                        console.log('fields is ')
+                        console.log(fields)
                         if(doc.userId === suggestPostsUserId)
                         {
                             FollowPosts.insert({
