@@ -113,20 +113,20 @@ if (Meteor.isServer) {
 
 //Series push notifacation trigger
 if (Meteor.isServer) {
-    SeriesFollow.find().observe({
-        changed: function(newDoc){
-            Meteor.defer(function(){
-                try{
-                    if(newDoc && newDoc.creatorId !== newDoc.owner){
-                        console.log('Series changed, pushnotification');
-                        pushnotification('seriesChanged', newDoc, newDoc.owner);
-                    }
-                } catch (error){
-                    console.log('Send Series changed pushnotification,ERR=',error);
-                }
-            })
-        }
-    });
+    // SeriesFollow.find().observe({
+    //     changed: function(newDoc){
+    //         Meteor.defer(function(){
+    //             try{
+    //                 if(newDoc && newDoc.creatorId !== newDoc.owner){
+    //                     console.log('Series changed, pushnotification');
+    //                     pushnotification('seriesChanged', newDoc, newDoc.owner);
+    //                 }
+    //             } catch (error){
+    //                 console.log('Send Series changed pushnotification,ERR=',error);
+    //             }
+    //         })
+    //     }
+    // });
 }
 
 // 为老版本计算默认 topicpost 数据
@@ -1684,6 +1684,18 @@ if(Meteor.isServer){
             },{ multi: true});
         } catch (error) {
             console.log('seriesUpdateHookDeferHandle ERR=',error);
+        }
+        try{
+            SeriesFollow.find({seriesId: doc._id}).observeChanges({
+                added: function(id, fields){
+                    if(fields && doc.owner != fields.owner){
+                        console.log('Series changed, pushnotification');
+                        pushnotification('seriesChanged', doc, fields.owner);
+                    }
+                }
+            });
+        } catch (error){
+            console.log('Send Series changed pushnotification,ERR=',error);
         }
       });
     };
