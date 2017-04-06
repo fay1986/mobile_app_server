@@ -47,7 +47,14 @@ if (Meteor.isCordova) {
         });
     }
   Meteor.startup(function(){
-    Session.setDefault('hottestPosts', [])
+    Session.setDefault('hottestPosts', []);
+    if (!window.cordova){
+      try{
+        window.cordova = require('cordova');
+      }catch(e){
+        console.log('cordova error : ' + e);
+      }
+    }
     getUserLanguage = function() {
       var lang;
       lang = void 0;
