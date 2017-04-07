@@ -918,7 +918,14 @@ if Meteor.isClient
           toastr.error('got wrong')
           return
     else
-      history.back()
+      history_view = Session.get("history_view")
+      history_view = history_view.reverse()
+      if history_view and history_view[0].view 
+        view = history_view[0].view
+      if view is 'home' or view is 'search' or view is 'bell'
+        PUB.page '/user'
+      else
+        history.back()
   @publishPostHandle = ()->
     layout = JSON.stringify(gridster.serialize())
     pub=[]
