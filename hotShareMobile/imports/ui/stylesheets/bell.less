@@ -11,7 +11,41 @@
 .bell .line{text-align:center;width: 100%; height: 1px; padding: 5px 0px;}
 .bell .line span{background: #333; width: 100%; height: 1px; display: block;}
 .bell .content a,a:hover,a:focus{text-decoration: none;color: #bbb;}
-
+.bell .content {
+	.fa-bookmark-o{
+		padding-left: 3px;
+	}
+	.bell-line{
+		height: 50px;
+	    position: relative;
+	    line-height: 50px;
+	    margin-left: 15px;
+	    border-bottom: 1px solid #ccc;
+	    .title{
+    	    font-weight: bolder;
+		    position: absolute;
+		    left: 35px;
+	    }
+	}
+	.last-bell-line{
+		margin-left: 0 !important;
+    	padding-left: 15px;
+    	.title{
+    		left: 50px !important;
+    	}
+	}
+	.bebore-title{
+		color: #2196f3;
+    	font-size: 150%;
+	}
+	.after-title{
+		color: #ccc;
+	    font-size: 150%;
+	    float: right;
+	    line-height: 50px;
+	    padding-right: 15px;
+	}
+}
 
 //朋友圈
 .bellTop{width:100%;height:500px; overflow: hidden;position:relative;}

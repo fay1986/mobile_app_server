@@ -1,5 +1,23 @@
 if Meteor.isClient
-  Template.bell.helpers
+  Template.bellcontent.rendered=->
+    Session.set("postPageScrollTop", 0)
+    $('.content').css 'min-height',$(window).height()
+    $(window).scroll (event)->
+        target = $("#showMoreFeedsResults");
+        FEEDS_ITEMS_INCREMENT = 20;
+        if (!target.length)
+            return;
+        threshold = $(window).scrollTop() + $(window).height() - target.height();
+
+        if target.offset().top < threshold
+            if (!target.data("visible"))
+                target.data("visible", true);
+                Session.set("feedsitemsLimit",
+                Session.get("feedsitemsLimit") + FEEDS_ITEMS_INCREMENT);
+        else
+            if (target.data("visible"))
+                target.data("visible", false);
+  Template.bellcontent.helpers
     notReadCount: ()->
       Feeds.find({isRead:{$ne: true}, checked:{$ne: true}}).count()
     notRead:(read, check, index, createAt)->
@@ -22,13 +40,36 @@ if Meteor.isClient
       else
         false
     eventFeeds:->
-      feeds = Feeds.find({}, {sort: {createdAt: -1}})
-      if feeds.count() > 0
-        Meteor.defer ()->
-          Session.setPersistent('persistentFeedsForMe',feeds.fetch())
-        return feeds
-      else
-        Session.get('persistentFeedsForMe')
+      return Session.get 'bellData'
+      # feeds = Feeds.find({}, {sort: {createdAt: -1}})
+      # if feeds.count() > 0
+      #   Meteor.defer ()->
+      #     Session.setPersistent('persistentFeedsForMe',feeds.fetch())
+      #   return feeds
+      # else
+      #   Session.get('persistentFeedsForMe')
+    isAlsoComment:(eventType)->
+      eventType is 'pcomment'
+    isPCommentReply:(eventType)->
+      eventType is 'pcommentReply'
+    isAlsoFavourite:(eventType)->
+      eventType is 'pfavourite'
+    isPcommentOwner:(eventType)->
+      eventType is 'pcommentowner'
+    isPersonalletter:(eventType)->
+      eventType is 'personalletter'
+    isGetRequest:(eventType)->
+      eventType is 'getrequest'
+    isSendRequest:(eventType)->
+      eventType is 'sendrequest'
+    isRecommand:(eventType)->
+      eventType is 'recommand'
+    isReComment:(eventType)->
+      eventType is 'recomment'
+    isComment:(eventType)->
+      eventType is 'comment'
+    selfPosted:(eventType)->
+      eventType is 'SelfPosted'
     time_diff: (created)->
       GetTime0(new Date() - created)
     moreResults:->
@@ -42,7 +83,9 @@ if Meteor.isClient
          return false
       else 
          return true
-  Template.bell.events
+  Template.bellcontent.events
+  	'click #back': (e)->
+      Router.go '/bell'
     'click .bell-line': (e)->
       currentType = e.currentTarget.id
       Session.set 'bellType', currentType
