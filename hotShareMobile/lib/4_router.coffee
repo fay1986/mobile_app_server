@@ -168,6 +168,23 @@ if Meteor.isClient
         this.render 'bell'
         Session.set 'channel','bell'
       return
+    Router.route '/bellcontent', {
+      action: ->
+        currentType = Session.get 'bellType'
+        if !currentType
+          Router.go '/bell'
+        if currentType is 'new-story'
+          bellData = Feeds.find({'eventType':'SelfPosted'}, {sort: {createdAt: -1}}).fetch()
+        else if currentType is 'up-and-pcomment'
+          typeArr = ["pcomment","pcommentReply","pfavourite","pcommentowner","getrequest","sendrequest","recommand","recomment","comment"]
+          bellData = Feeds.find({"eventType":{"$in": typeArr}}, {sort: {createdAt: -1}}).fetch()
+        else if currentType is 'personal-letter'
+          bellData = Feeds.find({'eventType':'personalletter'}, {sort: {createdAt: -1}}).fetch()
+        else
+          Router.go '/bell'
+        Session.set 'bellData', bellData
+        this.render 'bellcontent', {data: bellData}
+    }
     Router.route '/user',()->
       if Meteor.isCordova is true
         this.render 'user'
