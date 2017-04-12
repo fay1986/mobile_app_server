@@ -18,8 +18,16 @@ if Meteor.isClient
             if (target.data("visible"))
                 target.data("visible", false);
   Template.bellcontent.helpers
-    notReadCount: ()->
-      Feeds.find({isRead:{$ne: true}, checked:{$ne: true}}).count()
+    headTitle: ()->
+      bellType = Session.get 'bellType'
+      t = '动态'
+      if bellType is 'new-story'
+        t = '新故事'
+      else if bellType is 'up-and-pcomment'
+        t = '赞和评论'
+      else if bellType is 'personal-letter'
+        t = '站内信'
+      return t
     notRead:(read, check, index, createAt)->
       console.log('isRead:'+read+ 'isCheck:'+check+'>>>>>>>>>>>参数 长度：'+arguments.length)
       if (new Date() - new Date(createAt).getTime() ) > (7 * 24 * 3600 * 1000)

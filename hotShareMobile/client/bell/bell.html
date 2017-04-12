@@ -10,9 +10,30 @@
       <div id="follow" class="leftButton"><span class="fa fa-plus"></span><i class="fa fa-user"></i></div>
     </div>
     <div class="content">
-      <div id="new-story" class="bell-line"><i class="fa fa-bookmark-o bebore-title" aria-hidden="true"></i><span class="title">新故事</span><i class="fa fa-angle-right after-title" aria-hidden="true"></i></div>
-      <div id="up-and-pcomment" class="bell-line"><i class="fa fa-heart-o bebore-title" aria-hidden="true"></i><span class="title">赞和评论</span><i class="fa fa-angle-right after-title" aria-hidden="true"></i></div>
-      <div id="personal-letter" class="bell-line last-bell-line"><i class="fa fa-envelope-o bebore-title" aria-hidden="true"></i><span class="title">私信</span><i class="fa fa-angle-right after-title" aria-hidden="true"></i></div>
+      <div id="new-story" class="bell-line"><img class="before-title" src="/img/bellicon1.png" alt=""><span class="title">新故事</span>
+      {{#if is_wait_read_count notReadCountNewposts}}
+        {{#if limit_top_read_count notReadCountNewposts}}
+        <div class="msg_count">99+</div>
+        {{else}}
+        <div class="msg_count">{{notReadCountNewposts}}</div>
+        {{/if}}
+      {{/if}}<i class="fa fa-angle-right after-title" aria-hidden="true"></i></div>
+      <div id="up-and-pcomment" class="bell-line"><img class="before-title" src="/img/bellicon2.png" alt=""><span class="title">赞和评论</span>
+      {{#if is_wait_read_count notReadCountPcomment}}
+        {{#if limit_top_read_count notReadCountPcomment}}
+        <div class="msg_count">99+</div>
+        {{else}}
+        <div class="msg_count">{{notReadCountPcomment}}</div>
+        {{/if}}
+      {{/if}}<i class="fa fa-angle-right after-title" aria-hidden="true"></i></div>
+      <div id="personal-letter" class="bell-line last-bell-line"><img class="before-title" src="/img/bellicon3.png" alt=""><span class="title">站内信</span>
+      {{#if is_wait_read_count notReadCountPersonalletter}}
+        {{#if limit_top_read_count notReadCountPersonalletter}}
+        <div class="msg_count">99+</div>
+        {{else}}
+        <div class="msg_count">{{notReadCountPersonalletter}}</div>
+        {{/if}}
+      {{/if}}<i class="fa fa-angle-right after-title" aria-hidden="true"></i></div>
     </div>
   </div>
   {{> footer}}

@@ -2,6 +2,41 @@ if Meteor.isClient
   Template.bell.helpers
     notReadCount: ()->
       Feeds.find({isRead:{$ne: true}, checked:{$ne: true}}).count()
+    notReadCountNewposts: ()->
+      Feeds.find({
+            followby: Meteor.userId(),
+            isRead:{$ne: true},
+            checked:{$ne: true},
+            eventType:'SelfPosted',
+            createdAt: {$gt: new Date((new Date()).getTime() - 7 * 24 * 3600 * 1000)}
+          },{
+            limit: 99
+          }).count()
+    notReadCountPcomment: ()->
+      typeArr = ["pcomment","pcommentReply","pfavourite","pcommentowner","getrequest","sendrequest","recommand","recomment","comment"]
+      Feeds.find({
+            followby: Meteor.userId(),
+            isRead:{$ne: true},
+            checked:{$ne: true},
+            eventType:{"$in": typeArr},
+            createdAt: {$gt: new Date((new Date()).getTime() - 7 * 24 * 3600 * 1000)}
+          },{
+            limit: 99
+          }).count()
+    notReadCountPersonalletter: ()->
+      Feeds.find({
+            followby: Meteor.userId(),
+            isRead:{$ne: true},
+            checked:{$ne: true},
+            eventType:'personalletter',
+            createdAt: {$gt: new Date((new Date()).getTime() - 7 * 24 * 3600 * 1000)}
+          },{
+            limit: 99
+          }).count()
+    is_wait_read_count: (count)->
+      count > 0
+    limit_top_read_count: (count)->
+      count >= 99
     notRead:(read, check, index, createAt)->
       console.log('isRead:'+read+ 'isCheck:'+check+'>>>>>>>>>>>参数 长度：'+arguments.length)
       if (new Date() - new Date(createAt).getTime() ) > (7 * 24 * 3600 * 1000)
