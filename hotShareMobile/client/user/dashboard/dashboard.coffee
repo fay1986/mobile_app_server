@@ -75,7 +75,7 @@ if Meteor.isClient
       Router.go '/display_lang'
     'click .update' :->
       console.log '##RDBG update clicked'
-      #$('#updateToLatestVersion').modal('show')
+      $('#updateToLatestVersion').modal('show')
     'click #updateToLatestVersion .btn-primary' :->
       window.location.href = 'http://180.153.105.143/imtt.dd.qq.com/16891/346CBF0E04862CA542EA8AD714643FB6.apk?mkey=57d128030673c190&f=188a&c=0&fsname=org.hotshare.everywhere_1.3.10_103102.apk&hsr=4d5s&p=.apkhttp://a.app.qq.com/o/simple.jsp?pkgname=org.hotshare.everywhere'
       setTimeout(()->
