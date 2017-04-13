@@ -24,7 +24,9 @@ if Meteor.isClient
   @checkNewVersion = ->
     platform = if Blaze._globalHelpers.isIOS() then 'ios' else (if Blaze._globalHelpers.isAndroid() then 'android' else 'others')
     version = Versions.findOne({})
-
+    if !window.localStorage.getItem("latestVersion")
+      console.log 'no localStorage latestVersion.'
+      window.localStorage.setItem("latestVersion", version_of_build)
     if version and version[platform]
       latestVersion = version[platform]
     else
@@ -35,6 +37,7 @@ if Meteor.isClient
     
     if _latestVersion > _version_of_build and _latestVersion > _localLatestVersion
       window.localStorage.setItem("latestVersion", latestVersion)
+      console.log 'set latestVersionAlert true. '
       Session.set('latestVersionAlert', true)
     else
       Session.set('latestVersionAlert', false)
@@ -45,6 +48,11 @@ if Meteor.isClient
     if _latestVersion <= _version_of_build
       console.log '当前版本已是最新版本！'
       return false
+  @goToUpdate = ->
+    if Blaze._globalHelpers.isIOS()
+      cordova.InAppBrowser.open('https://itunes.apple.com/app/gu-shi-tie/id957024953', '_system')
+    else
+      cordova.InAppBrowser.open('http://a.app.qq.com/o/simple.jsp?pkgname=org.hotshare.everywhere', '_system')
   Template.home.helpers
     wasLogon:()->
       Session.get('persistentLoginStatus')
@@ -77,6 +85,14 @@ Tracker.autorun((t)->
   if !Session.get('isFlag') and Session.get('latestVersionAlert')
     t.stop()
     setTimeout(()->
-      Dialogs.alert('我们已为您备好更有趣新版本，记得去更新哦~', null, '新版本提示', '好的')
+      # Dialogs.alert('我们已为您备好更有趣新版本，记得去更新哦~', null, '新版本提示', '好的')
+      navigator.notification.confirm(
+          '我们已为您备好更有趣新版本，记得去更新哦~'
+          (index)->
+            if index is 2
+              goToUpdate()
+          '新版本提示'
+          ['下次更新', '马上更新']
+        )
     , 1000)
 );
