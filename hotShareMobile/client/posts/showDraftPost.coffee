@@ -77,7 +77,11 @@ if Meteor.isClient
       )
     , 450
     $('.showBgColor').css('min-height',$(window).height())
-
+    setTimeout ()->
+      $lastEle = $('.element').last()
+      height = parseInt($lastEle.css('top')) + $lastEle.height()
+      $('#test').height(height)
+    ,200
 
   Template.showDraftPosts.helpers
     getmainImage:()->
