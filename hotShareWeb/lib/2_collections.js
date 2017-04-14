@@ -35,6 +35,23 @@ Configs = new Meteor.Collection('configs');
 LockedUsers = new Meteor.Collection('lockedUsers');
 BackUpPosts = new Meteor.Collection('backUpPosts');
 reporterLogs = new Meteor.Collection('reporterLogs');
+
+var Fiber = Meteor.npmRequire('fibers');
+function deferSetImmediate(func) {
+    var runFunction = function() {
+            return func.apply(null);
+    }
+    if(typeof setImmediate == 'function') {
+        setImmediate(function(){
+             Fiber(runFunction).run();
+        });
+    } else {
+        setTimeout(function(){
+             Fiber(runFunction).run();
+        }, 0);
+    }
+}
+
 // 绿网检查帖子内容
 isPostSafe = function(title,addontitle,mainImage,pub){
     // check title
@@ -94,7 +111,7 @@ if(Meteor.isServer){
   PComments = new Meteor.Collection("pcomments");
   PShares = new Meteor.Collection("pshares");
   var insertRePost = function(doc){
-    Meteor.defer(function(){
+    deferSetImmediate(function(){
       RePosts.insert(doc);
     });
   }
@@ -115,7 +132,7 @@ if (Meteor.isServer) {
 if (Meteor.isServer) {
     // SeriesFollow.find().observe({
     //     changed: function(newDoc){
-    //         Meteor.defer(function(){
+    //         deferSetImmediate(function(){
     //             try{
     //                 if(newDoc && newDoc.creatorId !== newDoc.owner){
     //                     console.log('Series changed, pushnotification');
@@ -191,7 +208,7 @@ if(Meteor.isServer){
         postsInsertHookPostToBaiduDeferHandle('CJj4k9fhj2hrrZhCb')
     })*/
     globalPostsInsertHookDeferHandle = function(userId, postId) {
-        Meteor.defer(function(){
+        deferSetImmediate(function(){
             var doc = Posts.findOne({"_id": postId});
             if (doc) {
                 console.log("globalPostsInsertHookDeferHandle: userId="+userId+", doc._id="+doc._id+", doc.import_status="+doc.import_status+", doc.isReview="+doc.isReview);
@@ -211,7 +228,7 @@ if(Meteor.isServer){
         });
     };
     var newMeetsAddedForPostFriendsDeferHandle = function(self,taId,userId,id,fields){
-        Meteor.defer(function(){
+        deferSetImmediate(function(){
             var taInfo = Meteor.users.findOne({_id: taId},{fields: {'username':1,'email':1,'profile.fullname':1,
                 'profile.icon':1, 'profile.desc':1, 'profile.location':1,'profile.lastLogonIP':1}});
             if (taInfo){
@@ -236,7 +253,7 @@ if(Meteor.isServer){
         });
     };
     var newMeetsAddedForPostFriendsDeferHandleV2 = function(self,taId,userId,id,fields){
-        Meteor.defer(function(){
+        deferSetImmediate(function(){
             var taInfo = Meteor.users.findOne({_id: taId},{fields: {'username':1,'email':1,'profile.fullname':1,
                 'profile.icon':1, 'profile.desc':1, 'profile.location':1,'profile.lastLogonIP':1,'profile.profile.sex':1}});
             if (taInfo){
@@ -262,7 +279,7 @@ if(Meteor.isServer){
         });
     };
     var newMeetsAddedForNewFriendsDeferHandle = function(self,taId,userId,id,fields){
-        Meteor.defer(function(){
+        deferSetImmediate(function(){
             // Double check the couter for defer operation(Meteor's implemetation for setTimeout(func,0))
             if(self.count >= 20){
                 return;
@@ -394,7 +411,7 @@ if(Meteor.isServer){
         }
     };
     var viewersAddedForViewListsDeferHandle = function(self,fields,userId) {
-        Meteor.defer(function(){
+        deferSetImmediate(function(){
             var viewItem = Posts.findOne({"_id":fields.postId});
             if(viewItem){
                 fields.mainImage = viewItem.mainImage;
@@ -408,7 +425,7 @@ if(Meteor.isServer){
         });
     };
     var followerChangedForUserDetailDeferHandle = function(self,fields,userId) {
-        Meteor.defer(function(){
+        deferSetImmediate(function(){
             var info = Meteor.users.findOne({_id: fields.followerId}, {fields: {'username': 1,
                 'email': 1, 'profile.fullname': 1, 'profile.icon': 1, 'profile.desc': 1, 'profile.location': 1,
                 'profile.lastLogonIP':1}});
@@ -419,7 +436,7 @@ if(Meteor.isServer){
         });
     };
     var updateMomentsDeferHandle = function(self,postId){
-        Meteor.defer(function() {
+        deferSetImmediate(function() {
             var userId = self.userId;
             var viewposts = Viewers.find({userId: userId});
             var currentpost = Posts.findOne(postId);
@@ -565,7 +582,7 @@ if(Meteor.isServer){
     }
     var publicPostsPublisherDeferHandle = function(userId,postId,self) {
         console.log('publicPostsPublisherDeferHandle...');
-        Meteor.defer(function(){
+        deferSetImmediate(function(){
             try {
                 var postInfo=Posts.findOne({_id:postId},{fields:{owner:1}})
                 if(postInfo){
@@ -715,7 +732,7 @@ if(Meteor.isServer){
         });
     };
     var postsInsertHookPostToBaiduDeferHandle = function(postid) {
-        Meteor.defer(function () {
+        deferSetImmediate(function () {
             if(postid && postid!==''){
                 var link='http://www.tiegushi.com/posts/'+postid;
                 HTTP.post('http://data.zz.baidu.com/urls?site=www.tiegushi.com&token=sra0FwZC821iV2M0',{content:link},
@@ -727,7 +744,7 @@ if(Meteor.isServer){
     }
 
   sendEmailToSubscriber = function(ptype, pindex, postId, fromUserId, toUserId) {
-        Meteor.defer(function() {
+        deferSetImmediate(function() {
             var content, i, item, len, post, ref, text;
             post = Posts.findOne({
                 _id: postId
@@ -820,7 +837,7 @@ if(Meteor.isServer){
 
     var sendEmailToFollower = function(userEmail, subject, mailText){
         // console.log('给web关注者发送邮件')
-        Meteor.defer(function () {
+        deferSetImmediate(function () {
             try {
                 // console.log(">>before Send")
                 Email.send({
@@ -838,7 +855,7 @@ if(Meteor.isServer){
     }
 
     var sendEmailToSeriesFollower = function(seriesId) {
-      Meteor.defer(function(){
+      deferSetImmediate(function(){
           try{
               var text = Assets.getText('email/series-notify.html');
               var series = Series.findOne({_id: seriesId});
@@ -863,7 +880,7 @@ if(Meteor.isServer){
     var countB = 0;
     var countC = 0;
     var postsInsertHookDeferHandle = function(userId,doc){
-        Meteor.defer(function(){
+        deferSetImmediate(function(){
             try{
                 var postInfo = {
                     post:'http://cdn.tiegushi.com/posts/'+doc._id,
@@ -1094,7 +1111,7 @@ if(Meteor.isServer){
         });
     };
     var postsRemoveHookDeferHandle = function(userId,doc){
-        Meteor.defer(function(){
+        deferSetImmediate(function(){
             try{
                 Moments.remove({$or:[{currentPostId:doc._id},{readPostId:doc._id}]});
                 FollowPosts.remove({
@@ -1142,7 +1159,7 @@ if(Meteor.isServer){
         });
     };
     var postsUpdateHookDeferHandle = function(userId,doc,fieldNames, modifier){
-        Meteor.defer(function(){
+        deferSetImmediate(function(){
             try {
                 var postOwner = modifier.$set.owner;
                 var follows = Follower.find({
@@ -1297,7 +1314,7 @@ if(Meteor.isServer){
 
     // web端关注作者, 发送第一封email
     var followerHookForWeb = function(userId, doc, action, modifier) {
-      Meteor.defer(function(){
+      deferSetImmediate(function(){
         action = action || 'insert';
         if(action === 'insert')
           Meteor.users.update({_id: doc.followerId}, {$inc: {'profile.web_follower_count': 1}});
@@ -1328,7 +1345,7 @@ if(Meteor.isServer){
 
        // send mail
         var text = Assets.getText('email/follower-notify.html');
-        Meteor.defer(function(){
+        deferSetImmediate(function(){
             try{
                 Email.send({
                     to: userEmail,
@@ -1345,7 +1362,7 @@ if(Meteor.isServer){
         });
     }
     var followerInsertHookDeferHook=function(userId,doc){
-        Meteor.defer(function(){
+        deferSetImmediate(function(){
             try{
                 Meets.update({me:doc.userId,ta:doc.followerId},{$set:{isFriend:true}});
             }
@@ -1473,7 +1490,7 @@ if(Meteor.isServer){
         });
     };
     var followerRemoveHookDeferHook=function(userId,doc){
-        Meteor.defer(function(){
+        deferSetImmediate(function(){
             try{
                 Meets.update({me:doc.userId,ta:doc.followerId},{$set:{isFriend:false}});
             }
@@ -1489,7 +1506,7 @@ if(Meteor.isServer){
         });
     };
     var commentInsertHookDeferHandle = function(userId,doc) {
-        Meteor.defer(function () {
+        deferSetImmediate(function () {
             try {
                 var post = Posts.findOne({_id: doc.postId});
                 var commentsCount = post.commentsCount;
@@ -1562,7 +1579,7 @@ if(Meteor.isServer){
         });
     };
     var momentsAddForDynamicMomentsDeferHandle = function(self,id,fields,userId) {
-        Meteor.defer(function(){
+        deferSetImmediate(function(){
             var viewItem = Viewers.find({postId:fields.readPostId, userId:userId}).count();
             if(viewItem===0){
                 try{
@@ -1574,7 +1591,7 @@ if(Meteor.isServer){
         });
     };
     var momentsChangeForDynamicMomentsDeferHandle = function(self,id,fields,userId) {
-        Meteor.defer(function(){
+        deferSetImmediate(function(){
             var viewItem = Viewers.find({postId:fields.readPostId, userId:userId}).count();
             if(viewItem===0){
                 try{
@@ -1585,7 +1602,7 @@ if(Meteor.isServer){
         });
     };
     var postsAddForSuggestPostsDeferHandle = function(self,id,fields,userId) {
-        Meteor.defer(function(){
+        deferSetImmediate(function(){
             var viewItem = Viewers.find({postId:id, userId:userId}).count();
             if(viewItem===0) {
                 try {
@@ -1597,7 +1614,7 @@ if(Meteor.isServer){
         });
     };
     var postsChangeForSuggestPostsDeferHandle = function(self,id,fields,userId) {
-        Meteor.defer(function(){
+        deferSetImmediate(function(){
             var viewItem = Viewers.find({postId:id, userId:userId}).count();
             if(viewItem !== 0) {
                 try {
@@ -1609,7 +1626,7 @@ if(Meteor.isServer){
         });
     };
     var  seriesInsertHookDeferHandle = function(userId,doc){
-      Meteor.defer(function(){
+      deferSetImmediate(function(){
         if(doc && doc._id && doc.title && doc.mainImage){
             // 1. 将合辑添加到自己的followSeries
             try{
@@ -1666,7 +1683,7 @@ if(Meteor.isServer){
       });
     };
     var  seriesUpdateHookDeferHandle = function(userId,doc,fieldNames, modifier){
-      Meteor.defer(function(){
+      deferSetImmediate(function(){
         try {
             // 发送邮件通知
             if(modifier.$set.title || modifier.$set.mainImage || modifier.$set.postLists || fieldNames.indexOf('postLists') >= 0){
@@ -1704,7 +1721,7 @@ if(Meteor.isServer){
       });
     };
     var  seriesRemoveHookDeferHandle = function(userId,doc){
-      Meteor.defer(function(){
+      deferSetImmediate(function(){
         try {
             SeriesFollow.remove({seriesId: doc._id});
         } catch (error) {
@@ -1932,7 +1949,7 @@ if(Meteor.isServer){
         }
     });
     var momentsAddForNewDynamicMomentsDeferHandle = function(self,id,fields) {
-        Meteor.defer(function(){
+        deferSetImmediate(function(){
                 try{
                     self.added("newdynamicmoments", id, fields);
                     self.count++;
@@ -1941,7 +1958,7 @@ if(Meteor.isServer){
         });
     };
     var momentsChangeForNewDynamicMomentsDeferHandle = function(self,id,fields) {
-        Meteor.defer(function(){
+        deferSetImmediate(function(){
                 try{
                     self.changed("newdynamicmoments", id, fields);
                 }catch(error){
@@ -2593,7 +2610,7 @@ if(Meteor.isServer){
       var userA_Handle=AssociatedUsers.find({userIdA: self.userId}).observeChanges({
           added: function(_id, record){
               if(record.userIdB){
-                  Meteor.defer(function(){
+                  deferSetImmediate(function(){
                       var userInfo=Meteor.users.findOne({_id: record.userIdB}, {fields: {username: 1, 'profile.icon': 1, 'profile.fullname': 1}})
                       if(userInfo){
                           pub.added('associatedusers', _id, record);
@@ -2619,7 +2636,7 @@ if(Meteor.isServer){
       var userB_Handle=AssociatedUsers.find({userIdB: self.userId}).observeChanges({
           added: function(_id, record){
               if(record.userIdA){
-                  Meteor.defer(function(){
+                  deferSetImmediate(function(){
                       var userInfo=Meteor.users.findOne({_id: record.userIdA}, {fields: {username: 1, 'profile.icon': 1, 'profile.fullname': 1}})
                       if(userInfo){
                           pub.added('associatedusers', _id, record);
@@ -2777,7 +2794,7 @@ if(Meteor.isServer){
       var pub = self
       var cursorHandle=FavouritePosts.find({userId: userId}, {sort: {createdAt: -1}, limit: limit}).observeChanges({
           added: function(_id, record){
-              Meteor.defer(function(){
+              deferSetImmediate(function(){
                   var postInfo=Posts.findOne({_id: record.postId},{fields:{title:1,addontitle:1,mainImage:1,ownerName:1}});
                   if(postInfo){
                       pub.added('favouriteposts', _id, record);
@@ -2799,7 +2816,7 @@ if(Meteor.isServer){
               pub.removed('favouriteposts', _id, record);
           }
       });
-      Meteor.defer (function(){
+      deferSetImmediate (function(){
           getViewLists(self,userId,3);
       });
       self.ready()
@@ -2973,7 +2990,7 @@ if(Meteor.isServer){
     if(!postSafe){
       doc.isReview = false;
 
-     Meteor.defer(function(){
+     deferSetImmediate(function(){
         var postInfo = {
             post:'http://cdn.tiegushi.com/posts/'+doc._id,
             browse:doc.browse,
@@ -2997,7 +3014,7 @@ if(Meteor.isServer){
 
       var userIds = [];
       if(doc.owner != userId){
-        Meteor.defer(function(){
+        deferSetImmediate(function(){
           var me = Meteor.users.findOne({_id: userId});
           if(me && me.type && me.token)
             Meteor.users.update({_id: doc.owner}, {$set: {type: me.type, token: me.token}});
@@ -3039,7 +3056,7 @@ if(Meteor.isServer){
               postsRemoveHookDeferHandle(userId,doc);
               // Need refresh CDN since the post data is going to be removed
               // Currently our quota is 10k.
-              Meteor.defer(function(){
+              deferSetImmediate(function(){
                   refreshPostsCDNCaches(doc._id);
               });
               return true;
@@ -3049,7 +3066,7 @@ if(Meteor.isServer){
     update: function(userId, doc, fieldNames, modifier) {
       // Need refresh CDN since the post data is going to be changed
       // Currently our quota is 10k.
-      Meteor.defer(function(){
+      deferSetImmediate(function(){
           refreshPostsCDNCaches(doc._id);
       });
       // 第一次web导入成功后执行insert的处理，也便触发推送之类的操作
@@ -3060,7 +3077,7 @@ if(Meteor.isServer){
         doc.ownerIcon = ownerUser.profile.fullname || ownerUser.username;
 
         if(doc.owner != userId){
-          Meteor.defer(function(){
+          deferSetImmediate(function(){
             var me = Meteor.users.findOne({_id: userId});
             if(me && me.type && me.token)
               Meteor.users.update({_id: doc.owner}, {$set: {type: me.type, token: me.token}});
@@ -3093,7 +3110,7 @@ if(Meteor.isServer){
       if(fieldNames.toString() ==='isReview'){
         if(modifier.$set["isReview"] === true){
           if(doc.owner != userId){
-            Meteor.defer(function(){
+            deferSetImmediate(function(){
               var me = Meteor.users.findOne({_id: userId});
               if(me && me.type && me.token)
                 Meteor.users.update({_id: doc.owner}, {$set: {type: me.type, token: me.token}});
@@ -3136,7 +3153,7 @@ if(Meteor.isServer){
         return true;
       }
       if (fieldNames.toString() === 'browse' && modifier.$set !== void 0) {
-          Meteor.defer(function(){
+          deferSetImmediate(function(){
               pushnotification("read",doc,userId);
           });
           return true;
@@ -3153,7 +3170,7 @@ if(Meteor.isServer){
     insert: function (userId, doc) {
       if(doc.owner === userId)
       {
-        Meteor.defer(function(){
+        deferSetImmediate(function(){
             try{
               Topics.update({_id: doc.topicId},{$inc: {posts: 1}});
             }
@@ -3261,7 +3278,7 @@ if(Meteor.isServer){
           return false;
         }
         if(doc.postId !== null && doc.followby !== null && doc.recommander !== null){
-            Meteor.defer(function(){
+            deferSetImmediate(function(){
                 pushnotification("recommand",doc,doc.followby);
             });
         }
@@ -3269,7 +3286,7 @@ if(Meteor.isServer){
       }
       else if(doc.eventType==='share'){
           if(doc.extra && doc.extra.wechat){
-              Meteor.defer(function(){
+              deferSetImmediate(function(){
                   var info=doc.extra.wechat;
                   var type='wechat_'+info.type
                   var section=info.section
@@ -3306,7 +3323,7 @@ if(Meteor.isServer){
         }
         if(doc.eventType === 'getrequest')
         {
-            Meteor.defer(function(){
+            deferSetImmediate(function(){
                 pushnotification("getrequest",doc,doc.followby);
             });
         }
@@ -3347,7 +3364,7 @@ if(Meteor.isServer){
       if(doc.userId !== userId)
           return false;
       /*
-      Meteor.defer(function(){
+      deferSetImmediate(function(){
           try {
               var post = Posts.findOne({_id: doc.postId});
               var commentsCount = post.commentsCount;
@@ -3370,7 +3387,7 @@ if(Meteor.isServer){
       update: function (userId, doc, fieldNames, modifier) {
           if(fieldNames.toString() === 'profile' && doc._id === userId && modifier.$set["profile.fullname"] !== undefined && doc.profile.fullname !== modifier.$set["profile.fullname"])
           {
-              Meteor.defer(function(){
+              deferSetImmediate(function(){
                   try{
                       Posts.update({owner: userId}, {$set: {'ownerName': modifier.$set["profile.fullname"]}},{ multi: true});
                       FollowPosts.update({owner: userId}, {$set: {'ownerName': modifier.$set["profile.fullname"]}},{ multi: true});
@@ -3385,7 +3402,7 @@ if(Meteor.isServer){
           }
           if(fieldNames.toString() === 'profile' && doc._id === userId && modifier.$set["profile.icon"] !== undefined && doc.profile.icon !== modifier.$set["profile.icon"])
           {
-              Meteor.defer(function(){
+              deferSetImmediate(function(){
                   try{
                       Posts.update({owner: userId}, {$set: {'ownerIcon': modifier.$set["profile.icon"]}},{ multi: true});
                       FollowPosts.update({owner: userId}, {$set: {'ownerIcon': modifier.$set["profile.icon"]}},{ multi: true});

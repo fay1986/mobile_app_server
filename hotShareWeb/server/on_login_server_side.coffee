@@ -8,7 +8,8 @@ if Meteor.isServer
         if LockedUsers.find({token: object.user.token}).count() > 0
           throw new Meteor.Error(403, "设备被禁用")
       if object.user
-        console.log('login='+JSON.stringify(object.user))
+        #console.log('login='+JSON.stringify(object.user))
+        console.log('login: user._id='+object.user._id)
       # NO NEED 禁止匿名登录(only mobile)
       ###
       if object.user and object.user.profile and object.user.profile.anonymous is true
