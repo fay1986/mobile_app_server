@@ -1,9 +1,9 @@
-var updatePostsLatestSeries = function(postLists, seriesId, seriesTitle) {
+var updatePostsLatestSeries = function(postLists, seriesId, seriesTitle,seriesImage) {
   if (!seriesId || !postLists)
     return false;
   var i = 0;
   for (i = 0; i < postLists.length; i++) {
-    Posts.update({_id: postLists[i].postId}, {$set: {latestSeries: {seriesId: seriesId, seriesTitle: seriesTitle}}});
+    Posts.update({_id: postLists[i].postId}, {$set: {latestSeries: {seriesId: seriesId, seriesTitle: seriesTitle, seriesImage:seriesImage}}});
   }
 };
 var removePostsLatestSeries = function(seriesId){
@@ -51,7 +51,7 @@ var uploadSeriesImage = function(data) {
                 console.log('insert series ERR=',err)
               } else {
                 console.log('insert series successed ,ID=',_id);
-                updatePostsLatestSeries(postdata.postLists, _id, postdata.title);
+                updatePostsLatestSeries(postdata.postLists, _id, postdata.title, mainImage);
               }
             });
           } else {
@@ -71,7 +71,7 @@ var uploadSeriesImage = function(data) {
                 console.log('update series ERR=',err)
               } else {
                 console.log('update series successed ,num=',num);
-                updatePostsLatestSeries(postdata.postLists, Session.get('seriesId'), postdata.title);
+                updatePostsLatestSeries(postdata.postLists, Session.get('seriesId'), postdata.title,mainImage);
               }
             });
           }
@@ -136,7 +136,7 @@ updateOrInsertSeries = function(isNewSeries,publish){
           console.log('insert series ERR=',err)
         } else {
           console.log('insert series successed ,ID=',_id)
-          updatePostsLatestSeries(posts, _id, title);
+          updatePostsLatestSeries(posts, _id, title,mainImage);
         }
       });
     } else {
@@ -156,7 +156,7 @@ updateOrInsertSeries = function(isNewSeries,publish){
           console.log('update series ERR=',err)
         } else {
           console.log('update series successed ,num=',num);
-          updatePostsLatestSeries(posts, Session.get('seriesId'), title);
+          updatePostsLatestSeries(posts, Session.get('seriesId'), title,mainImage);
         }
       });
     }
