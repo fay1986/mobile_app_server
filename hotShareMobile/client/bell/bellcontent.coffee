@@ -1,4 +1,15 @@
 if Meteor.isClient
+  updateUserFeedsByType = ()->
+    me = Meteor.userId()
+    type = Session.get('bellType')
+    if me 
+      if type is 'new-story'
+        Meteor.call('updateFeedsByType',me,['SelfPosted'])
+      else if type is 'up-and-pcomment'
+        typeArr = ["pcomment","pcommentReply","pfavourite","pcommentowner","getrequest","sendrequest","recommand","recomment","comment"]
+        Meteor.call('updateFeedsByType',me,typeArr)
+      else if type is 'personal-letter'
+        Meteor.call('updateFeedsByType',me,['personalletter'])
   Template.bellcontent.rendered=->
     Session.set("postPageScrollTop", 0)
     $('.content').css 'min-height',$(window).height()
@@ -93,6 +104,7 @@ if Meteor.isClient
          return true
   Template.bellcontent.events
   	'click #back': (e)->
+      updateUserFeedsByType()
       Router.go '/bell'
     'click .bell-line': (e)->
       currentType = e.currentTarget.id
@@ -125,7 +137,8 @@ if Meteor.isClient
           Session.set "isPcommetReply",false
         Feeds.update({_id:this._id},{$set: {checked:true}})
       console.log(this._id)
-      Meteor.call 'updataFeedsWithMe', Meteor.userId()
+      # Meteor.call 'updataFeedsWithMe', Meteor.userId()
+      updateUserFeedsByType()
     'click .acceptrequest': (event)->
        Follower.insert {
          userId: this.requesteeId

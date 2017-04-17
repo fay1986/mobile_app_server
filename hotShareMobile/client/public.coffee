@@ -76,13 +76,13 @@ pages = ['/user', '/bell', '/search']
         for tmpPage in history
             console.log "Frank.PUB: page, tmpPage = "+JSON.stringify(tmpPage)
         console.log "pageName is :"+pageName
-        if pageName is '/bell'
-            Session.set('canClearUnreadMessage',true)
-        else 
-            if Session.equals('canClearUnreadMessage',true)
-                Session.set('canClearUnreadMessage',false)
-                Session.set('updataFeedsWithMe',true)
-                Meteor.call 'updataFeedsWithMe', Meteor.userId()
+        # if pageName is '/bell'
+        #     Session.set('canClearUnreadMessage',true)
+        # else 
+        #     if Session.equals('canClearUnreadMessage',true)
+        #         Session.set('canClearUnreadMessage',false)
+        #         Session.set('updataFeedsWithMe',true)
+        #         Meteor.call 'updataFeedsWithMe', Meteor.userId()
         Router.go(pageName)
         return
     # 返回上一页

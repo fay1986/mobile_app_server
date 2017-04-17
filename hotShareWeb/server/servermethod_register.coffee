@@ -650,6 +650,9 @@ if Meteor.isServer
         #url += '?ip=12.206.217.29'
         console.log("Call httpCall, url="+url);
         return HTTP.call(method, url, options)
+      "updateFeedsByType": (userId,types)->
+        Meteor.defer ()->
+          Feeds.update({followby: userId,eventType:{$in:types}},{$set:{isRead: true}},{multi: true})
       "updataFeedsWithMe": (userId)->
         Meteor.defer ()->
           Feeds.update({followby: userId,isRead:{$exists:false}},{$set:{isRead: true}},{multi: true})
