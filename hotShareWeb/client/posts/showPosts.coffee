@@ -639,7 +639,7 @@ if Meteor.isClient
       unless postId
         postId = this.postId
       currentPostId = Session.get("postContent")._id
-      postBack = Session.get("postBack")
+      postBack = Session.get("postBack") || []
       postBack.push(currentPostId)
       Session.set("postForward",[])
       Session.set("postBack",postBack)
