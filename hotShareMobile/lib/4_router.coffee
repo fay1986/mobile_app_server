@@ -163,6 +163,15 @@ if Meteor.isClient
     Router.route '/cropImage',()->
       this.render 'cropImage'
       return
+    Router.route '/addressBook',()->
+      if Meteor.isCordova is true
+        this.render 'addressBook'
+        Session.set 'channel','addressBook'
+      return
+    Router.route '/simpleUserProfile/:_id',()->
+      Session.set('simpleUserProfileUserId',this.params._id)
+      this.render 'simpleUserProfile'
+      return
     Router.route '/bell',()->
       if Meteor.isCordova is true
         this.render 'bell'
@@ -185,6 +194,9 @@ if Meteor.isClient
         Session.set 'bellData', bellData
         this.render 'bellcontent', {data: bellData}
     }
+    Router.route '/write-letter',()->
+      this.render 'writeLetter'
+      return
     Router.route '/user',()->
       if Meteor.isCordova is true
         this.render 'user'

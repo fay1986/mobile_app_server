@@ -22,6 +22,7 @@ meteor-phonegap-push
 fortawesome:fontawesome
 servicelocale:geoip
 
+matb33:collection-hooks
 meteorhacks:kadira
 meteor-swipe
 email@1.1.17_1
@@ -62,3 +63,4 @@ standard-minifier-css@1.2.0_1
 standard-minifier-js@1.2.0_1
 shell-server
 feiwu:simple-chat
+ground:db

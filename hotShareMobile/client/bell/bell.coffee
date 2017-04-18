@@ -24,15 +24,12 @@ if Meteor.isClient
             limit: 99
           }).count()
     notReadCountPersonalletter: ()->
-      Feeds.find({
-            followby: Meteor.userId(),
-            isRead:{$ne: true},
-            checked:{$ne: true},
-            eventType:'personalletter',
-            createdAt: {$gt: new Date((new Date()).getTime() - 7 * 24 * 3600 * 1000)}
-          },{
-            limit: 99
-          }).count()
+      counts = 0
+      lists = SimpleChat.MsgSession.find({userId: Meteor.userId(),sessionType:'user'}).fetch()
+      getLetterCounts = (item)->
+        counts += item.count
+      getLetterCounts item for item in lists
+      return counts
     is_wait_read_count: (count)->
       count > 0
     limit_top_read_count: (count)->
@@ -80,6 +77,11 @@ if Meteor.isClient
   Template.bell.events
     'click .bell-line': (e)->
       currentType = e.currentTarget.id
+      if currentType is 'personal-letter'
+        history_view = Session.get('history_view') || []
+        history_view.push({view:'bell'})
+        Session.set('history_view',history_view)
+        return Router.go '/simple-chat/user-list/'+Meteor.userId() 
       Session.set 'bellType', currentType
       Router.go '/bellcontent'
     'click .closePersonalLetter': ()->

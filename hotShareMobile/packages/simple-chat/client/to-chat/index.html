@@ -2,10 +2,35 @@
   <div class="simple-chat">
     <div class="msg-box">
       <div class="header">
-        <div class="left back"></div>
-        <script type="text/javascript">$('.header .back').click(function(){history.go(-1);})</script>
-        <!--<span>{{title}}</span>-->
-        <span>聊天室</span>
+        <div class="left back"><i class="fa fa-angle-left fa-fw"></i></div>
+        <script type="text/javascript">
+        $('.header .back').click(function(){
+          SimpleChat.MsgSession.update({userId: Meteor.userId(), toUserId: location.search.replace('?id=', '')}, {$set: {count: 0}});
+
+          var historyArr = Session.get("history_view");
+          if (historyArr && historyArr.length > 0) {
+            PUB.back();
+          }
+          else{
+            history.go(-1);
+          }
+        })
+        </script>
+        <span>{{title}}</span>
+        {{#if isGroups}}
+          <!--<div class="right groupsProfile"></div>-->
+        {{else}}
+        <div class="rightDropMenu dropdown">
+            <div class="rightButton dropdown-toggle" id="btn-more" data-toggle="dropdown">
+              <i class="fa fa-ellipsis-h" style="height: 40; line-height: 40px; padding-top: 2px;"></i>
+            </div>
+            <ul class="dropdown-menu" role="menu" aria-labelledby="btn-more">
+                <li role="presentation"><a id="addToBlacklist" role="menuitem" tabindex="-1" ><i class="fa fa-ban"></i>加入黑名单</a></li>
+                <li role="presentation"><a id="reporterUser" role="menuitem" tabindex="-1" ><i class="fa fa-flag-o"></i>举报用户</a></li>
+            </ul>
+        </div>
+        {{/if}}
+
         <!--<div class="right profile"></div>-->
         {{#if loading}}
         <div class="loading"></div>
@@ -43,20 +68,91 @@
 </template>
 
 <template name="_simpleChatToChatItem">
-  {{#if is_show_time create_time}}
-  <li class="time">{{get_time create_time}}</li>
+  {{#if is_show_time _id}}
+  <li id="{{_id}}" class="time">{{get_time _id}}</li>
   {{/if}}
-  <li class="{{ta_me form.id}}">
+  <li id="{{_id}}" class="{{ta_me form.id}}">
     <div class="icon"><img src="{{form.icon}}" /></div>
     <div class="name">{{form.name}}</div>
     {{#if text}}
-    <div class="text">{{text}}</div>
+    <div class="text">{{text}}
+      {{#if people_id}}
+        {{#if show_images images}}
+        <div class="imgs">
+          {{#each images}}
+          <img class="work-ai-img swipebox" data-type="images" data-peoplehisid="{{people_his_id}}" src="{{url}}" />
+          {{/each}}
+        </div>
+        {{#if wait_lable}}
+        <div class="line-label-box"><div class="check">标记</div><div class="no">删除</div></div>
+        {{else}}
+        <div class="line-label-box"><div class="yes">对</div><div class="no">错</div></div>
+        {{/if}}
+        {{/if}}
+      {{else}}
+        {{#if show_images images}}
+        <div class="imgs">
+          {{#each images}}
+          <img class="swipebox" data-type="images" src="{{url}}" />
+          {{/each}}
+        </div>
+        {{/if}}
+      {{/if}}
+      <div id="{{_id}}" class="showmore">查看全部</div>
+    </div>
     {{else}}
     {{#if image}}
-    <div class="img"><img src="{{image}}" /></div>
+    <div class="img"><img class="swipebox" src="{{image}}" /></div>
     {{else}}
     <div class="img"><img src="{{thumbnail}}" /></div>
     {{/if}}
     {{/if}}
+    {{#if device_name}}
+    <div class="form-to"><div>来自：{{device_name}}</div></div>
+    {{/if}}
   </li>
+</template>
+
+<template name="_simpleChatToChatLabelBox">
+  <div class="simple-chat-label-box">
+    <div class="mask"></div>
+    <div class="_body">
+      <div class="title">{{title}}</div>
+      <div class="_main">
+        {{#if list}}
+        <select>
+          <optgroup disabled hidden></optgroup>
+          {{#each list}}
+          <option value="{{this}}">{{this}}</option>
+          {{/each}}
+          <option value="">其它</option>
+        </select>
+        <input style="display: none;" type="text" placeholder="{{tips}}" />
+        {{else}}
+        <div class="dest">{{tips}}</div>
+        {{/if}}
+      </div>
+      <div class="btns">
+        {{#each btns}}
+        <div class="my-btn">{{this}}</div>
+        {{/each}}
+      </div>
+    </div>
+  </div>
+</template>
+
+<template name="_simpleChatToChatLabel">
+  <div class="simple-chat-label">
+    {{#if data.label}}
+    <div class="btn-label">此照片是 {{data.label}} 吗？</div>
+    {{else}}
+    <div class="btn-label yes">我想标记此照片</div>
+    {{/if}}
+    {{#if data.label}}
+    <div class="btn-yes"><i class="fa fa-circle-o" aria-hidden="true"></i><i class="fa fa-check" aria-hidden="true"></i></div>
+    <div class="btn-no"><i class="fa fa-circle-o" aria-hidden="true"></i><i class="fa fa-close" aria-hidden="true"></i></div>
+    {{else}}
+    <div class="btn-no" style="top: 5px;"><i class="fa fa-circle-o" aria-hidden="true"></i><i class="fa fa-close" aria-hidden="true"></i></div>
+    {{/if}}
+  </div>
 </template>

@@ -1,0 +1,44 @@
+<template name="writeLetter">
+  <div class="followers">
+    <div class="head">
+      <div>写私信</div>
+      <div class="leftButton back"><i class="fa fa-angle-left fa-fw"></i></div>
+    </div>
+    <div class="content">
+      {{#if loading}}
+          <div>正在加载中...</div>
+      {{/if}}
+      {{#if loadError}}
+          <div>加载失败，请检查网络设置或稍后重试</div>
+      {{/if}}
+      {{#each followers}}
+        {{#if isFollowers}}
+            <a href="/simple-chat/to/user?id={{followerId}}" class="contentList">
+            <!--列出偶像-->
+            <img class="icon" src="{{followerIcon}}" width='30' height='30'>
+            <div class="userName">{{followerName}}</div>
+              <div id="{{followerId}}" class="follow" >私信</div>
+            <div class="desc">{{followerDesc}}</div>
+            </a>
+        {{else}}
+            <a href="/simple-chat/to/user?id={{userId}}" class="contentList">
+            <!--列出粉丝-->
+            <img class="icon" src="{{userIcon}}" width='30' height='30'>
+            <div class="userName">{{userName}}</div>
+              <div id="{{userId}}" class="follow">私信</div>
+            <div class="desc">{{userDesc}}</div>
+            </a>
+        {{/if}}
+      <div class="line">
+        <span></span>
+      </div>
+      {{/each}}
+      {{#if moreResults}}
+      <div id="showMoreFollowsResults" style="margin-left: 25px;">
+        <span class="loading">加载中...</span>
+      </div>
+      {{/if}}
+    </div>
+  </div>
+  {{> footer}}
+</template>

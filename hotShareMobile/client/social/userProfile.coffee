@@ -336,6 +336,16 @@ if Meteor.isClient
       else
         false
   Template.userProfilePage1.events
+    'click .chatToUser':(e)->
+      ta = Session.get("ProfileUserId1")
+      $(window).children().off()
+      $(window).unbind('scroll')
+      if PopUpBox
+        PopUpBox.close()
+      Meteor.setTimeout ()->
+        Session.set("Social.LevelOne.Menu",'contactsList')
+        Router.go('/simple-chat/to/user?id='+ta)
+      ,300
     'click #followAuthor': (e)->
       if Meteor.user().profile.fullname
         username = Meteor.user().profile.fullname
@@ -463,6 +473,16 @@ if Meteor.isClient
       else
         false
   Template.userProfilePage2.events
+    'click .chatToUser':(e)->
+      ta = Session.get("ProfileUserId2")
+      $(window).children().off()
+      $(window).unbind('scroll')
+      if PopUpBox
+        PopUpBox.close()
+      Meteor.setTimeout ()->
+        Session.set("Social.LevelOne.Menu",'contactsList')
+        Router.go('/simple-chat/to/user?id='+ta)
+      ,300
     'click #followAuthor': (e)->
       if Meteor.user().profile.fullname
         username = Meteor.user().profile.fullname
@@ -589,6 +609,16 @@ if Meteor.isClient
       else
         false
   Template.userProfilePage3.events
+    'click .chatToUser':(e)->
+      ta = Session.get("ProfileUserId3")
+      $(window).children().off()
+      $(window).unbind('scroll')
+      if PopUpBox
+        PopUpBox.close()
+      Meteor.setTimeout ()->
+        Session.set("Social.LevelOne.Menu",'contactsList')
+        Router.go('/simple-chat/to/user?id='+ta)
+      ,300
     'click #followAuthor': (e)->
       if Meteor.user().profile.fullname
         username = Meteor.user().profile.fullname
@@ -717,6 +747,16 @@ if Meteor.isClient
       else
         false
   Template.userProfilePage.events
+    'click .chatToUser':(e)->
+      ta = Session.get("ProfileUserId")
+      $(window).children().off()
+      $(window).unbind('scroll')
+      if PopUpBox
+        PopUpBox.close()
+      Meteor.setTimeout ()->
+        Session.set("Social.LevelOne.Menu",'contactsList')
+        Router.go('/simple-chat/to/user?id='+ta)
+      ,300
     'click #followAuthor': (e)->
       if Meteor.user().profile.fullname
         username = Meteor.user().profile.fullname

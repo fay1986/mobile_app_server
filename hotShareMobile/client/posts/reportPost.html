@@ -5,7 +5,11 @@
       <div class="leftButton back"><i class="fa fa-angle-left fa-fw"></i></div>
     </div>
     <div class="content">
+      {{#if reportUser}}
+      <div id="title">{{_ "reportAt"}}{{reportUser}}</div>
+      {{else}}
       <div id="title">{{_ "reportAt"}}{{postOwner}}{{_ "storyRef1"}}{{postTitle}}{{_ "storyRef2"}}</div>
+      {{/if}}
       <div><textarea id="reason" placeholder="{{_ 'addReportContent'}}" maxlength="150"></textarea></div>
       <div id="save">{{_ "report"}}</div>
     </div>

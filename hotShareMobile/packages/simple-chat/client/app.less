@@ -10,6 +10,15 @@
       .left{width: 60px; height: 40px; position: absolute; left: 0; top: 0;}
       .right{width: 60px; height: 40px; position: absolute; right: 0; top: 0;}
       .back{background-image: url(/packages/feiwu_simple-chat/images/back.png); background-size: auto 70%; background-position: center center; background-repeat: no-repeat;}
+      .groupsProfile{
+        background-image: url(/packages/feiwu_simple-chat/images/groupsProfile.png); background-size: auto 70%; background-position: center center; background-repeat: no-repeat;
+      }
+      .userProfile{
+            font-size: 27px;
+            color: #fff;
+            background: none;
+            //margin-top: 5px;
+      }
       .profile{background-image: url(/packages/feiwu_simple-chat/images/account.png); background-size: auto 50%; background-position: center center; background-repeat: no-repeat;}
       .loading{
         height: 2px; line-height: 2px; overflow: hidden; position: absolute; left: 0px; top: 40px; background-color: @master_color; z-index: 9999999; width: 0%;
@@ -31,7 +40,25 @@
         padding: 10px;
         li{
           margin: 10px 0px; position: relative;
-          .text{display: inline-block; padding: 10px;}
+          .text{
+            display: inline-block; padding: 10px;
+            .showmore{
+              display: block;
+              position: absolute;
+              background: #fff;
+              right: 8px;
+              bottom: 0;
+              display: none;
+              text-align: right;
+              padding: 5px;
+              width: 100%
+            }
+          }
+          .line-label-box{
+            min-width: 160px; border-top: 1px solid #ccc; margin-top: 10px; margin-left: -10px; margin-right: -10px;
+            > div{width: 50%; float: left; height: 40px; line-height: 40px; color: @master_color; text-align: center; margin-bottom: -10px; border-left: 1px solid #ccc;}
+            > div:first-child{border-left: nonde; margin-left: -1px;}
+          }
           .icon{
             width: 40px; height: 40px; position: absolute; top: 0px; background-color: #fff; z-index: 2;
             img{width: 100%; height: 100%; object-fit: cover;}
@@ -40,8 +67,15 @@
             max-width: 60%; display: inline-block; background-color: #fff; padding: 3px;
             img{max-width: 100%; border-radius: 5px; z-index: 3;}
           }
+          .imgs{
+            img{width: 60px; height: 60px; margin-top: 5px; border-radius: 3px;}
+          }
           .name{display: none;}
           .text, .img{position: relative; border-radius: 5px; border:1px solid #d2d2d2; z-index: 1;}
+          .form-to{
+            padding-bottom: 5px; padding-left: 5px;
+            div{display: inline-block; color: #8e8e8e; font-size: 12px;}
+          }
         }
         li.time{width: 80px; background-color: #ccc; color: #fff; height: 24px; line-height: 24px; font-size: 12px; text-align: center; margin: 0px auto; border-radius: 5px;}
         li.ta{
@@ -58,6 +92,7 @@
           .img{background-color: @master_color;}
           .icon:before{content: " ";position: absolute; top: 10px;right: 52px;width: 0; height: 0;border-bottom: 10px solid transparent;border-top: 10px solid transparent;border-left: 10px solid #d2d2d2;}
           .icon:after{content: " ";position: absolute; top: 10px;right:52px;width: 0; height: 0;border-bottom: 10px solid transparent;border-top: 10px solid transparent;border-left: 10px solid @master_color;}
+          .line-label-box{display: none;}
         }
       }
       ul.group-list{
@@ -78,13 +113,115 @@
       .btn-box.image{background-image: url(/packages/feiwu_simple-chat/images/image.png); background-size: auto 90%; background-position: center center; background-repeat: no-repeat;}
       .input{
         height: 36px; line-height: 36px; position: absolute; top: 5px; left: 60px; right: 75px;
-        input{width: 100%; height: 36px; line-height: 36px; border-radius: 5px; box-sizing: border-box; border:1px solid rgb(170, 170, 170); color: #000;font-size: 110%;font-weight: bolder;}
+        input{width: 100%; height: 36px; line-height: 36px; padding: 4px 10px; border-radius: 5px; box-sizing: border-box; border:1px solid rgb(170, 170, 170); color: rgb(183, 183, 183)}
       }
       .send-btn{
         width: 75px; height: 48px; line-height: 48px; position: absolute; right: 0px; top: 0px; z-index: 999;
-        box-sizing: border-box; padding-left: 10px; padding-right: 10px;
-        .btn{font-size: 110%;-webkit-appearance: none;width: 100%; height: 34px; margin: 0; padding: 0; border:none; line-height: 34px; text-align: center; border-radius: 5px; background-color: @master_color; color: #fff; text-align: center;}
+        box-sizing: border-box; padding-left: 10px; padding-right: 10px; padding-top: 6px;
+        .btn{display: block; -webkit-appearance: none;width: 100%; height: 34px; margin: 0; padding: 0; border:none; line-height: 34px; text-align: center; border-radius: 5px; background-color: @master_color; color: #fff; text-align: center;}
       }
     }
   }
+  .dropdown {
+    cursor: pointer;
+    position: absolute;
+    right: 0;
+    width: 48px;
+    padding-top: 2px;
+    font-size: 26px;
+    #btn-more{
+            top: -45px;
+          }
+    .dropdown-backdrop{
+        background-color: rgba(0, 0, 0, 0.1)
+    }
+    .dropdown-menu {
+        padding: 0;
+        right: 5px;
+        left: auto;
+        min-width: 140px;
+        top: 0;
+        border-radius: 5px;
+        li {
+            background-color: transparent !important;
+            padding: 8px;
+            padding-left: 0;
+            border-bottom: 1px solid #ececec;
+            i{margin: 0 12px; color: #2196f3;}
+        }
+        li:last-child{border: none;}
+        a {
+            font-size: 15px;padding: 4px 0
+        }
+    }
+  }
 }
+.simple-chat-label{
+  position: absolute; height: 85px; left: 0; bottom: 10%; right: 0; z-index: 99999990;
+  .btn-label{ position: absolute; height: 48px; line-height: 48px; left: 20px; top: 0; }
+  .btn-yes,.btn-no{
+    position: absolute; height: 40px; line-height: 40px; right: 0px; padding-right: 20px; width: 80px; padding: 0px 10px;
+    i{font-size: 20px;}
+    i.fa-circle,i.fa-circle-o{padding-right: 10px;}
+    i.fa-check{color: #4caf50;}
+    i.fa-close{color: red;}
+  }
+  .btn-yes{top: 0px;}
+  .btn-no{top: 45px;}
+}
+.simple-chat-label-box{
+  .mask{position: absolute; left: 0; top: 0; bottom: 0; right: 0; background-color: #000; opacity: 0.6; z-index: 99999992;}
+  ._body{
+    width: 260px; height: 160px; background-color: #fff; z-index: 99999993; position: absolute; left: 50%; top: 50%; margin-left: -130px; margin-top: -80px; border-radius: 5px; border: 1px solid #ccc;
+    .title{width: 100%; height: 40px; line-height: 40px; text-align: center; color: #000;}
+    ._main{
+      padding: 20px; height: 100%; box-sizing: border-box; padding-bottom: 38px; padding-top: 0px;
+      select,input{width: 100%; height: 38px; line-height: 38px; color: #ccc;}
+      select{color: #000;}
+      .dest{color: #616161;}
+    }
+    .btns{
+      position: absolute; left: 0; right: 0; bottom: 0; height: 48px; line-height: 48px; border-top: 1px solid #ccc;
+      .my-btn{width: 50%; height: 48px; line-height: 48px; text-align: center; box-sizing: border-box; float: left; border-left: 1px solid #ccc; color: #2196f3;}
+      .my-btn:first-child{border-left: none;}
+    }
+  }
+}
+
+
+div.simple-chat > .msg-box > .header{
+  background: #37a7fe; color: #fff;
+  .back{background: none;font-size: 2em;text-align: left;}
+  span{display: block; margin: 0 48px; overflow: hidden; white-space: nowrap; text-overflow: hidden;}
+}
+
+
+// for lists
+.simple-chat-medialist{
+  margin:0; padding: 0;
+  li{list-style: none; color: #000;height: 64px; border-bottom: 1px solid #ccc; position: relative; margin-left:10px;}
+  li > div {float: left;}
+  .left{
+    height: 48px;
+    width: 48px;
+    padding: 8px 0;
+    img{width: 48px; height: 48px; object-fit: cover; border-radius: 4px;}
+  }
+  .right{
+    position: absolute;
+    top: 8px;
+    bottom: 8px;
+    left: 56px;
+    right: 10px;
+    h2,p{margin: 0; padding: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;}
+    h2{font-size: 16px; font-weight: bold; line-height: 28px; margin-right: 64px;}
+    p{font-size: 12px; line-height: 18px;color: #555;}
+  }
+  .reddot{position: absolute; width: 10px; height: 10px; background: red; top: 4px;left: 42px;border-radius: 5px;}
+  .time{position: absolute; display: inline-block; top: 4px; right: 10px; width: 64px; font-size: 12px; color: #555; height: 28px; line-height: 28px; text-align: right;}
+}
+.container-box{
+  position: absolute; left: 0; right: 0; top: 48px; bottom: 0;overflow-x: hidden; overflow-y: auto; background: #fff;
+}
+.writeMeaaage{font-weight: normal; padding-right: 10px;}
+

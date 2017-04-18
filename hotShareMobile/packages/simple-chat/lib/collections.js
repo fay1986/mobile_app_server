@@ -12,63 +12,84 @@ if(Meteor.isServer){
   };
   var options = {_driver: remoteCollectionDriver()};
 
-  Messages = new Mongo.Collection(PRFIX + 'messages', options);
-  MsgSession = new Mongo.Collection(PRFIX + 'msg_session', options);
   Groups = new Mongo.Collection(PRFIX + 'groups', options);
   GroupUsers = new Mongo.Collection(PRFIX + 'groups_users', options);
+  // MsgSession = new Mongo.Collection(PRFIX + 'msg_session');
 }else{
-  Messages = new Mongo.Collection(PRFIX + 'messages');
-  MsgSession = new Mongo.Collection(PRFIX + 'msg_session');
   Groups = new Mongo.Collection(PRFIX + 'groups');
   GroupUsers = new Mongo.Collection(PRFIX + 'groups_users');
+
+  Meteor.startup(function() {
+    //var LocalMessagesObservor = new PersistentMinimongo2(Messages, 'workai');
+    //Ground.Collection(Messages, 'gdb');
+
+    Messages = new Ground.Collection(PRFIX + 'messages', { connection: null })
+    MsgSession = new Ground.Collection(PRFIX + 'msg_session', { connection: null });
+    Messages.after.insert(function (userId, doc) {updateMsgSession(doc);});
+    Messages.after.update(function (userId, doc, fieldNames, modifier, options) {updateMsgSession(doc);});
+
+    SimpleChat.Messages = Messages;
+    SimpleChat.MsgSession = MsgSession;
+  });
+
+  // 生成聊天会话
+  var updateMsgSession = function(doc){
+    if (!Meteor.userId())
+      return;
+    
+    var msgObj = null;
+    switch(doc.to_type){
+      case 'group':
+        if (GroupUsers.find({group_id: doc.to.id}).count() > 0) // -> my group
+          msgObj = {toUserId: doc.to.id, toUserName: doc.to.name, toUserIcon: doc.to.icon, sessionType: 'group'};
+        break;
+      case 'user':
+        if (doc.form.id === Meteor.userId()) // me -> ta
+          msgObj = {toUserId: doc.to.id, toUserName: doc.to.name, toUserIcon: doc.to.icon, sessionType: 'user', count: -1};
+        else if (doc.to.id == Meteor.userId()) // ta - me
+          msgObj = {toUserId: doc.form.id, toUserName: doc.form.name, toUserIcon: doc.form.icon, sessionType: 'user'};
+        break;
+    }
+
+    if (!msgObj)
+      return;
+    if (doc.to_type === 'user' && doc.to.id == Meteor.userId()) {
+      //ta 被我拉黑
+      if(BlackList.find({blackBy: Meteor.userId(), blacker:{$in: [doc.to.id]}}).count() === 0){
+        console.log(doc.to.id+'被我拉黑');
+        return;
+      }
+    }
+
+    msgObj.userId = Meteor.userId();
+    msgObj.userName = AppConfig.get_user_name(Meteor.user());
+    msgObj.userIcon = AppConfig.get_user_icon(Meteor.user()); 
+    msgObj.lastText = doc.type === 'text' ? doc.text : '[图片]';
+    msgObj.updateAt = new Date();
+
+    var msgSession = MsgSession.findOne({userId: Meteor.userId(), toUserId: msgObj.toUserId});
+    if (msgSession){
+      msgObj.createAt = msgSession.createAt;
+      MsgSession.update({_id: msgSession._id}, {$set: msgObj, $inc: {count: 1}});
+      console.log('update chat session:', msgObj);
+    } else {
+      msgObj.createAt = new Date();
+      msgObj.count = 1;
+      MsgSession.insert(msgObj);
+      console.log('insert chat session:', msgObj);
+    }
+  };
 }
 
 if(Meteor.isServer){
-  Messages.allow({
-    insert: function(userId, doc){
-      var result =  userId && userId === doc.form.id;
-      if(result){
-        var sess = MsgSession.findOne({user_id: userId, 'to.id': doc.to.id, type: doc.to_type});
-        if(sess){
-          MsgSession.update({_id: sess._id}, {
-            $set: {
-              text: doc.text,
-              update_time: new Date()
-            },
-            $inc: {msg_count: 1}
-          });
-        }else{
-          MsgSession.insert({
-            user_id: doc.form.id,
-            user_name: doc.form.name,
-            user_icon: doc.form.icon,
-            text: doc.text,
-            update_time: new Date(),
-            msg_count: 1,
-            type: doc.to_type,
-            to: doc.to
-          });
-        }
-      }
-
-      return result;
-    },
-    update: function (userId, doc, fields, modifier) {
-      return userId === doc.form.id;
-    },
-    remove: function (userId, doc) {
-      return userId === doc.form.id;
-    }
-  });
-
   Meteor.startup(function(){
-    Messages._ensureIndex({'form.id': 1, 'to.id': 1, 'create_time': -1});
-    MsgSession._ensureIndex({'form.id': 1, 'to.id': 1, 'create_time': -1});
     Groups._ensureIndex({'user_id': 1});
     GroupUsers._ensureIndex({'user_id': 1});
     GroupUsers._ensureIndex({'group_id': 1});
     GroupUsers._ensureIndex({'group_id': 1, 'user_id': 1});
-    MsgSession._ensureIndex({'user_id': 1, 'update_time': -1});
-    MsgSession._ensureIndex({'user_id': 1, 'type': 1});
   });
 }
+
+SimpleChat.Groups = Groups;
+SimpleChat.GroupUsers = GroupUsers;
+

@@ -12,6 +12,9 @@
       {{else}}
         <div>{{profile.username}}</div>
       {{/if}}
+      {{#unless isMyself}}
+      <div class="rightButton chatToUser" style="padding-top:0;height:40px;font-weight:normal;">私信</div>
+      {{/unless}}
     </div>
     <div class="userProfileTop">
         <img class="icon" src="{{profile.profile.icon}}" width='70' height='70'>
@@ -78,6 +81,9 @@
       {{else}}
         <div>{{profile.username}}</div>
       {{/if}}
+      {{#unless isMyself}}
+      <div class="rightButton chatToUser" style="padding-top:0;height:40px;font-weight:normal;">私信</div>
+      {{/unless}}
     </div>
     <div class="userProfileTop">
         <img class="icon" src="{{profile.profile.icon}}" width='70' height='70'>
@@ -144,6 +150,9 @@
       {{else}}
         <div>{{profile.username}}</div>
       {{/if}}
+      {{#unless isMyself}}
+      <div class="rightButton chatToUser" style="padding-top:0;height:40px;font-weight:normal;">私信</div>
+      {{/unless}}
     </div>
     <div class="userProfileTop">
         <img class="icon" src="{{profile.profile.icon}}" width='70' height='70'>
@@ -210,6 +219,9 @@
           {{else}}
               <div>{{profile.username}}</div>
           {{/if}}
+          {{#unless isMyself}}
+          <div class="rightButton chatToUser" style="padding-top:0;height:40px;font-weight:normal;">私信</div>
+          {{/unless}}
         </div>
         <div class="userProfileTop">
             <img class="icon" src="{{profile.profile.icon}}" width='70' height='70'>

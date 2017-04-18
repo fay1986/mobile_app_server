@@ -21,19 +21,24 @@ if Meteor.isClient
       count >= 99
     wait_read_count:->
       me = Meteor.user()
+      counts = 0
       if me
         # if Session.equals('updataFeedsWithMe',true)
         #   return 0
         # else
-        return Feeds.find({
-            followby: Meteor.userId(),
-            isRead:{$ne: true},
-            checked:{$ne: true},
-            eventType:{$ne:'share'},
-            createdAt: {$gt: new Date((new Date()).getTime() - 7 * 24 * 3600 * 1000)}
-          },{
-            limit: 99
-          }).count()
+        counts += Feeds.find({
+          followby: Meteor.userId(),
+          isRead:{$ne: true},
+          checked:{$ne: true},
+          eventType:{$ne:'share'},
+          createdAt: {$gt: new Date((new Date()).getTime() - 7 * 24 * 3600 * 1000)}
+        },{
+          limit: 99
+        }).count()
+        lists = SimpleChat.MsgSession.find({userId: Meteor.userId(),sessionType:'user'}).fetch()
+        getLetterCounts = (item)->
+          counts += item.count
+        getLetterCounts item for item in lists
           # waitReadCount = Session.get('waitReadCount')
         #if me.profile and me.profile.waitReadCount
           #waitReadCount = me.profile.waitReadCount
@@ -44,8 +49,7 @@ if Meteor.isClient
           #   Session.set('waitReadCount',0)
           #   Meteor.users.update({_id: Meteor.user()._id}, {$set: {'profile.waitReadCount': 0}});
           # return waitReadCount
-      else
-        0
+      return counts
     wait_import_count:->
        return Session.get('wait_import_count')
 
