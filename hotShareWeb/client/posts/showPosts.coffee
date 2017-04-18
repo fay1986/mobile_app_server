@@ -352,6 +352,24 @@ if Meteor.isClient
       $(window).scroll(scrollEventCallback)
 
   Template.showPosts.helpers
+    isInSeries:()->
+      latestSeries = Session.get("postContent").latestSeries
+      if latestSeries
+        return true
+      return false
+    postSeriesId:()->
+      latestSeries = Session.get("postContent").latestSeries
+      latestSeries.seriesId
+    postSeriesTitle:()->
+      latestSeries = Session.get("postContent").latestSeries
+      latestSeries.seriesTitle
+    postSeriesImage:()->
+      post = Session.get("postContent")
+      latestSeries = post.latestSeries
+      if latestSeries.seriesImage
+        return latestSeries.seriesImage
+      else 
+        return post.mainImage
     showPostGroupChatIntro:->
       return !localStorage.getItem('postGroupChatIntro')
     showSaveTipHintTemplate:->
@@ -632,6 +650,9 @@ if Meteor.isClient
         Router.go('post_index', {_id: Session.get('postContent')._id, _index: self.index})
         #Router.go('/posts/'+Session.get('postContent')._id+'/'+self.index)
   Template.showPosts.events
+    'click .postSeries': (e,t)->
+      seriesId = e.currentTarget.id
+      Router.go '/series/' + seriesId
     'click .authorReadPopularPostItem': (e)->
       postId = e.currentTarget.id
       unless postId

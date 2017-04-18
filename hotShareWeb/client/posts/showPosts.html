@@ -124,6 +124,15 @@
       <div id="sendEmail"><i class="fa fa-envelope-o"></i>     私信作者</div>
       {{/if}}
     </div>
+    {{#if isInSeries}}
+    <div class="postSeries" id="{{postSeriesId}}">
+      <div class="postSeriesImage"><img src="{{postSeriesImage}}" width="50" height="50"/></div>
+      <div class="postSeriesIntro">
+        <h4>本文来自：合辑·{{postSeriesTitle}}</h4>
+      </div>
+      <div class="postSeriesRight"><i class="fa fa-angle-right"></i></div>
+    </div>
+    {{/if}}
     {{#if browse}}
     <div class="recommendstory show-or-hidden"  id="shareStoryBtn">
         <div class="description">{{browse}}人读过，分享您的故事给他们吧！<span class="shareStoryBtn ripple" style="position: relative;">分享</span></div>
