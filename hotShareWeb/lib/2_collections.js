@@ -36,22 +36,25 @@ LockedUsers = new Meteor.Collection('lockedUsers');
 BackUpPosts = new Meteor.Collection('backUpPosts');
 reporterLogs = new Meteor.Collection('reporterLogs');
 
-var Fiber = Meteor.npmRequire('fibers');
-function deferSetImmediate(func) {
-    var runFunction = function() {
-            return func.apply(null);
+if(Meteor.isServer){
+    
+    var Fiber = Meteor.npmRequire('fibers');
+    function deferSetImmediate(func) {
+        var runFunction = function() {
+                return func.apply(null);
+        }
+        if(typeof setImmediate == 'function') {
+            setImmediate(function(){
+                Fiber(runFunction).run();
+            });
+        } else {
+            setTimeout(function(){
+                Fiber(runFunction).run();
+            }, 0);
+        }
     }
-    if(typeof setImmediate == 'function') {
-        setImmediate(function(){
-             Fiber(runFunction).run();
-        });
-    } else {
-        setTimeout(function(){
-             Fiber(runFunction).run();
-        }, 0);
-    }
-}
 
+}
 // 绿网检查帖子内容
 isPostSafe = function(title,addontitle,mainImage,pub){
     // check title
