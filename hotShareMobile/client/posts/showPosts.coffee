@@ -200,6 +200,13 @@ if Meteor.isClient
     layoutHelperInit()
     Session.set("content_loadedCount", 0)
     getHotPostsData()
+  Template.showPosts.onRendered ->
+    owner = Session.get('postContent').owner
+    _id = Session.get('postContent')._id
+    if owner and _id
+      Meteor.subscribe "authorReadPopularPosts",owner,_id,3,()->
+        authorHotPosts = Posts.find({owner: owner, publish: {$ne: false}},{sort: {browse: -1},limit: 3}).fetch()
+        Session.set("authorHotPosts", authorHotPosts)
   Template.showPosts.onDestroyed ->
     # if window._music
     #   document.getElementById('audio_' + window._music_id).pause()
@@ -479,28 +486,29 @@ if Meteor.isClient
       else 
         return post.mainImage
     authorReadPopularPosts: ()->
-      myHotPosts = Meteor.users.findOne({_id: @owner}).myHotPosts
-      if (myHotPosts && myHotPosts.length >= 3)
-        return myHotPosts
-      else
-        Meteor.subscribe "authorReadPopularPosts",@owner,@_id,3
-        mostReadPosts = Posts.find({owner: @owner, publish: {$ne: false}},{sort: {browse: -1},limit: 3}).fetch()
-        if (myHotPosts == undefined || myHotPosts == null)
-          myHotPosts = []
-        if (mostReadPosts == undefined || mostReadPosts == null)
-          mostReadPosts = []
-        size = myHotPosts.length
-        idx = 0
-        while (size < 3 && idx < mostReadPosts.length)
-          inHotPosts = false
-          for itemPost in myHotPosts
-            itemId = itemPost.postId or itemPost._id
-            if itemId and itemId is mostReadPosts[idx]._id
-              inHotPosts = true
-          unless inHotPosts
-            myHotPosts.push(mostReadPosts[idx])
-          idx++
-          size = myHotPosts.length
+      # myHotPosts = Meteor.users.findOne({_id: @owner}).myHotPosts
+      # if (myHotPosts && myHotPosts.length >= 3)
+      #   return myHotPosts
+      # else
+      #   Meteor.subscribe "authorReadPopularPosts",@owner,@_id,3
+      #   mostReadPosts = Posts.find({owner: @owner, publish: {$ne: false}},{sort: {browse: -1},limit: 3}).fetch()
+      #   if (myHotPosts == undefined || myHotPosts == null)
+      #     myHotPosts = []
+      #   if (mostReadPosts == undefined || mostReadPosts == null)
+      #     mostReadPosts = []
+      #   size = myHotPosts.length
+      #   idx = 0
+      #   while (size < 3 && idx < mostReadPosts.length)
+      #     inHotPosts = false
+      #     for itemPost in myHotPosts
+      #       itemId = itemPost.postId or itemPost._id
+      #       if itemId and itemId is mostReadPosts[idx]._id
+      #         inHotPosts = true
+      #     unless inHotPosts
+      #       myHotPosts.push(mostReadPosts[idx])
+      #     idx++
+      #     size = myHotPosts.length
+      myHotPosts = Session.get("authorHotPosts")
       return myHotPosts
     clickedCommentOverlayThumbsDown:()->
       i = Session.get('focusedIndex')
@@ -695,10 +703,10 @@ if Meteor.isClient
       unless postId
         postId = this.postId
       currentPostId = Session.get('postContent')._id
+      document.body.scrollTop = 0
+      $('.showPosts .head').fadeIn(300)
       if postId is currentPostId
-        document.body.scrollTop = 0
         Session.set("SocialOnButton",'postBtn')
-        $('.showPosts .head').fadeIn(300)
       else
         Session.set 'readMomentsPost',true
         Router.go '/posts/' + postId

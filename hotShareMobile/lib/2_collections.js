@@ -2242,6 +2242,13 @@ if(Meteor.isServer){
     return Versions.find({});
   });
 
+ Meteor.publish('authorReadPopularPosts', function(owner,currPostId,limit){
+     if(this.userId === null|| !Match.test(limit, Number)) {
+          return this.ready();
+      } else {
+          return Posts.find({owner: owner, publish: true},{sort: {browse: -1},limit: limit,fields:{title:1,publish:1,owner:1,browse:1,latestSeries:1}});
+      }
+  });
   Meteor.publish('readerpopularposts', function() {
     if(this.userId) {
         // return ReaderPopularPosts.find({userId: this.userId},{limit:3});
