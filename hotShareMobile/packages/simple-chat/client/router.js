@@ -702,6 +702,7 @@ var loadScript = function(url, callback){
   document.getElementsByTagName('head')[0].appendChild(script);
 }
 Template._simpleChatToChatLayout.onRendered(function(){
+  Meteor.subscribe('myBlackList');
   if(Meteor.isCordova){
     $('#container').click(function(){
       selectMediaFromAblum(1, function(cancel, result, currentCount, totalCount){
@@ -757,20 +758,26 @@ Template._simpleChatToChatLayout.helpers({
 
 Template._simpleChatToChatLayout.events({
   'click #addToBlacklist': function(e){
-    blackerId = location.search.replace('?id=', '');
-    console.log('addToBlacklist,userId=',BlackList.find({blackBy: Meteor.userId(), blacker:{$in:[blackerId]}}).count());
-    followerId = Follower.findOne({userId: Meteor.userId(), followerId: blackerId})
-    MsgSessionId = MsgSession.findOne({userId: Meteor.userId(), toUserId: blackerId})
+    try{
+    var blackerId = location.search.replace('?id=', '');
+    var followerId = Follower.findOne({userId: Meteor.userId(), followerId: blackerId})
+    var MsgSessionId = MsgSession.findOne({userId: Meteor.userId(), toUserId: blackerId})
     if(MsgSessionId){
       MsgSession.remove(MsgSessionId._id);
     }
-    if(BlackList.find({blackBy: Meteor.userId(), blacker:{$in:[blackerId]}}).count() === 0){
+    if(BlackList.find({blackBy: Meteor.userId()}).count() === 0){
       BlackList.insert({blacker: [blackerId], blackBy: Meteor.userId()});
+    } else {
+      var blackDocId = BlackList.findOne({blackBy: Meteor.userId()})._id;
+      BlackList.update({_id: blackDocId},{$addToSet:{blacker: blackerId}});
     }
     if(followerId) {
       Follower.remove(followerId._id);
     }
     return PUB.back();
+    } catch (err){
+      console.log('black err=',err);
+    }
   },
   'click #reporterUser': function(){
     // TODO
