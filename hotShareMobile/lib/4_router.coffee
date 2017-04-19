@@ -489,11 +489,15 @@ if Meteor.isClient
         this.render 'my_notice'
         Session.set 'channel','my_notice'
         return
-    Router.route '/my_blacklist',()->
-      if Meteor.isCordova is true
-        this.render 'my_blacklist'
+    Router.route '/my_blacklist',{
+      loadingTemplate: 'loadingPost'
+      waitOn: ->
+        Meteor.subscribe('myBlackList')
+      action: ->
         Session.set 'channel','my_blacklist'
+        this.render 'my_blacklist'
         return
+    }
     Router.route '/display_lang',()->
       if Meteor.isCordova is true
         this.render 'display_lang'

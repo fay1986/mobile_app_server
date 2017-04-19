@@ -261,7 +261,10 @@ if Meteor.isClient
 
   Template.my_blacklist.rendered=->
     $('.dashboard').css 'min-height', $(window).height()
-    Meteor.subscribe("allBlackList")
+    # Meteor.subscribe("allBlackList")
+    blackList = BlackList.findOne({blackBy: Meteor.userId()}) || {}
+    blackers = blackList.blacker
+    Meteor.subscribe('allBlackListUsers',blackers)
     # Meteor.subscribe('allUsers')
     return
   Template.my_blacklist.helpers
@@ -272,7 +275,7 @@ if Meteor.isClient
   Template.my_blacklist_item.helpers
     profile :->
       id = this.toString()
-      Meteor.subscribe('usersById', id)
+      # Meteor.subscribe('usersById', id)
       return Meteor.users.findOne({_id: id}).profile
     thisUserName:->
       id = this.toString()

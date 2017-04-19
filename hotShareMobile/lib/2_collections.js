@@ -1870,6 +1870,18 @@ if(Meteor.isServer){
   Meteor.publish('allBlackList', function () {
     return BlackList.find({},{limit: 10});
   });
+  Meteor.publish('myBlackList', function (){
+    if(!this.userId){
+        return this.ready();
+    }
+    return BlackList.find({blackBy: this.userId});
+  });
+  Meteor.publish('allBlackListUsers',function(ids){
+    if(!ids){
+        return this.ready();
+    }
+    return Meteor.users.find({_id:{$in:ids}})
+  });
   Meteor.publish("refcomments", function() {
     Max = RefComments.find().count()-8;
     Rnd = Rnd + 1;

@@ -973,7 +973,7 @@ if Meteor.isClient
         if buttonIndex is 1
           Router.go('reportPost')
         else if buttonIndex is 2
-          if BlackList.find({blackBy: Meteor.userId(), blacker:{$in: [blackerId]}}).count() is 0
+          if BlackList.find({blackBy: Meteor.userId()}).count() is 0
             if BlackList.find({blackBy: Meteor.userId()}).count() is 0
               #Meteor.call('addBlackList', blackerId, Meteor.userId())
               BlackList.insert({blacker: [blackerId],blackBy: Meteor.userId()})
