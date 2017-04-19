@@ -181,3 +181,7 @@ if Meteor.isClient
         createAt: new Date()
       }
       addFollower(insertObj)
+    'click .meet_letter_btn':(e)->
+      e.stopPropagation()
+      ta = e.currentTarget.id
+      Router.go '/simple-chat/to/user?id='+ta
