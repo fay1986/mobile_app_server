@@ -4,6 +4,7 @@ var list_limit = new ReactiveVar(list_limit_val);
 var page_title = new ReactiveVar('聊天室');
 var list_data = new ReactiveVar([]);
 var message_list = new ReactiveVar([]);
+var page_data = null;
 
 Router.route(AppConfig.path + '/to/:type', {
   layoutTemplate: '_simpleChatToChatLayout',
@@ -37,7 +38,8 @@ Router.route(AppConfig.path + '/to/:type', {
       type: slef.params.type,
       where: where,
       messages: function(){
-        return message_list.get();
+        return Messages.find(where, {limit: list_limit.get(), sort: {create_time: -1}}).fetch().reverse();
+        // return message_list.get();
       },
       loading: is_loading.get()
     };
@@ -70,11 +72,18 @@ Router.route(AppConfig.path + '/user-list/:_user',{
   }
 });
 
+Template._simpleChatToChatLayout.onRendered(function(){
+  page_data = this.data;
+});
+Template._simpleChatToChatLayout.onDestroyed(function(){
+  page_data = null;
+});
+
 var time_list = [];
 var init_page = false;
 var fix_data_timeInterval = null;
 var fix_data = function(){
-  var data = message_list.get(); //Blaze.getData($('.simple-chat')[0]).messages.fetch();
+  var data = page_data.messages();// message_list.get(); //Blaze.getData($('.simple-chat')[0]).messages.fetch();
   data.sort(function(a, b){
     return a.create_time - b.create_time;
   });
@@ -223,6 +232,10 @@ Template._simpleChatToChat.onDestroyed(function(){
   }
 });
 
+var setMsgList = function(where, action){
+  if(action === 'insert' || action === 'remove'){Meteor.setTimeout(function(){$('.box').scrollTop($('.box ul').height());}, 200);}
+};
+
 Template._simpleChatToChat.onRendered(function(){
   is_loading.set(true);
   list_limit.set(list_limit_val);
@@ -232,42 +245,31 @@ Template._simpleChatToChat.onRendered(function(){
   message_list.set([]);
   var slef = this;
 
-  message_list.set(Messages.find(slef.data.where, {limit: list_limit_val, sort: {create_time: -1}}).fetch().reverse());
   if (!Messages.onBefore){
     Messages.after.insert(function (userId, doc) {
-      var chatBox = document.getElementsByClassName('simple-chat');
-      if (chatBox.length <= 0)
+      if (!page_data)
         return;
-
-      var data = Blaze.getData(chatBox[0]);
-      if (!data)
-        return;
-
-      if (doc.to_type === data.type && doc.to.id === data.id){
+      if (doc.to_type === page_data.type && doc.to.id === page_data.id){
         console.log('message insert');
-        Meteor.setTimeout(function(){$('.box').scrollTop($('.box ul').height());}, 200);
-        console.log('data:', Messages.find(data.where, {limit: list_limit.get(), sort: {create_time: -1}}).fetch().reverse());
-        message_list.set(Messages.find(data.where, {limit: list_limit.get(), sort: {create_time: -1}}).fetch().reverse());
+        setMsgList(page_data.where, 'insert');
       }
     });
     Messages.after.update(function (userId, doc, fieldNames, modifier, options) {
-      var chatBox = document.getElementsByClassName('simple-chat');
-      if (chatBox.length <= 0)
+      if (!page_data)
         return;
-
-      var data = Blaze.getData(chatBox[0]);
-      if (!data)
-        return;
-
-      if (doc.to_type === data.type && doc.to.id === data.id){
+      if (doc.to_type === page_data.type && doc.to.id === page_data.id){
         console.log('message update');
-        console.log('data:', Messages.find(data.where, {limit: list_limit.get(), sort: {create_time: -1}}).fetch().reverse());
-        message_list.set(Messages.find(data.where, {limit: list_limit.get(), sort: {create_time: -1}}).fetch().reverse());
+        setMsgList(page_data.where, 'update');
       }
     });
     Messages.after.remove(function (userId, doc){
-      // console.log('message remove');
-      // message_list.set(Messages.find(slef.data.where, {limit: list_limit.get(), sort: {create_time: -1}}).fetch().reverse());
+      console.log('message remove');
+      if (!page_data)
+        return;
+      if (doc.to_type === page_data.type && doc.to.id === page_data.id){
+        console.log('message update');
+        setMsgList(page_data.where, 'remove');
+      }
     });
     Messages.onBefore = true;
   }
@@ -298,7 +300,6 @@ Template._simpleChatToChat.onRendered(function(){
       // if(slef.data.messages.count() >= list_limit.get())
       is_loading.set(true);
       list_limit.set(list_limit.get()+list_limit_val);
-      message_list.set(Messages.find(slef.data.where, {limit: list_limit.get(), sort: {create_time: -1}}).fetch().reverse());
       Meteor.setTimeout(function(){is_loading.set(false);}, 500);
     }
   });
@@ -339,22 +340,22 @@ Template._simpleChatToChatItem.events({
         initialIndexOnArray: selected,
         hideCloseButtonOnMobile : true,
         loopAtEnd: false,
-        beforeOpen: function(){
-          if (data.people_id)
-            labelView = Blaze.renderWithData(Template._simpleChatToChatLabel, data, document.body);
-        },
-        afterClose: function(){
-          if (data.people_id)
-            Blaze.remove(labelView);
-        },
-        indexChanged: function(index){
-          var data = Blaze.getData($('.simple-chat-label')[0]);
-          var $img = $('#swipebox-overlay .slide.current img');
+        // beforeOpen: function(){
+        //   if (data.people_id)
+        //     labelView = Blaze.renderWithData(Template._simpleChatToChatLabel, data, document.body);
+        // },
+        // afterClose: function(){
+        //   if (data.people_id)
+        //     Blaze.remove(labelView);
+        // },
+        // indexChanged: function(index){
+        //   var data = Blaze.getData($('.simple-chat-label')[0]);
+        //   var $img = $('#swipebox-overlay .slide.current img');
 
-          console.log($img.attr('src'));
-          console.log(_.pluck(data.images, 'url'));
-          Session.set('SimpleChatToChatLabelImage', data.images[index]);
-        }
+        //   console.log($img.attr('src'));
+        //   console.log(_.pluck(data.images, 'url'));
+        //   Session.set('SimpleChatToChatLabelImage', data.images[index]);
+        // }
       });
     }
   },
@@ -362,162 +363,205 @@ Template._simpleChatToChatItem.events({
     console.log(e.currentTarget.id);
     id = e.currentTarget.id;
     $('li#' + id + ' div.showmore').hide();
-    $('li#' + id + ' div.text').removeAttr('style');
+    $('li#' + id + ' div.text .imgs').removeAttr('style');
+    $('li#' + id + ' div.text .imgs-1-box').removeAttr('style');
   },
   'click .check': function(){
-    var data = this;
-    var names = get_people_names();
+    Template._simpleChatLabelDevice.open(this);
+    // var data = this;
+    // var names = get_people_names();
 
-    show_label(function(name){
-      Meteor.call('get-id-by-name', data.people_uuid, name, function(err, res){
-        if(err)
-          return PUB.toast('标记失败，请重试~');
+    // show_label(function(name){
+    //   Meteor.call('get-id-by-name', data.people_uuid, name, function(err, res){
+    //     if(err)
+    //       return PUB.toast('标记失败，请重试~');
 
-        console.log(res);
-        PeopleHis.update({_id: data.people_his_id}, {
-          $set: {fix_name: name, msg_to: data.to},
-          $push: {fix_names: {
-            _id: new Mongo.ObjectID()._str,
-            name: name,
-            userId: Meteor.userId(),
-            userName: Meteor.user().profile && Meteor.user().profile.fullname ? Meteor.user().profile.fullname : Meteor.user().username,
-            userIcon: Meteor.user().profile && Meteor.user().profile.icon ? Meteor.user().profile.icon : '/userPicture.png',
-            fixTime: new Date()
-          }}
-        }, function(err, num){
-          if(err || num <= 0){
-            return PUB.toast('标记失败，请重试~');
-          }
+    //     console.log(res);
+    //     PeopleHis.update({_id: data.people_his_id}, {
+    //       $set: {fix_name: name, msg_to: data.to},
+    //       $push: {fix_names: {
+    //         _id: new Mongo.ObjectID()._str,
+    //         name: name,
+    //         userId: Meteor.userId(),
+    //         userName: Meteor.user().profile && Meteor.user().profile.fullname ? Meteor.user().profile.fullname : Meteor.user().username,
+    //         userIcon: Meteor.user().profile && Meteor.user().profile.icon ? Meteor.user().profile.icon : '/userPicture.png',
+    //         fixTime: new Date()
+    //       }}
+    //     }, function(err, num){
+    //       if(err || num <= 0){
+    //         return PUB.toast('标记失败，请重试~');
+    //       }
 
-          data.images.forEach(function(img) {
-            Messages.update({_id: data.msg_id, 'images.url': img.url}, {
-              $set: {
-                'images.$.label': name,
-                'images.$.result': ''
-              }
-            });
-            sendMqttMessage('trainset', {url: img.url, person_id: res.id ? res.id : '', device_id: data.people_uuid, face_id: res ? res.faceId : data.people_id, drop: false});
-          });
+    //       data.images.forEach(function(img) {
+    //         Messages.update({_id: data.msg_id, 'images.url': img.url}, {
+    //           $set: {
+    //             'images.$.label': name,
+    //             'images.$.result': ''
+    //           }
+    //         });
+    //         sendMqttMessage('trainset', {url: img.url, person_id: res.id ? res.id : '', device_id: data.people_uuid, face_id: res ? res.faceId : data.people_id, drop: false});
+    //       });
           
-          onFixName(data.people_id, data.people_uuid, data.people_his_id, data.images, data.to, name, 'label');
-          PUB.toast('标记成功~');
-        });
-      });
-    });
+    //       onFixName(data.people_id, data.people_uuid, data.people_his_id, data.images, data.to, name, 'label');
+    //       PUB.toast('标记成功~');
+    //     });
+    //   });
+    // });
+  },
+  'click .crop':function(){
+    Template._simpleChatLabelCrop.open(this);
+  },
+  'click .remove': function(){
+    Template._simpleChatLabelRemove.open(this);
   },
   'click .yes': function(){
-    var data = this;
-    var names = get_people_names();
-    var name = data.images[0].label;
+    // update label
+    var setNames = [];
+    for (var i=0;i<this.images.length;i++){
+      if (this.images[i].label) {
+        var trainsetObj = {group_id: this.to.id, type: 'trainset', url: this.images[i].url, person_id: '', device_id: this.people_uuid, face_id: this.images[i].id, drop: false};
+        console.log("##RDBG trainsetObj: " + JSON.stringify(trainsetObj));
+        sendMqttMessage('/device/'+this.to.id, trainsetObj);
+      }
 
-    Meteor.call('get-id-by-name', data.people_uuid, name, function(err, res){
-      if(err)
-        return PUB.toast('标记失败，请重试~');
+      if (_.pluck(setNames, 'id').indexOf(this.images[i].id) === -1)
+        setNames.push({uuid: this.people_uuid, id: this.images[i].id, url: this.images[i].url, name: this.images[i].label});
+    }
+    if (setNames.length > 0)
+      Meteor.call('set-person-names', setNames);
 
-      console.log(res);
-      PeopleHis.update({_id: data.people_his_id}, {
-        $set: {fix_name: name, msg_to: data.to},
-        $push: {fix_names: {
-          _id: new Mongo.ObjectID()._str,
-          name: name,
-          userId: Meteor.userId(),
-          userName: Meteor.user().profile && Meteor.user().profile.fullname ? Meteor.user().profile.fullname : Meteor.user().username,
-          userIcon: Meteor.user().profile && Meteor.user().profile.icon ? Meteor.user().profile.icon : '/userPicture.png',
-          fixTime: new Date()
-        }}
-      }, function(err, num){
-        if(err || num <= 0){
-          return PUB.toast('标记失败，请重试~');
-        }
+    // update collection
+    Messages.update({_id: this._id}, {$set: {label_complete: true}});
 
-        data.images.forEach(function(img) {
-          Messages.update({_id: data.msg_id, 'images.url': img.url}, {
-            $set: {
-              'images.$.label': name,
-              'images.$.result': ''
-            }
-          });
-          sendMqttMessage('trainset', {url: img.url, person_id: res.id ? res.id : '', device_id: data.people_uuid, face_id: res ? res.faceId : data.people_id, drop: false});
-        });
+    // var data = this;
+    // var names = get_people_names();
+    // var name = data.images[0].label;
+
+    // Meteor.call('get-id-by-name', data.people_uuid, name, function(err, res){
+    //   if(err)
+    //     return PUB.toast('标记失败，请重试~');
+
+    //   console.log(res);
+    //   PeopleHis.update({_id: data.people_his_id}, {
+    //     $set: {fix_name: name, msg_to: data.to},
+    //     $push: {fix_names: {
+    //       _id: new Mongo.ObjectID()._str,
+    //       name: name,
+    //       userId: Meteor.userId(),
+    //       userName: Meteor.user().profile && Meteor.user().profile.fullname ? Meteor.user().profile.fullname : Meteor.user().username,
+    //       userIcon: Meteor.user().profile && Meteor.user().profile.icon ? Meteor.user().profile.icon : '/userPicture.png',
+    //       fixTime: new Date()
+    //     }}
+    //   }, function(err, num){
+    //     if(err || num <= 0){
+    //       return PUB.toast('标记失败，请重试~');
+    //     }
+
+    //     data.images.forEach(function(img) {
+    //       Messages.update({_id: data.msg_id, 'images.url': img.url}, {
+    //         $set: {
+    //           'images.$.label': name,
+    //           'images.$.result': ''
+    //         }
+    //       });
+    //       sendMqttMessage('trainset', {url: img.url, person_id: res.id ? res.id : '', device_id: data.people_uuid, face_id: res ? res.faceId : data.people_id, drop: false});
+    //     });
         
-        onFixName(data.people_id, data.people_uuid, data.people_his_id, data.images, data.to, name, 'label');
-        PUB.toast('标记成功~');
-      });
-    });
+    //     onFixName(data.people_id, data.people_uuid, data.people_his_id, data.images, data.to, name, 'label');
+    //     PUB.toast('标记成功~');
+    //   });
+    // });
   },
   'click .no': function(){
-    var data = this;
-    var names = get_people_names();
+    Template._simpleChatLabelLabel.open(this);
+    // var data = this;
+    // var names = get_people_names();
 
-    showBox('提示', ['重新标记', '删除'], null, '你要重新标记照片还是删除？', function(index){
-      if(index === 0)
-        show_label(function(name){
-          Meteor.call('get-id-by-name', data.people_uuid, name, function(err, res){
-            if(err)
-              return PUB.toast('标记失败，请重试~');
+    // showBox('提示', ['重新标记', '删除'], null, '你要重新标记照片还是删除？', function(index){
+    //   if(index === 0)
+    //     show_label(function(name){
+    //       Meteor.call('get-id-by-name', data.people_uuid, name, function(err, res){
+    //         if(err)
+    //           return PUB.toast('标记失败，请重试~');
 
-            PeopleHis.update({_id: data.people_his_id}, {
-              $set: {fix_name: name, msg_to: data.to},
-              $push: {fix_names: {
-                _id: new Mongo.ObjectID()._str,
-                name: name,
-                userId: Meteor.userId(),
-                userName: Meteor.user().profile && Meteor.user().profile.fullname ? Meteor.user().profile.fullname : Meteor.user().username,
-                userIcon: Meteor.user().profile && Meteor.user().profile.icon ? Meteor.user().profile.icon : '/userPicture.png',
-                fixTime: new Date()
-              }}
-            }, function(err, num){
-              if(err || num <= 0){
-                return PUB.toast('标记失败，请重试~');
-              }
+    //         PeopleHis.update({_id: data.people_his_id}, {
+    //           $set: {fix_name: name, msg_to: data.to},
+    //           $push: {fix_names: {
+    //             _id: new Mongo.ObjectID()._str,
+    //             name: name,
+    //             userId: Meteor.userId(),
+    //             userName: Meteor.user().profile && Meteor.user().profile.fullname ? Meteor.user().profile.fullname : Meteor.user().username,
+    //             userIcon: Meteor.user().profile && Meteor.user().profile.icon ? Meteor.user().profile.icon : '/userPicture.png',
+    //             fixTime: new Date()
+    //           }}
+    //         }, function(err, num){
+    //           if(err || num <= 0){
+    //             return PUB.toast('标记失败，请重试~');
+    //           }
 
-              data.images.forEach(function(img) {
-                Messages.update({_id: data.msg_id, 'images.url': img.url}, {
-                  $set: {
-                    'images.$.label': name,
-                    'images.$.result': ''
-                  }
-                });
-                sendMqttMessage('trainset', {url: img.url, person_id: res.id ? res.id : '', device_id: data.people_uuid, face_id: res ? res.faceId : data.people_id, drop: false});
-              });
+    //           data.images.forEach(function(img) {
+    //             Messages.update({_id: data.msg_id, 'images.url': img.url}, {
+    //               $set: {
+    //                 'images.$.label': name,
+    //                 'images.$.result': ''
+    //               }
+    //             });
+    //             sendMqttMessage('trainset', {url: img.url, person_id: res.id ? res.id : '', device_id: data.people_uuid, face_id: res ? res.faceId : data.people_id, drop: false});
+    //           });
 
-              onFixName(data.people_id, data.people_uuid, data.people_his_id, data.images, data.to, name, 'label');
-              PUB.toast('标记成功~');
-            });
-          });
-        });
-      else
-        show_remove(function(text){
-          PeopleHis.update({_id: data.people_his_id}, {
-            $set: {msg_to: data.to},
-            $push: {fix_names: {
-              _id: new Mongo.ObjectID()._str,
-              userId: Meteor.userId(),
-              userName: Meteor.user().profile && Meteor.user().profile.fullname ? Meteor.user().profile.fullname : Meteor.user().username,
-              userIcon: Meteor.user().profile && Meteor.user().profile.icon ? Meteor.user().profile.icon : '/userPicture.png',
-              fixTime: new Date(),
-              fixType: 'remove',
-              removeText: text
-            }}
-          }, function(err, num){
-            if(err || num <= 0){
-              console.log(err);
-              return PUB.toast('删除失败，请重试~');
-            }
+    //           onFixName(data.people_id, data.people_uuid, data.people_his_id, data.images, data.to, name, 'label');
+    //           PUB.toast('标记成功~');
+    //         });
+    //       });
+    //     });
+    //   else
+    //     show_remove(function(text){
+    //       PeopleHis.update({_id: data.people_his_id}, {
+    //         $set: {msg_to: data.to},
+    //         $push: {fix_names: {
+    //           _id: new Mongo.ObjectID()._str,
+    //           userId: Meteor.userId(),
+    //           userName: Meteor.user().profile && Meteor.user().profile.fullname ? Meteor.user().profile.fullname : Meteor.user().username,
+    //           userIcon: Meteor.user().profile && Meteor.user().profile.icon ? Meteor.user().profile.icon : '/userPicture.png',
+    //           fixTime: new Date(),
+    //           fixType: 'remove',
+    //           removeText: text
+    //         }}
+    //       }, function(err, num){
+    //         if(err || num <= 0){
+    //           console.log(err);
+    //           return PUB.toast('删除失败，请重试~');
+    //         }
 
-            data.images.forEach(function(img) {
-              Messages.update({_id: data.msg_id, 'images.url': img.url}, {
-                $set: {
-                  'images.$.result': 'remove'
-                }
-              });
-            });
+    //         data.images.forEach(function(img) {
+    //           Messages.update({_id: data.msg_id, 'images.url': img.url}, {
+    //             $set: {
+    //               'images.$.result': 'remove'
+    //             }
+    //           });
+    //         });
 
-            onFixName(data.people_id, data.people_uuid, data.people_his_id, data.images, data.to, text, 'remove');
-            PUB.toast('删除成功~');
-          });
-        });
-    });
+    //         onFixName(data.people_id, data.people_uuid, data.people_his_id, data.images, data.to, text, 'remove');
+    //         PUB.toast('删除成功~');
+    //       });
+    //     });
+    // });
+  },
+  'click .show_more': function(e, t){
+    var $li = $('li#' + this._id);
+    var $imgs = $li.find('.text .imgs');
+    var $labels = $li.find('.text .imgs-1-item');
+    var $show = $li.find('.show_more');
+
+    if ($imgs.css('height') === '70px' || $labels.css('height') === '55px'){
+      $imgs.css('height', 'auto');
+      $labels.css('height', 'auto');
+      $show.html('<i class="fa fa-angle-up"></i>');
+    } else {
+      $imgs.css('height', '70px');
+      $labels.css('height', '55px');
+      $show.html('<i class="fa fa-angle-right"></i>');
+    }
   }
 });
 
@@ -848,26 +892,73 @@ Template._simpleChatToChatLayout.events({
   },
   'click .groupsProfile':function(e,t){
     var data = Blaze.getData(Blaze.getView(document.getElementsByClassName('simple-chat')[0]));
-    Router.go('/groupsProfile/'+data.id);
+    Router.go('/groupsProfile/'+data.type+'/'+data.id);
   },
   'click .userProfile':function(e,t){
     var data = Blaze.getData(Blaze.getView(document.getElementsByClassName('simple-chat')[0]));
-    PUB.page('/simpleUserProfile/'+data.id);
+    Router.go('/groupsProfile/'+data.type+'/'+data.id);
+    //PUB.page('/simpleUserProfile/'+data.id);
   }
 
 });
 
 Template._simpleChatToChatItem.helpers({
+  is_error: function(images){
+    for(var i=0;i<images.length;i++){
+      if (images[i].error)
+        return true;
+    }
+    return false;
+  },
+  is_remove: function(images){
+    for(var i=0;i<images.length;i++){
+      if (images[i].remove)
+        return true;
+    }
+    return false;
+  },
+  is_label: function(images){
+    for(var i=0;i<images.length;i++){
+      if (images[i].label)
+        return true;
+    }
+    return false;
+  },
+  is_remove_label: function(images){
+    for(var i=0;i<images.length;i++){
+      if (images[i].remove || images[i].label)
+        return true;
+    }
+    return false;
+  },
+  is_wait_img: function(images){
+    for(var i=0;i<images.length;i++){
+      if (!images[i].remove && !images[i].label && !images[i].error)
+        return true;
+    }
+    return false;
+  },
+  is_wait_item: function(item){
+    return !item.remove && !item.label && !item.error;
+  },
   ta_me: function(id){
     return id != Meteor.userId() ? 'ta' : 'me';
   },
   show_images: function(images){
-    if(images && images.length > 9){
-      $('li#' + this._id + ' div.text').css('height', '130px');
-      $('li#' + this._id + ' div.text').css('overflow', 'hidden');
-      $('li#' + this._id + ' div.showmore').show();
-    }
-    return images && images.length > 0;
+    var $li = $('li#' + this._id);
+    var $imgs = $li.find('.text .imgs');
+    var $labels = $li.find('.text .imgs-1-item');
+    var is_scroll = false;
+
+    $imgs.scrollTop(10);
+    if ($imgs.scrollTop() > 0){is_scroll = true;$imgs.scrollTop(0);}
+    $labels.each(function(){
+      $(this).scrollTop(10);
+      if ($(this).scrollTop() > 0){is_scroll = true;$(this).scrollTop(0);}
+    });
+
+    if (is_scroll)
+      $li.find('.show_more').show();
   },
   is_show_time: function(id){
     try{
@@ -912,8 +1003,21 @@ window.___message = {
       to: to,
       to_type: data.type,
       type: 'image',
-      thumbnail: '/packages/feiwu_simple-chat/images/sendingBmp.gif',
+      images:[
+        {
+          _id: new Mongo.ObjectID()._str,
+          id:'',
+          url:null,
+          label:null,
+          people_his_id:id,
+          thumbnail: '/packages/feiwu_simple-chat/images/sendingBmp.gif'
+        }
+      ],
+      //thumbnail: '/packages/feiwu_simple-chat/images/sendingBmp.gif',
       create_time: new Date(),
+      people_uuid:'',
+      people_his_id:id,
+      wait_lable:true,
       is_read: false
     }, function(err, id){
       console.log('insert id:', id);
@@ -921,9 +1025,13 @@ window.___message = {
     });
   },
   update: function(id, url){
-    var msg = Messages.find({_id: id});
+    var msg = Messages.findOne({_id: id});
+    var images = msg.images;
+    for (var i = 0; i < images.length; i++) {
+      images[i].url = url;
+    }
     Messages.update({_id: id}, {$set: {
-      image: url
+      images: images
     }}, function(){
       console.log('update id:', id);
       $('.box').scrollTop($('.box ul').height());
@@ -940,70 +1048,161 @@ window.___message = {
     });
   }
 };
-last_msg = null;
+
 SimpleChat.onMqttMessage = function(topic, msg) {
-  console.log('SimpleChat.onMqttMessage, topic: ' + topic + ', msg: ' + msg);
-  var group = topic.substring(topic.lastIndexOf('/') + 1);
+  var insertMsg = function(msgObj, type){
+    console.log(type, msgObj._id);
+    Messages.insert(msgObj, function(err, _id){
+      if (err)
+        console.log('insert msg error:', err);
+    });
+  };
+
+  if (!(topic.startsWith('/msg/g/') || topic.startsWith('/msg/u/')))
+    return;
+
   var msgObj = JSON.parse(msg);
-  //var last_msg = Messages.findOne({}, {sort: {create_time: -1}});
-  if(msgObj.form.id === Meteor.userId()){
-    return;
-  }
-  if(last_msg && last_msg._id === msgObj._id){
-    return;
-  }
-  last_msg = msgObj;
+  var whereTime = new Date(format_date(new Date(), 'yyyy-MM-dd 00:00:00'));
+  var msgType = topic.split('/')[2];
+  var where = {
+    to_type: msgObj.to_type,
+    wait_lable: msgObj.wait_lable,
+    label_complete: {$ne: true},
+    'to.id': msgObj.to.id,
+    images: {$exists: true},
+    create_time: {$gte: whereTime},
+    type: 'text'
+  };
 
-  if(Messages.find({_id: msgObj._id}).count() > 0){
-    // 自己发送的消息且本地已经存在
-    //if (msgObj && msgObj.form.id === Meteor.userId())
-    //  return;
-
-    //msgObj._id = new Mongo.ObjectID()._str;
-    return
+  msgObj.create_time = msgObj.create_time ? new Date(msgObj.create_time) : new Date();
+  if (msgObj.images && msgObj.length > 0 && msgObj.is_people && msgObj.people_id){
+    for(var i=0;i<msgObj.images.length;i++)
+      msgObj.images[i].id = msgObj.people_id;
   }
-  
-  try{
-    console.log('last_msg:', last_msg);
-    msgObj.create_time = msgObj.create_time ? new Date(msgObj.create_time) : new Date();
-    var group_msg = last_msg && msgObj && msgObj.to_type === 'group' && msgObj.to.id === last_msg.to.id; // 当前组消息
-    if (!group_msg)
-      return Messages.insert(msgObj);
 
-    if (last_msg && last_msg.is_people === true && last_msg.images && last_msg.images.length > 0 && msgObj.images && msgObj.images.length > 0){
-      if(!msgObj.wait_lable && msgObj.images[0].label === last_msg.images[0].label){
-        Messages.update({_id: last_msg._id}, {
-          $set: {create_time: msgObj.create_time},
-          $push: {images: msgObj.images[0]}
-        }, function(err, num){
-          if (err || num <= 0)
-            Messages.insert(msgObj);
-        });
-      }else if(msgObj.wait_lable && msgObj.people_id === last_msg.people_id && msgObj.people_uuid === last_msg.people_uuid){
-        Messages.update({_id: last_msg._id}, {
-          $set: {create_time: msgObj.create_time},
-          $push: {images: msgObj.images[0]}
-        }, function(err, num){
-          if (err || num <= 0)
-            Messages.insert(msgObj);
-        });
-      }else{
-        Messages.insert(msgObj);
-      }
-    }else{
-      Messages.insert(msgObj);
+  if (msgObj.wait_lable){where.people_uuid = msgObj.people_uuid}
+  else if (!msgObj.wait_lable && msgObj.images && msgObj.images.length > 0) {where['images.label'] = msgObj.images[0].label}
+  else {return Messages.insert(msgObj)}
+
+  console.log('SimpleChat.SimpleChat where:', where);
+  var targetMsg = Messages.findOne(where, {sort: {create_time: -1}});
+
+  if (Messages.find({_id: msgObj._id}).count() > 0)
+    return console.log('已存在此消息:', msgObj._id);
+  if (!targetMsg || !targetMsg.images || targetMsg.images.length <= 0)
+    return insertMsg(msgObj, '无需合并消息');
+  if (!msgObj.images || msgObj.images.length <= 0)
+    return insertMsg(msgObj, '不是图片消息');
+  if (msgObj.to_type != 'group' || !msgObj.is_people)
+    return insertMsg(msgObj, '不是 Group 或人脸消息');
+
+  var setObj = {create_time: new Date(), 'form.name': msgObj.form.name};
+  if (msgObj.wait_lable){
+    var count = 0;
+    for(var i=0;i<targetMsg.images.length;i++){
+      if (!targetMsg.images[i].label && !targetMsg.images[i].remove && !targetMsg.images[i].error)
+        count += 1;
     }
-  }catch(ex){
-    console.log(ex);
-    Messages.insert(msgObj);
+    for(var i=0;i<msgObj.images.length;i++){
+      if (!msgObj.images[i].label && !msgObj.images[i].remove && !msgObj.images[i].error)
+        count += 1;
+    }
+    if (count > 0)
+      setObj.text = count + ' 张照片需要标注';
+  } else {
+    setObj.text = msgObj.images[0].label + ' 加入了聊天室';
   }
+
+  Messages.update({_id: targetMsg._id}, {
+    $set: setObj,
+    $push: {images: {$each: msgObj.images}}
+  }, function(err, num){
+    if (err || num <= 0)
+      insertMsg(msgObj, 'update 失败');
+  });
 };
+
+// SimpleChat.onMqttMessage('/msg/g/b82cc56c599e4c143442c6d0', JSON.stringify({
+//   "_id":new Mongo.ObjectID()._str,
+//   "form":{"id":"u5DuPhJYW5raAQYuh","name":"7YRBBDB722002717","icon":"/userPicture.png"},
+//   "to":{"id":"b82cc56c599e4c143442c6d0","name":"群聊 2","icon":""},
+//   "images":[{"_id":new Mongo.ObjectID()._str,"id":"17","people_his_id":"56rqonm3FNssmh6cR","url":"http://onm4mnb4w.bkt.clouddn.com/eb2a15d6-2310-11e7-9ce5-d065caa81a04","label":null}],
+//   "to_type":"group",
+//   "type":"text",
+//   "text":"[设备 4,17]: -> 需要标注",
+//   "create_time": new Date(),
+//   "people_id":"17",
+//   "people_uuid":"7YRBBDB722002717",
+//   "people_his_id":"56rqonm3FNssmh6cR",
+//   "wait_lable":true,
+//   "is_people":true,
+//   "is_read":false
+// });
+
+last_msg = null;
+// SimpleChat.onMqttMessage = function(topic, msg) {
+//   console.log('SimpleChat.onMqttMessage, topic: ' + topic + ', msg: ' + msg);
+//   var group = topic.substring(topic.lastIndexOf('/') + 1);
+//   var msgObj = JSON.parse(msg);
+//   //var last_msg = Messages.findOne({}, {sort: {create_time: -1}});
+//   if(msgObj.form.id === Meteor.userId()){
+//     return;
+//   }
+//   if(last_msg && last_msg._id === msgObj._id){
+//     return;
+//   }
+//   last_msg = msgObj;
+
+//   if(Messages.find({_id: msgObj._id}).count() > 0){
+//     // 自己发送的消息且本地已经存在
+//     //if (msgObj && msgObj.form.id === Meteor.userId())
+//     //  return;
+
+//     //msgObj._id = new Mongo.ObjectID()._str;
+//     return
+//   }
+  
+//   try{
+//     console.log('last_msg:', last_msg);
+//     msgObj.create_time = msgObj.create_time ? new Date(msgObj.create_time) : new Date();
+//     var group_msg = last_msg && msgObj && msgObj.to_type === 'group' && msgObj.to.id === last_msg.to.id; // 当前组消息
+//     if (!group_msg)
+//       return Messages.insert(msgObj);
+
+//     if (last_msg && last_msg.is_people === true && last_msg.images && last_msg.images.length > 0 && msgObj.images && msgObj.images.length > 0){
+//       if(!msgObj.wait_lable && msgObj.images[0].label === last_msg.images[0].label){
+//         Messages.update({_id: last_msg._id}, {
+//           $set: {create_time: msgObj.create_time},
+//           $push: {images: msgObj.images[0]}
+//         }, function(err, num){
+//           if (err || num <= 0)
+//             Messages.insert(msgObj);
+//         });
+//       }else if(msgObj.wait_lable && msgObj.people_id === last_msg.people_id && msgObj.people_uuid === last_msg.people_uuid){
+//         Messages.update({_id: last_msg._id}, {
+//           $set: {create_time: msgObj.create_time},
+//           $push: {images: msgObj.images[0]}
+//         }, function(err, num){
+//           if (err || num <= 0)
+//             Messages.insert(msgObj);
+//         });
+//       }else{
+//         Messages.insert(msgObj);
+//       }
+//     }else{
+//       Messages.insert(msgObj);
+//     }
+//   }catch(ex){
+//     console.log(ex);
+//     Messages.insert(msgObj);
+//   }
+// };
 
 
 // label
 var label_view = null;
 var label_limit = new ReactiveVar(0);
-var show_label = function(callback){
+show_label = function(callback){
   if (label_view)
     Blaze.remove(label_view);
   label_view = Blaze.renderWithData(Template._simpleChatToChatLabelName, {
@@ -1042,7 +1241,7 @@ Template._simpleChatToChatLabelName.events({
 
 // remove
 var remove_view = null;
-var show_remove = function(callback){
+show_remove = function(callback){
   if (remove_view)
     Blaze.remove(remove_view);
   remove_view = Blaze.renderWithData(Template._simpleChatToChatLabelRemove, {
