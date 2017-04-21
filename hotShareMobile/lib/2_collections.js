@@ -13,9 +13,9 @@ Viewers = new Meteor.Collection('viewers');
 RefComments = new Meteor.Collection("refcomments");
 ReComment = new Meteor.Collection('recomment');
 Reports = new Meteor.Collection('reports');
-Messages = new Meteor.Collection('messages');
-MsgSession = new Meteor.Collection('msgsession');
-MsgGroup = new Meteor.Collection('msggroup');
+//Messages = new Meteor.Collection('messages');
+//MsgSession = new Meteor.Collection('msgsession');
+//MsgGroup = new Meteor.Collection('msggroup');
 Meets = new Meteor.Collection('meets');
 Versions = new Meteor.Collection('versions');
 Moments = new Meteor.Collection('moments');
@@ -26,6 +26,55 @@ UserRelation = new Meteor.Collection('userrelation'); // 用户关系，为了�
 Recommends = new Meteor.Collection('recommends');
 Series = new Meteor.Collection('series');
 SeriesFollow = new Meteor.Collection('seriesfollow');
+
+People = new Meteor.Collection('people');
+PeopleHis = new Meteor.Collection('peopleHis');
+Devices = new Meteor.Collection('devices');
+
+Person = new Meteor.Collection('person');
+PersonNames = new Meteor.Collection('personNames');
+/*Person = {
+  id: <Integer>,
+  uuid: <Integer>,
+  faceId: <Integer>,
+  url: <String>,
+  name: <String>,
+  faces: [{id: <Integer>, url: <String>}]
+  deviceId: <String>,
+  DeviceName: <String>,
+  createAt: <Date>,
+  updateAt: <Date>
+}*/
+
+if(Meteor.isServer){
+  PeopleHis.allow({
+    update: function (userId, doc, fields, modifier) {
+      var user = Meteor.users.findOne({_id: userId})
+
+      if(modifier['$set'].fix_name){
+        PERSON.setName(doc.uuid, doc.id, doc.aliyun_url, modifier['$set'].fix_name);
+        var people = People.find({id: doc.id, uuid: doc.uuid});
+        if(people && people.name)
+          People.update({name: people.name}, {$set: {name: modifier['$set'].fix_name, updateTime: new Date()}}, {multi: true});
+        else
+          People.update({id: doc.id, uuid: doc.uuid}, {$set: {name: modifier['$set'].fix_name, updateTime: new Date()}});
+      }
+      return true;
+    }
+  });
+  Meteor.publish('people_new', function(){
+    return People.find({}, {sort: {updateTime: -1}, limit: 50});
+  });
+  Meteor.methods({
+    getPeopleIdByName: function(name, uuid){
+      var people = People.findOne({name: name, uuid: uuid}, {sort: {updateTime: -1}});
+      if(!people)
+        return '';
+      
+      return {uuid: people.uuid, id: people.id};
+    }
+  });
+}
 
 GetStringByteLength = function(str){
   return str ? str.replace(/[^\x00-\xff]/g, 'xx').length : 0;
@@ -1372,7 +1421,7 @@ if(Meteor.isServer){
                 }
             }
             catch(error){}
-            try{
+       try{
                 var series = Series.find({owner: doc.followerId});
                 if(series.count() > 0){
                     series.forEach(function(data){
@@ -2180,7 +2229,7 @@ if(Meteor.isServer){
       return this.ready();
     else
       return Reports.find({postId: postId},{limit:5});
-  });
+  });/*
   Meteor.publish("messages", function(to){
     if(this.userId === null || to === null || to === undefined)
       return this.ready();
@@ -2238,23 +2287,27 @@ if(Meteor.isServer){
 
     return Messages.find(filter, {sort: {createTime: 1}});
   });
+  */
+    /*
   Meteor.publish("msgSession", function(){
     if(this.userId === null)
       return this.ready();
     else
       return MsgSession.find({userId: this.userId}, {sort: {updateTime: -1}});
-  });
+  });*/
+  /*
   Meteor.publish("msgGroup", function(){
     if(this.userId === null)
       return this.ready();
     else
       return MsgGroup.find({"users.userId": this.userId});
   });
+  */
   Meteor.publish('versions', function() {
     return Versions.find({});
   });
 
- Meteor.publish('authorReadPopularPosts', function(owner,currPostId,limit){
+  Meteor.publish('authorReadPopularPosts', function(owner,currPostId,limit){
      if(this.userId === null|| !Match.test(limit, Number)) {
           return this.ready();
       } else {
@@ -2864,6 +2917,7 @@ if(Meteor.isServer){
       return doc._id === userId
     }
   });
+    /*
   Messages.allow({
     insert: function (userId, doc) {
       // 处理群消息的接收对象
@@ -3006,6 +3060,8 @@ if(Meteor.isServer){
       return userId === doc.userId;
     }
   });
+  */
+    /*
   MsgGroup.allow({
     insert: function (userId, doc) {
       return doc.create.userId === userId;
@@ -3039,7 +3095,7 @@ if(Meteor.isServer){
       return userId === doc.userId;
     }
   });
-
+*/
   SearchSource.defineSource('topics', function(searchText, options) {
     var options = {sort: {createdAt: -1}, limit: 20};
 

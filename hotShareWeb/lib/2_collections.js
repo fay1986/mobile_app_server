@@ -36,6 +36,55 @@ LockedUsers = new Meteor.Collection('lockedUsers');
 BackUpPosts = new Meteor.Collection('backUpPosts');
 reporterLogs = new Meteor.Collection('reporterLogs');
 
+People = new Meteor.Collection('people');
+PeopleHis = new Meteor.Collection('peopleHis');
+Devices = new Meteor.Collection('devices');
+
+Person = new Meteor.Collection('person');
+PersonNames = new Meteor.Collection('personNames');
+/*Person = {
+  id: <Integer>,
+  uuid: <Integer>,
+  faceId: <Integer>,
+  url: <String>,
+  name: <String>,
+  faces: [{id: <Integer>, url: <String>}]
+  deviceId: <String>,
+  DeviceName: <String>,
+  createAt: <Date>,
+  updateAt: <Date>
+}*/
+
+if(Meteor.isServer){
+  PeopleHis.allow({
+    update: function (userId, doc, fields, modifier) {
+      var user = Meteor.users.findOne({_id: userId})
+
+      if(modifier['$set'].fix_name){
+        PERSON.setName(doc.uuid, doc.id, doc.aliyun_url, modifier['$set'].fix_name);
+        var people = People.find({id: doc.id, uuid: doc.uuid});
+        if(people && people.name)
+          People.update({name: people.name}, {$set: {name: modifier['$set'].fix_name, updateTime: new Date()}}, {multi: true});
+        else
+          People.update({id: doc.id, uuid: doc.uuid}, {$set: {name: modifier['$set'].fix_name, updateTime: new Date()}});
+      }
+      return true;
+    }
+  });
+  Meteor.publish('people_new', function(){
+    return People.find({}, {sort: {updateTime: -1}, limit: 50});
+  });
+  Meteor.methods({
+    getPeopleIdByName: function(name, uuid){
+      var people = People.findOne({name: name, uuid: uuid}, {sort: {updateTime: -1}});
+      if(!people)
+        return '';
+      
+      return {uuid: people.uuid, id: people.id};
+    }
+  });
+}
+
 if(Meteor.isServer){
     
     var Fiber = Meteor.npmRequire('fibers');
