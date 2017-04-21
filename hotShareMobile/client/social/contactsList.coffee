@@ -184,4 +184,5 @@ if Meteor.isClient
     'click .meet_letter_btn':(e)->
       e.stopPropagation()
       ta = e.currentTarget.id
-      Router.go '/simple-chat/to/user?id='+ta
+      # Router.go '/simple-chat/to/user?id='+ta
+      writeLetterTo(ta)

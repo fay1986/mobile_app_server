@@ -344,7 +344,8 @@ if Meteor.isClient
         PopUpBox.close()
       Meteor.setTimeout ()->
         Session.set("Social.LevelOne.Menu",'contactsList')
-        Router.go('/simple-chat/to/user?id='+ta)
+        # Router.go('/simple-chat/to/user?id='+ta)
+        writeLetterTo(ta)
       ,300
     'click #followAuthor': (e)->
       if Meteor.user().profile.fullname
@@ -481,7 +482,8 @@ if Meteor.isClient
         PopUpBox.close()
       Meteor.setTimeout ()->
         Session.set("Social.LevelOne.Menu",'contactsList')
-        Router.go('/simple-chat/to/user?id='+ta)
+        # Router.go('/simple-chat/to/user?id='+ta)
+        writeLetterTo(ta)
       ,300
     'click #followAuthor': (e)->
       if Meteor.user().profile.fullname
@@ -617,7 +619,8 @@ if Meteor.isClient
         PopUpBox.close()
       Meteor.setTimeout ()->
         Session.set("Social.LevelOne.Menu",'contactsList')
-        Router.go('/simple-chat/to/user?id='+ta)
+        # Router.go('/simple-chat/to/user?id='+ta)
+        writeLetterTo(ta)
       ,300
     'click #followAuthor': (e)->
       if Meteor.user().profile.fullname
@@ -755,7 +758,8 @@ if Meteor.isClient
         PopUpBox.close()
       Meteor.setTimeout ()->
         Session.set("Social.LevelOne.Menu",'contactsList')
-        Router.go('/simple-chat/to/user?id='+ta)
+        # Router.go('/simple-chat/to/user?id='+ta)
+        writeLetterTo(ta)
       ,300
     'click #followAuthor': (e)->
       if Meteor.user().profile.fullname

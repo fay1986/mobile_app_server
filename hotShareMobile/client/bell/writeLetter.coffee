@@ -1,13 +1,13 @@
 #space 2
 if Meteor.isClient
-  @addFollower = (data)->
-    followerId = data.followerId
+  @writeLetterTo = (userId)->
+    Session.set('simpleChatFormPage',Router.current().route.getName())
     callback = ()->
       blackId = BlackList.findOne({blackBy: Meteor.userId()})._id
-      BlackList.update({_id: blackId}, {$pull: {blacker: followerId}})
-      Follower.insert data
+      BlackList.update({_id: blackId}, {$pull: {blacker: userId}})
+      Router.go('/simple-chat/to/user?id='+userId)
     #对方在黑名单中
-    if BlackList.find({blackBy: Meteor.userId(), blacker:{$in: [followerId]}}).count() > 0
+    if BlackList.find({blackBy: Meteor.userId(), blacker:{$in: [userId]}}).count() > 0
        navigator.notification.confirm(
                 '你已将对方加入黑名单，是否解除？'
                 (index)->
@@ -17,7 +17,7 @@ if Meteor.isClient
                 ['暂不','解除']
             )
     else
-      Follower.insert data
+      Router.go('/simple-chat/to/user?id='+userId)
   Template.writeLetter.rendered=->
     $('.content').css 'min-height',$(window).height()
     $(window).scroll (event)->
@@ -95,3 +95,6 @@ if Meteor.isClient
   Template.writeLetter.events
     'click .back' :->
       history.go(-1)
+    'click .contentList':(e)->
+      userId = e.currentTarget.id
+      writeLetterTo(userId)

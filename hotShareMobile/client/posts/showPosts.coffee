@@ -215,6 +215,7 @@ if Meteor.isClient
       $('.div_discover').css('display',"none")
       $('.div_me').css('display',"none")
       document.body.scrollTop = $(".showPostsBox").height()
+      Session.set('formSimpleChatPage',false)
   Template.showPosts.onDestroyed ->
     # if window._music
     #   document.getElementById('audio_' + window._music_id).pause()

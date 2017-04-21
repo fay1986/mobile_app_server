@@ -13,21 +13,21 @@
       {{/if}}
       {{#each followers}}
         {{#if isFollowers}}
-            <a href="/simple-chat/to/user?id={{followerId}}" class="contentList">
+            <div id="{{followerId}}" class="contentList">
             <!--列出偶像-->
             <img class="icon" src="{{followerIcon}}" width='30' height='30'>
             <div class="userName">{{followerName}}</div>
               <div id="{{followerId}}" class="follow" >私信</div>
             <div class="desc">{{followerDesc}}</div>
-            </a>
+            </div>
         {{else}}
-            <a href="/simple-chat/to/user?id={{userId}}" class="contentList">
+            <div  id="{{userId}}" class="contentList">
             <!--列出粉丝-->
             <img class="icon" src="{{userIcon}}" width='30' height='30'>
             <div class="userName">{{userName}}</div>
               <div id="{{userId}}" class="follow">私信</div>
             <div class="desc">{{userDesc}}</div>
-            </a>
+            </div>
         {{/if}}
       <div class="line">
         <span></span>

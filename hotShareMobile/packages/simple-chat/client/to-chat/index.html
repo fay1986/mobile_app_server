@@ -7,10 +7,12 @@
         $('.header .back').click(function(){
           SimpleChat.MsgSession.update({userId: Meteor.userId(), toUserId: location.search.replace('?id=', '')}, {$set: {count: 0}});
           var currentPage = location.pathname;
-          if(currentPage.match('/to/user')){
-            Session.set('formSimpleChatPage', 'user')
-          } else if(currentPage.match('/to/group')){
-            Session.set('formSimpleChatPage', 'group')
+          if(Session.get('simpleChatFormPage') && Session.get('simpleChatFormPage').match('posts')){
+            if(currentPage.match('/to/user')){
+              Session.set('formSimpleChatPage', 'user')
+            } else if(currentPage.match('/to/group')){
+              Session.set('formSimpleChatPage', 'group')
+            }
           }
           history.go(-1);
         })
