@@ -207,6 +207,14 @@ if Meteor.isClient
       Meteor.subscribe "authorReadPopularPosts",owner,_id,3,()->
         authorHotPosts = Posts.find({owner: owner, publish: {$ne: false}},{sort: {browse: -1},limit: 3}).fetch()
         Session.set("authorHotPosts", authorHotPosts)
+    if Session.get('formSimpleChatPage') is 'user'
+      $('.showPostsBox,.showPostsLine,.superChatIntroduce').show()
+      Session.set("Social.LevelOne.Menu",'contactsList')
+      Session.set("SocialOnButton",'contactsList')
+      $('.div_contactsList').css('display',"block")
+      $('.div_discover').css('display',"none")
+      $('.div_me').css('display',"none")
+      document.body.scrollTop = $(".showPostsBox").height()
   Template.showPosts.onDestroyed ->
     # if window._music
     #   document.getElementById('audio_' + window._music_id).pause()

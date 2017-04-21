@@ -6,14 +6,13 @@
         <script type="text/javascript">
         $('.header .back').click(function(){
           SimpleChat.MsgSession.update({userId: Meteor.userId(), toUserId: location.search.replace('?id=', '')}, {$set: {count: 0}});
-
-          var historyArr = Session.get("history_view");
-          if (historyArr && historyArr.length > 0) {
-            PUB.back();
+          var currentPage = location.pathname;
+          if(currentPage.match('/to/user')){
+            Session.set('formSimpleChatPage', 'user')
+          } else if(currentPage.match('/to/group')){
+            Session.set('formSimpleChatPage', 'group')
           }
-          else{
-            history.go(-1);
-          }
+          history.go(-1);
         })
         </script>
         <span>{{title}}</span>
@@ -186,7 +185,7 @@
           {{/if}}
         {{/each}}
       </div>
-      <div class="line-label-box crop-lable-box"><div class="check">标记</div><div class="crop">裁剪</div><div class="remove">删除</div></div>
+      <!--<div class="line-label-box crop-lable-box"><div class="check">标记</div><div class="crop">裁剪</div><div class="remove">删除</div></div>-->
     </div>
     <!-- {{else}}
     <div class="img"><img src="{{thumbnail}}" /></div>
