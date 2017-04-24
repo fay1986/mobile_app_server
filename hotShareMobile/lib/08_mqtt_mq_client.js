@@ -16,14 +16,11 @@ if(Meteor.isClient){
             }
             mqtt_connection=mqtt.connect('ws://tmq.tiegushi.com:80',mqttOptions);
             mqtt_connection.on('connect',function(){
-                var start = Date.now();
                 // get MQTT_TIME_DIFF
-                $.ajax({
-                    'type': 'head',
-                    'async': true,
-                    'url': 'http://'+server_domain_name+'/restapi/date/',
-                    'success': function(data,status,xhr){
-                        MQTT_TIME_DIFF = xhr.getResponseHeader('date') - Date.now();
+                var url = 'http://'+server_domain_name+'/restapi/date/';
+                $.get(url,function(data){
+                    if(data){
+                        MQTT_TIME_DIFF = Number(data) - Date.now();
                         console.log('MQTT_TIME_DIFF===',MQTT_TIME_DIFF)
                     }
                 });
@@ -49,6 +46,11 @@ if(Meteor.isClient){
             sendMqttMessage=function(topic,message){
                 console.log('sendMqttMessage:', topic, message);
                 mqtt_connection.publish(topic,JSON.stringify(message),{qos:1})
+                // send notification
+                console.log('topic===',topic)
+                if(topic.match('/msg/u/')){
+                    Meteor.call('sendPersonLetterNotification',message,message.to.id);
+                }
             };
             subscribeMqttGroup=function(group_id) {
                 if (mqtt_connection) {

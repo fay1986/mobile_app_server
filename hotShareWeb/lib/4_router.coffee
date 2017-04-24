@@ -495,5 +495,5 @@ if Meteor.isServer
       'Date': Date.now()
     }
     this.response.writeHead(200, headers)
-    this.response.end()
+    this.response.end(Date.now().toString())
   , {where: 'server'})

@@ -99,6 +99,16 @@ if Meteor.isServer
         postId: doc.postId
       }
       toUserId = userId
+    else if type is "personletter"
+      content = '您收到了一条来自'+doc.userName + '的私信'
+      if doc.type is 'text'
+        contentText = doc.text
+      if doc.type is 'image'
+        contentText = '[图片]'
+      extras = {
+        type: 'personletter'
+      }
+      toUserId = userId
     else if type is "read"
       if doc.owner == userId
         #console.log "read self post"
