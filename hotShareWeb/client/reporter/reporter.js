@@ -130,6 +130,7 @@ ReporterController = RouteController.extend({
     return LockedUsers.find({createdAt:{$exists: true}}, this.findOptions());
   },
   waitOn: function(){
+    Meteor.subscribe('topics');
     if(!Session.get('reporter-page')){
       Session.set('reporter-page',1)
     }
@@ -432,6 +433,12 @@ Template.reporter.events({
         }
       });
     });
+  },
+
+  // add Topic
+  'click .addToTopic': function(e){
+    Session.set('currentPostId',e.currentTarget.id);
+    $('.topicContainer').show();
   }
 });
 
@@ -518,3 +525,29 @@ Template.ReviewPostContent.helpers({
     return Session.get('reporterLayout') === 'review';
   }
 })
+
+Template.topicContainer.helpers({
+  topics: function(){
+    return Topics.find({}).fetch();
+  }
+});
+
+Template.topicContainer.events({
+  'click .topicLists li': function(e){
+    $(e.currentTarget).toggleClass('selected');
+  },
+  'click .left': function(e){
+    $('.topicLists li').removeClass('selected');
+    $('.topicContainer').hide()
+  },
+  'click .right': function(e){
+    var postId = Session.get('currentPostId');
+    var topicIds = [];
+    $('.topicLists li.selected').each(function(){
+      topicIds.push($(this).attr('id'))
+    });
+    $('.topicLists li').removeClass('selected');
+    $('.topicContainer').hide();
+    Meteor.call('addTopicsAtReview',postId,topicIds);
+  }
+});

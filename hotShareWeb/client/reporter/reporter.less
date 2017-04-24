@@ -28,7 +28,6 @@
       height: 32px;
       position: absolute;
       top: 48px;
-      margin: 0 16px;
       width: 100%;
       padding-top: 4px;
       line-height: 32px;
@@ -175,5 +174,27 @@
     // .reviewPostContent img{ width: 240px !important;} 
     .rp-header ul li{padding: 0 16px !important;}
     .rp-user-mobile{display: block;}
+  }
+}
+.topicContainer{
+  position: absolute;width:100%; height: 100%; background: #fff; z-index: 99; display: none;
+  .header {
+    position: fixed; top:
+    0; width:100%;height: 40px; background: #fff; color: deepskyblue; box-shadow: 0 0 4px #000;
+    div{display: inline-block; text-align: center; line-height: 40px;cursor: pointer;}
+    .left,.right{width: 64px;}
+    .right{float: right;}
+    .head{background: #fff !important; position: absolute; width: auto; left: 64px; right: 64px;}
+  }
+  .topicLists {
+    margin-top: 50px; background: #fff;
+    li {
+      border-bottom: 1px solid #ccc;
+      height: 48px;
+      line-height: 48px;
+      padding: 0 10px;
+      cursor: pointer;
+    }
+    li.selected{ background: #42a8ca; color: #fff;}
   }
 }

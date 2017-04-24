@@ -136,6 +136,7 @@
   {{/if}}
   {{> loginToReportSystem}}
   {{> ReviewPostContent}}
+  {{> topicContainer}}
 </div>
 
 </template>
@@ -197,7 +198,7 @@
   {{#if isReview}}
     <p id={{posts._id}} class="reviewPostPass rp-c-blue-btn" style="padding:8px 16px; display:inline-block;">通过</p>
     <p id={{posts._id}} class="reviewPostMiss rp-c-blue-btn" style="padding:8px 16px; display:inline-block;">不通过</p>  
-    <p id="{{posts._id}}" class="removeWithUser rp-c-red-btn" style="padding:8px 16px; display:inline-block;">不通过并禁止用户</p>  
+    <p id="{{posts._id}}" class="removeWithUser rp-c-red-btn" style="padding:8px 16px; display:inline-block;">禁止用户</p>  
   {{/if}}
   {{#if isRecover}}
     <p id={{posts._id}} class="restore rp-c-pink-btn" style="padding:8px 16px; display:inline-block;">恢复</p>
@@ -205,9 +206,25 @@
   {{/if}}
   {{#if isMontior}}
     <p id={{posts._id}} class="remove rp-c-pink-btn" style="padding:8px 16px; display:inline-block;">删除</p>
-    <p id={{posts._id}} class="removeWithUser rp-c-red-btn" style="padding:8px 16px; display:inline-block;">删除并禁止用户</p>  
+    <p id={{posts._id}} class="removeWithUser rp-c-red-btn" style="padding:8px 16px; display:inline-block;">禁止用户</p>  
   {{/if}}
-  <p id="closeReviewContent" class="rp-c-red-btn" style="padding:8px 16px; display:inline-block;position: absolute;z-index: 9; margin: 12px;">关闭</p>
+  <p id={{posts._id}} class="addToTopic rp-c-blue-btn" style="padding:8px 16px; display:inline-block;">话题</p>
+  <p id="closeReviewContent" class="rp-c-red-btn" style="padding:8px 16px; display:inline-block;">关闭</p>
   </div>
+</div>
+</template>
+<!--topic container-->
+<template name="topicContainer">
+<div class="topicContainer">
+  <div class="header">
+    <div class="left">返回</div>
+    <div class="head">添加话题</div>
+    <div class="right">完成</div>
+  </div>
+  <ul class="topicLists">
+  {{#each topics}}
+    <li id="{{_id}}">{{text}}</li>
+  {{/each}}
+  </ul>
 </div>
 </template>
