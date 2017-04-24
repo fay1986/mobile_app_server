@@ -573,3 +573,11 @@ if Meteor.isServer
            Meteor.subscribe("postsAuthor",this.params._id),
            Meteor.subscribe "pcomments"]
     }
+  Router.route('/restapi/date', (req, res, next)->
+    headers = {
+      'Content-type':'text/html;charest=utf-8',
+      'Date': Date.now()
+    }
+    this.response.writeHead(200, headers)
+    this.response.end()
+  ,{where: 'server'})

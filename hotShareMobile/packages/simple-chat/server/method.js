@@ -21,7 +21,7 @@ Meteor.methods({
               user_id: user._id,
               user_name: user.profile && user.profile.fullname ? user.profile.fullname : user.username,
               user_icon: user.profile && user.profile.icon ? user.profile.icon : '/userPicture.png',
-              create_time: new Date()
+              create_time: new Date(Date.now() + MQTT_TIME_DIFF)
             });
           }
         }
@@ -35,9 +35,9 @@ Meteor.methods({
       name: name,
       icon: '',
       describe: '',
-      create_time: new Date(),
+      create_time: new Date(Date.now() + MQTT_TIME_DIFF),
       last_text: '',
-      last_time: new Date(),
+      last_time: new Date(Date.now() + MQTT_TIME_DIFF),
       barcode: rest_api_url + '/restapi/workai-group-qrcode?group_id=' + id
     }, function(err){
       if(ids.indexOf(slef.userId) === -1)
@@ -54,7 +54,7 @@ Meteor.methods({
             user_id: user._id,
             user_name: user.profile && user.profile.fullname ? user.profile.fullname : user.username,
             user_icon: user.profile && user.profile.icon ? user.profile.icon : '/userPicture.png',
-            create_time: new Date()
+            create_time: new Date(Date.now() + MQTT_TIME_DIFF)
           });
         }
       }
@@ -86,7 +86,7 @@ Meteor.methods({
             user_id: user._id,
             user_name: user.profile && user.profile.fullname ? user.profile.fullname : user.username,
             user_icon: user.profile && user.profile.icon ? user.profile.icon : '/userPicture.png',
-            create_time: new Date()
+            create_time: new Date(Date.now() + MQTT_TIME_DIFF)
           });
         }
       }

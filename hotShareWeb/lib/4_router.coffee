@@ -488,3 +488,12 @@ if Meteor.isServer
     this.response.writeHead(200, headers)
     this.response.end(file, 'binary')
   , { where: 'server' })
+
+  Router.route('/restapi/date', (req, res, next)->
+    headers = {
+      'Content-type':'text/html;charest=utf-8',
+      'Date': Date.now()
+    }
+    this.response.writeHead(200, headers)
+    this.response.end()
+  , {where: 'server'})

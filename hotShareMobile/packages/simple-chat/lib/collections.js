@@ -65,7 +65,7 @@ if(Meteor.isServer){
     msgObj.userName = AppConfig.get_user_name(Meteor.user());
     msgObj.userIcon = AppConfig.get_user_icon(Meteor.user()); 
     msgObj.lastText = doc.type === 'text' ? doc.text : '[图片]';
-    msgObj.updateAt = new Date();
+    msgObj.updateAt = new Date(Date.now() + MQTT_TIME_DIFF);
 
     var msgSession = MsgSession.findOne({userId: Meteor.userId(), toUserId: msgObj.toUserId});
     if (msgSession){
@@ -73,7 +73,7 @@ if(Meteor.isServer){
       MsgSession.update({_id: msgSession._id}, {$set: msgObj, $inc: {count: 1}});
       console.log('update chat session:', msgObj);
     } else {
-      msgObj.createAt = new Date();
+      msgObj.createAt = new Date(Date.now() + MQTT_TIME_DIFF);
       msgObj.count = 1;
       MsgSession.insert(msgObj);
       console.log('insert chat session:', msgObj);

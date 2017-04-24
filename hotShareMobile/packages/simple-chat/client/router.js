@@ -137,7 +137,7 @@ var onFixName = function(id, uuid, his_id, url, to, value, type){
     images: images,
     to_type: "group",
     type: "text",
-    create_time: new Date(),
+    create_time: new Date(Date.now() + MQTT_TIME_DIFF),
     people_id: id,
     people_uuid: uuid,
     people_his_id: his_id,
@@ -875,7 +875,7 @@ Template._simpleChatToChatLayout.events({
         to_type: data.type,
         type: 'text',
         text: text,
-        create_time: new Date(),
+        create_time: new Date(Date.now() + MQTT_TIME_DIFF),
         is_read: false
       };
       Messages.insert(msg, function(){
@@ -1014,7 +1014,7 @@ window.___message = {
         }
       ],
       //thumbnail: '/packages/feiwu_simple-chat/images/sendingBmp.gif',
-      create_time: new Date(),
+      create_time: new Date(Date.now() + MQTT_TIME_DIFF),
       people_uuid:'',
       people_his_id:id,
       wait_lable:true,

@@ -27,3 +27,4 @@
 @signUpUserNameLength = 16
 @withPostTitleMaxLength = 180      #byte
 @withPostSubTitleMaxLength = 120   #byte
+@MQTT_TIME_DIFF = 0

@@ -16,6 +16,17 @@ if(Meteor.isClient){
             }
             mqtt_connection=mqtt.connect('ws://tmq.tiegushi.com:80',mqttOptions);
             mqtt_connection.on('connect',function(){
+                var start = Date.now();
+                // get MQTT_TIME_DIFF
+                $.ajax({
+                    'type': 'head',
+                    'async': true,
+                    'url': 'http://'+server_domain_name+'/restapi/date/',
+                    'success': function(data,status,xhr){
+                        MQTT_TIME_DIFF = xhr.getResponseHeader('date') - Date.now();
+                        console.log('MQTT_TIME_DIFF===',MQTT_TIME_DIFF)
+                    }
+                });
                 if(!mqtt_connected){
                     mqtt_connected = true;
                     console.log('Connected to mqtt server');
