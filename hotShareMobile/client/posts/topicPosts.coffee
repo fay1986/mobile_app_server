@@ -73,3 +73,75 @@ if Meteor.isClient
       ,animatePageTrasitionTimeout
       Session.set 'FollowPostsId',this._id
       return
+
+  Template.topicPostsAll.onCreated ()->
+    Session.set("newpostsLimit", 10)
+    Session.set('newpostsCollection','loading')
+    Meteor.subscribe 'newposts', 10, onReady: ->
+      if Session.get("newpostsLimit") >= Posts.find({}).count()
+        console.log 'newpostsCollection loaded'
+        Meteor.setTimeout (->
+          Session.set 'newpostsCollection', 'loaded'
+        ), 500
+    
+  Template.topicPostsAll.rendered=->
+    $('.content').css 'min-height',$(window).height()
+    $(window).scroll (event)->
+        tHeight = $('.home').height()
+        nHeight = $(window).scrollTop() + $(window).height() + 320
+        if nHeight > tHeight
+          Session.set('newpostsCollection','loading')
+        target = $("#topicPostShowMoreResults");
+        TOPIC_POSTS_ITEMS_INCREMENT = 10;
+
+        if (!target.length)
+            return;
+        threshold = $(window).scrollTop() + $(window).height() - target.height()
+
+        if target.offset().top < threshold
+          if (!target.data("visible"))
+              Session.set("newpostsLimit",
+                          Posts.find({}).count() + TOPIC_POSTS_ITEMS_INCREMENT)
+              Meteor.subscribe 'newposts', Session.get('newpostsLimit'), onReady: ->
+                if Session.get("newpostsLimit") >= Posts.find({}).count()
+                  console.log 'newpostsCollection loaded'
+                  Meteor.setTimeout (->
+                    Session.set 'newpostsCollection', 'loaded'
+                    return
+                  ), 500
+                return
+        else
+          if (target.data("visible"))
+              target.data("visible", false);
+  Template.topicPostsAll.helpers
+    getBrowseCount:(browse)->
+      if (browse)
+        browse
+      else
+        0
+    newPosts:()->
+      Posts.find({}, {sort: {createdAt: -1}})
+    moreResults:->
+      if Session.equals('newpostsCollection','loaded')
+          false
+      else
+          true
+  Template.topicPostsAll.events
+    'click .back':(event)->
+      $('.home').addClass('animated ' + animateOutUpperEffect);
+      Meteor.setTimeout ()->
+        PUB.back()
+      ,animatePageTrasitionTimeout
+    'click .mainImage': (event)->
+      Session.set("postPageScrollTop", 0)
+      if isIOS
+        if (event.clientY + $('#footer').height()) >=  $(window).height()
+          console.log 'should be triggered in scrolling'
+          return false
+      postId = this._id
+      $('.home').addClass('animated ' + animateOutUpperEffect);
+      Meteor.setTimeout ()->
+        PUB.page '/posts/'+postId
+      ,animatePageTrasitionTimeout
+      # Session.set 'FollowPostsId',this._id
+      return

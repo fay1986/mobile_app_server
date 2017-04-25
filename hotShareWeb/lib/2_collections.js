@@ -1943,6 +1943,13 @@ if(Meteor.isServer){
         }
     });
 
+    Meteor.publish("newposts", function(limit) {
+        if(this.userId === null || !Match.test(limit, Number))
+          return this.ready();
+        else
+          return Posts.find({}, {sort: {createdAt: -1}, limit:limit});
+    });
+
     Meteor.publish("mySeries", function(limit) {
         if(this.userId === null || !Match.test(limit, Number))
           return this.ready();

@@ -10,10 +10,14 @@
           <label><input id="search-box" type="text" placeholder={{_ "searchPeople"}}></label>
       </div>
       <div id="themeList">
+        <div class="block">
+          <div class="theme" style="background-image:url(/theme/theme4.jpg)"></div>
+          <h3 id="themeAll" class="themeBtn">最新故事</h3>
+        </div>
         {{#each theme}}
         <div class="block">
           <div class="theme" id="{{_id}}" style="background-image:url({{imgUrl}})"></div>
-          <h3 class="themeBtn">{{text}}</h3>
+          <h3 id="themeClick" class="themeBtn">{{text}}</h3>
         </div>
         {{/each}}
       </div>

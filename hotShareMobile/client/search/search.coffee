@@ -20,10 +20,12 @@ if Meteor.isClient
        PUB.page '/searchPeopleAndTopic'
     'click #follow': (event)->
        PUB.page '/searchFollow'
-    'click .themeBtn': (event)->
+    'click #themeClick': (event)->
        Session.set "topicId", @_id
        Session.set "topicTitle", "#"+ @text + "#"
        PUB.page '/topicPosts'
+    'click #themeAll': (event)->
+       PUB.page '/topicPostsAll'
     'click .topic': (event)->
        Session.set "topicId", @_id
        Session.set "topicTitle", "#"+ @text + "#"
