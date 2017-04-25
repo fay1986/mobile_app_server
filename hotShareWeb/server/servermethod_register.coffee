@@ -99,8 +99,6 @@ if Meteor.isServer
       FavouritePosts.insert({postId: postId, userId: userId, createdAt: new Date(), updateAt: new Date()})
   Meteor.startup ()->
     Meteor.methods
-      'sendPersonLetterNotification':(doc,userId)->
-        pushnotification('personletter',doc,userId)
       'updateFollowSeriesInfo':(userId,options)->
         Meteor.defer ()->
           try 

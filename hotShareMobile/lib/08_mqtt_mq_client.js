@@ -46,11 +46,7 @@ if(Meteor.isClient){
             sendMqttMessage=function(topic,message){
                 console.log('sendMqttMessage:', topic, message);
                 mqtt_connection.publish(topic,JSON.stringify(message),{qos:1})
-                // send notification
-                console.log('topic===',topic)
-                if(topic.match('/msg/u/')){
-                    Meteor.call('sendPersonLetterNotification',message,message.to.id);
-                }
+                
             };
             subscribeMqttGroup=function(group_id) {
                 if (mqtt_connection) {
