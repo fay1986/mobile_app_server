@@ -79,15 +79,21 @@ function sendNotification(db,message, toUserId ,type) {
           return
         }
         var content = '';
+        var msgText = '';
         var pushToken = {
           type: toUser.type,
           token: toUser.token
         };
+        if(message.type === 'image'){
+          msgText = '[图片]';
+        } else {
+          msgText = message.text;
+        }
         if(type == 'usermessage'){
-            content = message.form.name+ ':' + message.text;
+            content = message.form.name+ ':' + msgText;
         }
         if(type === 'groupmessage'){
-          content = message.to.name+ ':' + message.text;
+          content = message.to.name+ ':' + msgText;
         }
         var commentText = '';
         var extras = {
