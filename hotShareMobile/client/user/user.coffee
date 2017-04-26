@@ -99,41 +99,45 @@ if Meteor.isClient
     followers:->
       #Follower存放用户间关注记录， Follows是推荐偶像列表
       #followerId是偶像userId, userId是粉丝userId
-      myFollowedByCount = Session.get('myEmailFollowerCount-'+Meteor.userId()) + Session.get('myFollowedByCount-'+Meteor.userId())
-      if Session.equals('myCounterCollection','loaded')
-        myFollowedByCount = Counts.get('myEmailFollowerCount-'+Meteor.userId()) + Counts.get('myFollowedByCount-'+Meteor.userId())
-      if myFollowedByCount
-        myFollowedByCount
-      else
-        0
+      return Session.get('myEmailFollowerCount-'+Meteor.userId()) + Session.get('myFollowedByCount-'+Meteor.userId())
+      # myFollowedByCount = Session.get('myEmailFollowerCount-'+Meteor.userId()) + Session.get('myFollowedByCount-'+Meteor.userId())
+      # if Session.equals('myCounterCollection','loaded')
+      #   myFollowedByCount = Counts.get('myEmailFollowerCount-'+Meteor.userId()) + Counts.get('myFollowedByCount-'+Meteor.userId())
+      # if myFollowedByCount
+      #   myFollowedByCount
+      # else
+      #   0
 
     emailFollowerCount:->
-      myEmailFollowedByCount = Session.get('myEmailFollowerCount-'+Meteor.userId())
-      if Session.equals('myCounterCollection','loaded')
-        myEmailFollowedByCount = Counts.get('myEmailFollowerCount-'+Meteor.userId())
-      if myEmailFollowedByCount
-        myEmailFollowedByCount
-      else
-        0
+      return Session.get('myEmailFollowerCount-'+Meteor.userId())
+      # myEmailFollowedByCount = Session.get('myEmailFollowerCount-'+Meteor.userId())
+      # if Session.equals('myCounterCollection','loaded')
+      #   myEmailFollowedByCount = Counts.get('myEmailFollowerCount-'+Meteor.userId())
+      # if myEmailFollowedByCount
+      #   myEmailFollowedByCount
+      # else
+      #   0
 
     appFollowerCount:->
-      myFollowedByCount = Session.get('myFollowedByCount-'+Meteor.userId())
-      if Session.equals('myCounterCollection','loaded')
-        myFollowedByCount = Counts.get('myFollowedByCount-'+Meteor.userId())
+      return Session.get('myFollowedByCount-'+Meteor.userId())
+      # myFollowedByCount = Session.get('myFollowedByCount-'+Meteor.userId())
+      # if Session.equals('myCounterCollection','loaded')
+      #   myFollowedByCount = Counts.get('myFollowedByCount-'+Meteor.userId())
 
-      if myFollowedByCount
-        myFollowedByCount
-      else
-        0
+      # if myFollowedByCount
+      #   myFollowedByCount
+      # else
+      #   0
 
     draftsCount:->
-      mySavedDraftsCount = Session.get('mySavedDraftsCount')
-      if Session.equals('myCounterCollection','loaded')
-        mySavedDraftsCount = Counts.get('mySavedDraftsCount')
-      if mySavedDraftsCount
-        mySavedDraftsCount
-      else
-        0
+      return Session.get('mySavedDraftsCount')
+      # mySavedDraftsCount = Session.get('mySavedDraftsCount')
+      # if Session.equals('myCounterCollection','loaded')
+      #   mySavedDraftsCount = Counts.get('mySavedDraftsCount')
+      # if mySavedDraftsCount
+      #   mySavedDraftsCount
+      # else
+      #   0
     compareDraftsCount:(value)->
       if (Session.get('mySavedDraftsCount')> value)
         true
@@ -144,11 +148,11 @@ if Meteor.isClient
       if mySavedDrafts.count() > 0
         Meteor.defer ()->
           Session.setPersistent('persistentMySavedDrafts',mySavedDrafts.fetch())
-        return mySavedDrafts
-      else
-        Session.get('persistentMySavedDrafts')
+      #   return mySavedDrafts
+      # else
+      return Session.get('persistentMySavedDrafts')
         
-      return mySavedDrafts
+      # return mySavedDrafts
     gtValue: (value1, value2)->
       return value1 > value2
     gtZero: (value)->
@@ -159,14 +163,15 @@ if Meteor.isClient
       else
         return false
     postsCount:->
+      return Session.get('myPostsCount')
       #return  Posts.find({owner: Meteor.userId(), publish: {$ne: false}}).count()
       myPostsCount = Session.get('myPostsCount')
-      if Session.equals('myCounterCollection','loaded')
-        myPostsCount = Counts.get('myPostsCount')
-      if myPostsCount
-        myPostsCount
-      else
-        0
+      # if Session.equals('myCounterCollection','loaded')
+      #   myPostsCount = Counts.get('myPostsCount')
+      # if myPostsCount
+      #   myPostsCount
+      # else
+      #   0
     comparePostsCount:(value)->
       if (Session.get('myPostsCount') > value)
         true
@@ -181,13 +186,14 @@ if Meteor.isClient
       else
         Session.get('persistentMyOwnPosts')
     followCount:->
-      myFollowToCount = Session.get('myFollowToCount')
-      if Session.equals('myCounterCollection','loaded')
-        myFollowToCount = Counts.get('myFollowToCount')
-      if myFollowToCount
-        myFollowToCount
-      else
-        0
+      return Session.get('myFollowToCount')
+      # myFollowToCount = Session.get('myFollowToCount')
+      # if Session.equals('myCounterCollection','loaded')
+      #   myFollowToCount = Counts.get('myFollowToCount')
+      # if myFollowToCount
+      #   myFollowToCount
+      # else
+      #   0
     getmainImage:()->
       mImg = this.mainImage
       if (mImg.indexOf('file:///') >= 0)
