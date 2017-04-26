@@ -103,7 +103,8 @@ if Meteor.isClient
               Session.set("newpostsLimit",
                           Posts.find({}).count() + TOPIC_POSTS_ITEMS_INCREMENT)
               Meteor.subscribe 'newposts', Session.get('newpostsLimit'), onReady: ->
-                if Session.get("newpostsLimit") >= Posts.find({}).count()
+                notShowArrId = Session.get 'notShowPostUserIdArr'
+                if Session.get("newpostsLimit") >= Posts.find({'owner':{$nin:notShowArrId}}).count()
                   console.log 'newpostsCollection loaded'
                   Meteor.setTimeout (->
                     Session.set 'newpostsCollection', 'loaded'
@@ -120,7 +121,15 @@ if Meteor.isClient
       else
         0
     newPosts:()->
-      Posts.find({}, {sort: {createdAt: -1}})
+      userId = Meteor.userId()
+      followerData = Follower.find().fetch()
+      notShowArrId = []
+      notShowArrId.push(userId)
+      for item in followerData
+        notShowArrId.push(item.followerId)
+      console.log notShowArrId
+      Session.set 'notShowPostUserIdArr', notShowArrId
+      Posts.find({'owner':{$nin:notShowArrId}}, {sort: {createdAt: -1}})
     moreResults:->
       if Session.equals('newpostsCollection','loaded')
           false
