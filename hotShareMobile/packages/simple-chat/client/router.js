@@ -1058,7 +1058,7 @@ SimpleChat.onMqttMessage = function(topic, msg) {
     });
   };
 
-  if (!(topic.startsWith('/msg/g/') || topic.startsWith('/msg/u/')))
+  if (!(topic.startsWith('/t/msg/g/') || topic.startsWith('/t/msg/u/')))
     return;
 
   var msgObj = JSON.parse(msg);
@@ -1122,7 +1122,7 @@ SimpleChat.onMqttMessage = function(topic, msg) {
   });
 };
 
-// SimpleChat.onMqttMessage('/msg/g/b82cc56c599e4c143442c6d0', JSON.stringify({
+// SimpleChat.onMqttMessage('/t/msg/g/b82cc56c599e4c143442c6d0', JSON.stringify({
 //   "_id":new Mongo.ObjectID()._str,
 //   "form":{"id":"u5DuPhJYW5raAQYuh","name":"7YRBBDB722002717","icon":"/userPicture.png"},
 //   "to":{"id":"b82cc56c599e4c143442c6d0","name":"群聊 2","icon":""},

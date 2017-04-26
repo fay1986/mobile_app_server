@@ -51,23 +51,23 @@ if(Meteor.isClient){
             subscribeMqttGroup=function(group_id) {
                 if (mqtt_connection) {
                     console.log('sub mqtt:' + group_id);
-                    mqtt_connection.subscribe('/msg/g/'+group_id,{qos:1});
+                    mqtt_connection.subscribe('/t/msg/g/'+group_id,{qos:1});
                 }
             };
             unsubscribeMqttGroup=function(group_id) {
                 if (mqtt_connection) {
-                    mqtt_connection.unsubscribe("/msg/g/" + group_id);
+                    mqtt_connection.unsubscribe("/t/msg/g/" + group_id);
                 }
             };
             subscribeMqttUser=function(user_id){
                 if (mqtt_connection) {
                     console.log('sub mqtt:' + user_id);
-                    mqtt_connection.subscribe('/msg/u/'+user_id,{qos:1});
+                    mqtt_connection.subscribe('/t/msg/u/'+user_id,{qos:1});
                 }
             };
             unsubscribeMqttUser=function(user_id){
                 if (mqtt_connection) {
-                    mqtt_connection.unsubscribe("/msg/u/" + user_id);
+                    mqtt_connection.unsubscribe("/t/msg/u/" + user_id);
                 }
             };
             // sendMqttMessage=function(topic,message){
@@ -76,11 +76,11 @@ if(Meteor.isClient){
             //     })
             // };
             sendMqttGroupMessage=function(group_id, message) {
-                sendMqttMessage("/msg/g/" + group_id, message);
+                sendMqttMessage("/t/msg/g/" + group_id, message);
             };
             sendMqttUserMessage=function(user_id, message) {
                 // console.log('sendMqttUserMessage:', message);
-                sendMqttMessage("/msg/u/" + user_id, message);
+                sendMqttMessage("/t/msg/u/" + user_id, message);
             };
         }
     }
