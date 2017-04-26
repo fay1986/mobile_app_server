@@ -1,14 +1,14 @@
 var mqtt = require('mqtt')
 var MongoClient = require('mongodb').MongoClient;
 
-var serverUrl = 'http://host1.tiegushi.com/'
+var serverUrl = process.env.SERVER_URL || 'http://host1.tiegushi.com/';
 var MQTT_URL = process.env.MQTT_URL;
 var DB_CONN = process.env.MONGO_URL;
 // var DB_CONN = 'mongodb://workAIAdmin:weo23biHUI@aidb.tiegushi.com:27017/workai';
 var db = null;
 var debug_on = process.env.DEBUG_MESSAGE || false;
 var allowGroupNotification = process.env.ALLOW_GROUP_NOTIFICATION || false;
-
+var projectName = process.env.PROJECT_NAME || null; // '故事贴：t , 点圈： d'
 var client  = mqtt.connect(MQTT_URL);
 MongoClient.connect(DB_CONN, {poolSize:20 , reconnectTries: Infinity}, function(err, mongodb){
   if (err) {
@@ -26,10 +26,14 @@ MongoClient.connect(DB_CONN, {poolSize:20 , reconnectTries: Infinity}, function(
 
 client.on('connect', function () {
   console.log('mqtt connected')
-  client.unsubscribe('/#');
-  client.subscribe('/#',{qos:1},function(err,granted){
-        console.log('Granted is '+JSON.stringify(granted)) 
-    });
+  var subscribeTopic = '/msg/#';
+  if(projectName){
+    subscribeTopic = '/'+projectName+'/msg/#';
+  }
+  client.unsubscribe(subscribeTopic);
+  client.subscribe(subscribeTopic,{qos:1},function(err,granted){
+    console.log('Granted is '+JSON.stringify(granted)) 
+  });
 });
  
 client.on('message', function (topic, message) {
@@ -38,12 +42,12 @@ client.on('message', function (topic, message) {
   var msgObj = JSON.parse(message.toString());
   debug_on && console.log(msgObj)
   // client.end()
-  if(topic.match('/msg/g/')){
+  if(allowGroupNotification && topic.match('/msg/g/')){
     if(msgObj.is_people){
     } else {
       sendGroupNotification(db,msgObj,'groupmessage');
     }
-  } else if(allowGroupNotification && topic.match('/msg/u/')){
+  } else if(topic.match('/msg/u/')){
       sendNotification(db,msgObj, msgObj.to.id,'usermessage');
   }
 });
@@ -80,10 +84,10 @@ function sendNotification(db,message, toUserId ,type) {
           token: toUser.token
         };
         if(type == 'usermessage'){
-          content = '新消息:' + message.text;
+            content = message.form.name+ ':' + message.text;
         }
         if(type === 'groupmessage'){
-          '群消息:' + message.text;
+          content = message.to.name+ ':' + message.text;
         }
         var commentText = '';
         var extras = {
@@ -93,8 +97,8 @@ function sendNotification(db,message, toUserId ,type) {
         var waitReadCount = (toUser.profile && toUser.profile.waitReadCount) ? toUser.profile.waitReadCount : 1;
         var tidyDoc = {
           _id: message._id,
-          form: message.form,
-          to: message.to,
+          form: message.form.id,
+          to: message.to.id,
           to_type: message.to_type,
           type: message.type,
           text: message.text,
@@ -102,7 +106,7 @@ function sendNotification(db,message, toUserId ,type) {
         };
 
         var dataObj = {
-          formserver: encodeURIComponent(serverUrl),
+          fromserver: encodeURIComponent(serverUrl),
           eventType: type,
           doc: tidyDoc,
           userId: userId,
