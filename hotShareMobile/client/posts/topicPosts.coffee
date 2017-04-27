@@ -89,6 +89,20 @@ if Meteor.isClient
       Meteor.subscribe("recentPostsViewByUser", this.owner)
       onUserProfile()
 
+  getFollowerArr = ()->
+    userId = Meteor.userId()
+    followerData = Follower.find().fetch()
+    followpostData = FollowPosts.find().fetch()
+    notShowArrId = []
+    notShowArrId.push(userId)
+    for item in followerData
+      if item.userId is userId
+        notShowArrId.push(item.followerId)
+    for postData in followpostData
+      if notShowArrId.indexOf(postData.owner) is -1
+        notShowArrId.push(postData.owner)
+    console.log notShowArrId
+    Session.set 'notShowPostUserIdArr', notShowArrId
   Template.topicPostsAll.onCreated ()->
     Session.set("newpostsLimit", 10)
     Session.set('newpostsCollection','loading')
@@ -118,7 +132,8 @@ if Meteor.isClient
               Session.set("newpostsLimit",
                           Posts.find({}).count() + TOPIC_POSTS_ITEMS_INCREMENT)
               Meteor.subscribe 'newposts', Session.get('newpostsLimit'), onReady: ->
-                notShowArrId = Session.get 'notShowPostUserIdArr'
+                notShowArrId = Session.get('notShowPostUserIdArr')
+                getFollowerArr()
                 if Session.get("newpostsLimit") >= Posts.find({'owner':{$nin:notShowArrId}}).count()
                   console.log 'newpostsCollection loaded'
                   Meteor.setTimeout (->
@@ -135,16 +150,16 @@ if Meteor.isClient
         browse
       else
         0
+    hideFollowerPosts:(owner)->
+      followerIdArr = Session.get('notShowPostUserIdArr')
+      if followerIdArr.indexOf(owner) isnt -1
+        return false
+      else
+        return true
     newPosts:()->
-      userId = Meteor.userId()
-      followerData = Follower.find().fetch()
-      notShowArrId = []
-      notShowArrId.push(userId)
-      for item in followerData
-        notShowArrId.push(item.followerId)
-      console.log notShowArrId
-      Session.set 'notShowPostUserIdArr', notShowArrId
-      Posts.find({'owner':{$nin:notShowArrId},isReview:true,publish:true}, {sort: {createdAt: -1}})
+      getFollowerArr()
+      notShowArrId = Session.get('notShowPostUserIdArr')
+      return Posts.find({'owner':{$nin:notShowArrId},'isReview':true,'publish':true}, {sort: {createdAt: -1}})
     moreResults:->
       if Session.equals('newpostsCollection','loaded')
           false

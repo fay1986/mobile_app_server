@@ -1948,7 +1948,7 @@ if(Meteor.isServer){
           return this.ready();
         else
           notshowArrId = ['3uFSntcg8j2XXRbSG','jJN2frttsQJG8vPtE',this.userId]
-          return Posts.find({'owner':{$nin:notshowArrId}, isReview:true,publish:true}, {sort: {createdAt: -1}, limit:limit});
+          return Posts.find({'owner':{$nin:notshowArrId}, 'isReview':true,'publish':true}, {sort: {createdAt: -1}, limit:limit});
     });
 
     Meteor.publish("mySeries", function(limit) {
