@@ -10,6 +10,9 @@ var debug_on = process.env.DEBUG_MESSAGE || false;
 var allowGroupNotification = process.env.ALLOW_GROUP_NOTIFICATION || false;
 var projectName = process.env.PROJECT_NAME || null; // '故事贴：t , 点圈： d'
 var client  = mqtt.connect(MQTT_URL);
+
+var Array = require('node-array');
+
 MongoClient.connect(DB_CONN, {poolSize:20 , reconnectTries: Infinity}, function(err, mongodb){
   if (err) {
     console.log('Mongo connect Error:' + err);
@@ -47,8 +50,10 @@ client.on('message', function (topic, message) {
     } else {
       sendGroupNotification(db,msgObj,'groupmessage');
     }
-  } else if(topic.match('/msg/u/')){
-      sendNotification(db,msgObj, msgObj.to.id,'usermessage');
+  } 
+  if(topic.match('/msg/u/')){
+      // sendNotification(db,msgObj, msgObj.to.id,'usermessage');
+      sendUserNotification(db, msgObj, 'usermessage');
   }
 });
 
@@ -137,8 +142,26 @@ function sendNotification(db,message, toUserId ,type) {
   });
 }
 
+function sendUserNotification(db, message, type){
+  var BlackList = db.collection('blackList');
+  var toUserId  = message.to.id;
+  var userId    = message.form.id;
+  BlackList.findOne({blackBy: toUserId,blacker:{$in:[userId]}},function(err, result){
+    if (err){
+      debug_on && console.log('mongo blackList Error:',err);
+      return
+    }
+
+    if (result) {
+      debug_on && console.log('在对方黑名单中， userId='+ userId +' ,toUserId='+ toUserId);
+      return
+    }
+    sendNotification(db, message, toUserId, type);
+  });
+};
+
 function sendGroupNotification(db, message, type){
-  
+
   var groupUsers = db.collection('simple_chat_groups_users');
 
   var groupId = message.to.id;
@@ -147,8 +170,15 @@ function sendGroupNotification(db, message, type){
       return
     }
 
-    docs.forEach(function(doc){
-      sendNotification(db,message,docs.user_id,type)
+    docs.forEachAsync(function(doc,index, arr,next){
+      // continue after 100ms
+      setTimeout(function() {
+          sendNotification(db,message,docs.user_id,type)
+          next();
+      }, 100);
+      return true;
+    },function(){
+      debug_on && console.log('send GroupNotification complete, messageForm:',JSON.stringify(message.form));
     })
   }); 
 };

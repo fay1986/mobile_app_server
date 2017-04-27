@@ -5,7 +5,7 @@
   "main": "main.js",
   "scripts": {
     "test": "test",
-    "start":"node main.js"
+    "start": "node main.js"
   },
   "keywords": [
     "mqtt",
@@ -15,6 +15,7 @@
   "license": "ISC",
   "dependencies": {
     "mongodb": "^2.2.26",
-    "mqtt": "^2.6.2"
+    "mqtt": "^2.6.2",
+    "node-array": "0.0.7"
   }
 }
