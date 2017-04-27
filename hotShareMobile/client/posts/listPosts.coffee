@@ -1,3 +1,14 @@
+onUserProfile = ->
+  @PopUpBox = $('.popUpBox').bPopup
+    positionStyle: 'fixed'
+    position: [0, 0]
+    console.log "in user profile page"
+    Session.set('displayUserProfileBox',true)
+    #onClose: ->
+    #  Session.set('displayUserProfileBox',false)
+    #onOpen: ->
+    #  Session.set('displayUserProfileBox',true)
+    
 if Meteor.isClient
   Template.listPosts.rendered=->
     $('.content').css 'min-height',$(window).height()
@@ -60,3 +71,18 @@ if Meteor.isClient
       console.log this.postId
       Session.set 'FollowPostsId',this._id
       console.log this._id
+    'click .footer .icon': (e)->
+      console.log 'i clicked a icon'
+      console.log "owner is: " + this.owner
+      Session.set("ProfileUserId1", this.owner)
+      Session.set("currentPageIndex",-1)
+      Meteor.subscribe("userinfo", this.owner)
+      Meteor.subscribe("recentPostsViewByUser", this.owner)
+      onUserProfile()
+    'click .footer .name': (e)->
+      console.log 'i clicked a name'
+      Session.set("ProfileUserId1", this.owner)
+      Session.set("currentPageIndex",-1)
+      Meteor.subscribe("userinfo", this.owner)
+      Meteor.subscribe("recentPostsViewByUser", this.owner)
+      onUserProfile()
