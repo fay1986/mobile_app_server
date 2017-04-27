@@ -133,3 +133,21 @@ if Meteor.isClient
         createAt: new Date()
       }
       addFollower(insertObj)
+    'click .contentList .icon': (e)->
+      userId = e.currentTarget.id
+      console.log 'i clicked a icon'
+      console.log "owner is: " + userId
+      Session.set("ProfileUserId1", userId)
+      Session.set("currentPageIndex",-1)
+      Meteor.subscribe("usersById", userId)
+      Meteor.subscribe("recentPostsViewByUser", userId)
+      onUserProfile()
+    'click .contentList .userName': (e)->
+      userId = e.currentTarget.id
+      console.log 'i clicked a icon'
+      console.log "owner is: " + userId
+      Session.set("ProfileUserId1", userId)
+      Session.set("currentPageIndex",-1)
+      Meteor.subscribe("usersById", userId)
+      Meteor.subscribe("recentPostsViewByUser", userId)
+      onUserProfile()

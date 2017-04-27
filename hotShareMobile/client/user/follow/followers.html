@@ -15,8 +15,8 @@
         {{#if isFollowers}}
             <a href="" id="{{followerId}}" class="contentList">
             <!--列出偶像-->
-            <img class="icon" src="{{followerIcon}}" width='30' height='30'>
-            <div class="userName">{{followerName}}</div>
+            <img class="icon" id="{{followerId}}" src="{{followerIcon}}" width='30' height='30'>
+            <div class="userName" id="{{followerId}}">{{followerName}}</div>
             {{#if isFollowed this}}
               <div id="{{followerId}}" class="follow del"><span class="fa fa-check"></span><i class="fa fa-user"></i></div>
             {{else}}
@@ -27,8 +27,8 @@
         {{else}}
             <a href="" id="{{userId}}" class="contentList">
             <!--列出粉丝-->
-            <img class="icon" src="{{userIcon}}" width='30' height='30'>
-            <div class="userName">{{userName}}</div>
+            <img class="icon" id="{{userId}}" src="{{userIcon}}" width='30' height='30'>
+            <div class="userName" id="{{userId}}">{{userName}}</div>
             {{#if isFollowed this}}
               <div id="{{userId}}" class="follow del"><span class="fa fa-check"></span><i class="fa fa-user"></i></div>
             {{else}}
@@ -46,6 +46,9 @@
         <span class="loading">加载中...</span>
       </div>
       {{/if}}
+    </div>
+    <div class="popUpBox">
+      {{> userProfileBox}}
     </div>
   </div>
   {{> footer}}

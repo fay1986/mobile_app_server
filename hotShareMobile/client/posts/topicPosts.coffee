@@ -73,6 +73,21 @@ if Meteor.isClient
       ,animatePageTrasitionTimeout
       Session.set 'FollowPostsId',this._id
       return
+    'click .footer .icon': (e)->
+      console.log 'i clicked a icon'
+      console.log "owner is: " + this.owner
+      Session.set("ProfileUserId1", this.owner)
+      Session.set("currentPageIndex",-1)
+      Meteor.subscribe("usersById", this.owner)
+      Meteor.subscribe("recentPostsViewByUser", this.owner)
+      onUserProfile()
+    'click .footer .name': (e)->
+      console.log 'i clicked a name'
+      Session.set("ProfileUserId1", this.owner)
+      Session.set("currentPageIndex",-1)
+      Meteor.subscribe("usersById", this.owner)
+      Meteor.subscribe("recentPostsViewByUser", this.owner)
+      onUserProfile()
 
   Template.topicPostsAll.onCreated ()->
     Session.set("newpostsLimit", 10)
@@ -154,3 +169,18 @@ if Meteor.isClient
       ,animatePageTrasitionTimeout
       # Session.set 'FollowPostsId',this._id
       return
+    'click .footer .icon': (e)->
+      console.log 'i clicked a icon'
+      console.log "owner is: " + this.owner
+      Session.set("ProfileUserId1", this.owner)
+      Session.set("currentPageIndex",-1)
+      Meteor.subscribe("userinfo", this.owner)
+      Meteor.subscribe("recentPostsViewByUser", this.owner)
+      onUserProfile()
+    'click .footer .name': (e)->
+      console.log 'i clicked a name'
+      Session.set("ProfileUserId1", this.owner)
+      Session.set("currentPageIndex",-1)
+      Meteor.subscribe("userinfo", this.owner)
+      Meteor.subscribe("recentPostsViewByUser", this.owner)
+      onUserProfile()
