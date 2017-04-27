@@ -1948,7 +1948,7 @@ if(Meteor.isServer){
           return this.ready();
         else
           notshowArrId = ['3uFSntcg8j2XXRbSG','jJN2frttsQJG8vPtE',this.userId]
-          return Posts.find({'owner':{$nin:notshowArrId}}, {sort: {createdAt: -1}, limit:limit});
+          return Posts.find({'owner':{$nin:notshowArrId}, isReview:true,publish:true}, {sort: {createdAt: -1}, limit:limit});
     });
 
     Meteor.publish("mySeries", function(limit) {
@@ -2869,7 +2869,7 @@ if(Meteor.isServer){
       var cursorHandle=FavouritePosts.find({userId: userId}, {sort: {createdAt: -1}, limit: limit}).observeChanges({
           added: function(_id, record){
               deferSetImmediate(function(){
-                  var postInfo=Posts.findOne({_id: record.postId},{fields:{title:1,addontitle:1,mainImage:1,ownerName:1}});
+                  var postInfo=Posts.findOne({_id: record.postId},{fields:{title:1,addontitle:1,mainImage:1,ownerName:1,owner:1}});
                   if(postInfo){
                       pub.added('favouriteposts', _id, record);
                       var postId=postInfo._id

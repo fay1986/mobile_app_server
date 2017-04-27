@@ -144,7 +144,7 @@ if Meteor.isClient
         notShowArrId.push(item.followerId)
       console.log notShowArrId
       Session.set 'notShowPostUserIdArr', notShowArrId
-      Posts.find({'owner':{$nin:notShowArrId}}, {sort: {createdAt: -1}})
+      Posts.find({'owner':{$nin:notShowArrId},isReview:true,publish:true}, {sort: {createdAt: -1}})
     moreResults:->
       if Session.equals('newpostsCollection','loaded')
           false
