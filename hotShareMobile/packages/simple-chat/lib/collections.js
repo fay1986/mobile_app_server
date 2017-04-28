@@ -53,7 +53,7 @@ if(Meteor.isServer){
 
     if (!msgObj)
       return;
-    if (doc.to_type === 'user' && doc.to.id == Meteor.userId()) {
+    if (doc.to_type === 'user' && doc.to.id == Meteor.userId() && doc.to_type == 'user') {
       //ta 被我拉黑
       if(BlackList.find({blackBy: Meteor.userId(), blacker:{$in: [doc.form.id]}}).count() > 0){
         console.log(doc.to.id+'被我拉黑');
