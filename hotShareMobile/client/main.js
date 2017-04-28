@@ -287,3 +287,7 @@ if (Meteor.isClient) {
     document.title = Session.get("DocumentTitle");
   });
 }
+
+Meteor.startup(function(){
+  Meteor.subscribe('themes');
+});

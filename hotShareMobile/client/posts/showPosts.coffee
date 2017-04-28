@@ -1518,3 +1518,39 @@ if Meteor.isClient
       Session.set('storyListsLoaded',false)
     'click .storySource .radio': (e)->
       Session.set('storyListsType',e.currentTarget.id)
+
+    Tracker.autorun ()->
+      if Session.get('postContent')
+        style = Session.get('postContent').style
+        if !style
+          return
+        $theme = $('head link#post-theme')
+        if ($theme.length > 0)
+          return $theme.attr('href', theme_host_url + style)
+        $('head').append('<link id="post-theme" rel="stylesheet" type="text/css" href="'+theme_host_url + style+'">')
+    Template.showPosts.helpers
+      is_owner: ()->
+        return Meteor.userId() is Session.get('postContent').owner
+      themes: ()->
+        return Themes.find({})
+      theme_host: ()->
+        return theme_host_url
+      get_hover: (theme)->
+        return theme.style is Session.get('postContent').style or (!Session.get('postContent').style and theme.default is true)
+    Template.showPosts.events
+      'click .post-theme-btn': ()->
+        $('.post-theme-box').show()
+        $('.post-theme-box-mask').show()
+      'click .post-theme-box-mask': ()->
+        $('.post-theme-box').hide()
+        $('.post-theme-box-mask').hide()
+      'click .post-theme-box li': ()->
+        Posts.update {_id: Session.get('postContent')._id}, {$set: {style: this.style}}, (err, num)->
+          if err or num <= 0
+            return console.log('update post style error:', err)
+          Session.set('postContent', Posts.findOne({_id: Session.get('postContent')._id}))
+          console.log('update post style')
+      'click .post-theme-box .btn-succ': ()->
+        $('.post-theme-box').hide()
+        $('.post-theme-box-mask').hide()
+

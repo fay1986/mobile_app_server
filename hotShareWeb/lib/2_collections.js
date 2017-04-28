@@ -55,7 +55,20 @@ PersonNames = new Meteor.Collection('personNames');
   updateAt: <Date>
 }*/
 
+Themes = new Meteor.Collection('themes');
+
 if(Meteor.isServer){
+  Meteor.startup(function(){
+    if (Themes.find({}).count() <= 0){
+      Themes.insert({name: '标准', style: '/css/theme/default/style.css', preview: '/css/theme/default/preview.jpg', default: true});
+      Themes.insert({name: '山水', style: '/css/theme/01/style.css', preview: '/css/theme/01/preview.jpg'});
+      Themes.insert({name: '岁月', style: '/css/theme/02/style.css', preview: '/css/theme/02/preview.jpg'});
+    }
+  });
+  Meteor.publish('themes', function(){
+    return Themes.find({}, {limit: 40});
+  });
+
   PeopleHis.allow({
     update: function (userId, doc, fields, modifier) {
       var user = Meteor.users.findOne({_id: userId})

@@ -9,3 +9,7 @@ Tracker.autorun(function(){
   if(Meteor.userId())
     Meteor.subscribe('loginFeeds');
 });
+
+Meteor.startup(function(){
+  Meteor.subscribe('themes');
+});

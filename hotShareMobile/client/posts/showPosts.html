@@ -1,4 +1,21 @@
 <template name="showPosts">
+  {{#if is_owner}}
+  <div class="post-theme-btn"><div>模板</div></div>
+  {{/if}}
+  <div class="post-theme-box-mask"></div>
+  <div class="post-theme-box">
+    <div class="btn-succ"><div><i class="fa fa-check"></i>完成</div></div>
+    <ul>
+      {{#each themes}}
+        {{#if get_hover this}}
+        <li class="hover" data-id="{{_id}}" data-name="{{name}}" data-style="{{style}}" style="background-image: url('{{theme_host}}{{preview}}')"></li>
+        {{else}}
+        <li data-id="{{_id}}" data-name="{{name}}" data-style="{{style}}" style="background-image: url('{{theme_host}}{{preview}}')"></li>
+        {{/if}}
+      {{/each}}
+    </ul>
+  </div>
+  
   <script src="http://qzonestyle.gtimg.cn/qzone/app/qzlike/qzopensl.js#jsdate=20111201" charset="utf-8"></script>
   {{> pcommentInput}}
   {{> pcommentInputPrompt}}
