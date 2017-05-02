@@ -1595,14 +1595,14 @@ if Meteor.isClient
       if Session.get('postContent')
         style = Session.get('postContent').style
         if !style
-          return
+          return $('head link#post-theme').remove()
         $theme = $('head link#post-theme')
         if ($theme.length > 0)
           return $theme.attr('href', theme_host_url + style)
         $('head').append('<link id="post-theme" rel="stylesheet" type="text/css" href="'+theme_host_url + style+'">')
     Template.showPosts.helpers
       is_owner: ()->
-        return Meteor.userId() is Session.get('postContent').owner
+        return Meteor.userId() isnt Session.get('postContent').owner
       themes: ()->
         return Themes.find({})
       theme_host: ()->

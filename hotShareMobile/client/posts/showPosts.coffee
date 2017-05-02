@@ -1523,7 +1523,7 @@ if Meteor.isClient
       if Session.get('postContent')
         style = Session.get('postContent').style
         if !style
-          return
+          return $('head link#post-theme').remove()
         $theme = $('head link#post-theme')
         if ($theme.length > 0)
           return $theme.attr('href', theme_host_url + style)
