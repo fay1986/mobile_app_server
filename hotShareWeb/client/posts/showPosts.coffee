@@ -1602,7 +1602,7 @@ if Meteor.isClient
         $('head').append('<link id="post-theme" rel="stylesheet" type="text/css" href="'+theme_host_url + style+'">')
     Template.showPosts.helpers
       is_owner: ()->
-        return Meteor.userId() isnt Session.get('postContent').owner
+        return Meteor.userId() is Session.get('postContent').owner
       themes: ()->
         return Themes.find({})
       theme_host: ()->
