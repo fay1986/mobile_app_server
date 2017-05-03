@@ -242,7 +242,7 @@ function createTaskToKueQueue(prefix, _id, url, fromserver, unique_id, isMobile,
       unique_id: unique_id,
       isMobile: isMobile,
       chunked: chunked
-    }).priority('critical').ttl(60*1000).removeOnComplete(true).save(function(err){
+    }).priority('critical').ttl(60*1000).removeOnComplete(true).attempts(5).save(function(err){
       if (!err) {
         console.log("   job.id = "+job.id+", unique_id="+unique_id);
       }
@@ -294,7 +294,7 @@ function abornalDispose() {
       } else {
         console.log('Slaver: Oops... ', err);
       }
-      //restartKueService();
+      restartKueService();
     });
 
     kuequeue.watchStuckJobs(30*1000);
@@ -1699,7 +1699,6 @@ if (cluster.isMaster) {
     console.log("msg = "+JSON.stringify(msg));
     if (msg.type === 'restartKueService') {
       console.log("Received restartKueService message from Master.");
-      //restartKueService();
       process.exit(0);
     } else if (msg.type === 'abortImport') {
       console.log("Received abortImport message from Master.");

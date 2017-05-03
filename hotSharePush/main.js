@@ -34,6 +34,32 @@ var totalRequestCount = 0;
 var totalRedisTaskCount = 0;
 var oplog = null;
 var pushmessages = null;
+var restartKueServiceTimeout = null;
+
+process.addListener('uncaughtException', function (err) {
+  if (!err) {
+    err = {};
+  }
+  var msg = err.message;
+  if (err.stack) {
+    msg += '\n' + err.stack;
+  }
+  if (!msg) {
+    msg = JSON.stringify(err);
+  }
+  if (cluster.isMaster) {
+    console.log("uncaughtException on Master");
+  } else {
+    console.log("uncaughtException on Slaver");
+  }
+  console.log("uncaughtException: err="+JSON.stringify(err));
+  console.log(msg);
+  console.trace();
+  if (err.message && err.message.toLowerCase().startsWith("redis")) {
+    restartKueService();
+  }
+});
+
 var oplog_connect=function(db){
   if(oplog){
     oplog.destroy(function(){
@@ -123,6 +149,38 @@ if (cluster.isMaster) {
   });
 }
 
+/*Kue relative process*/
+function restartKueService() {
+    if (restartKueServiceTimeout) {
+        clearTimeout(restartKueServiceTimeout);
+        restartKueServiceTimeout = null;
+    }
+
+    console.log("restartKueService in");
+    restartKueServiceTimeout = setTimeout(function(){
+        if (cluster.isMaster) {
+            for (var id in cluster.workers) {
+                var msg = {type:'restartKueService'}
+                console.log("Sending message restartKueService to work id: "+id);
+                cluster.workers[id].send(JSON.parse(msg));
+            }
+        }
+        if (kuequeue) {
+            var timeout = 30000;
+            kuequeue.shutdown(Number(timeout), function () {
+                if (cluster.isMaster) {
+                    console.log("!!!!!!!!!! restartKueService: Master, shutdown kue queue service! Start again...");
+                    kuequeue = null;
+                    startKueService();
+                } else {
+                    console.log("!!!!!!!!!! restartKueService: Slaver, shutdown kue queue service! Start again...");
+                    process.exit(0);
+                }
+            });
+        }
+    }, 5000);
+}
+
 function abornalDispose() {
     /*kuequeue.on('job enqueue', function(id, type){
       if (cluster.isMaster) {
@@ -150,7 +208,7 @@ function abornalDispose() {
         } else {
             console.log('Slaver: Oops... ', err);
         }
-        //restartKueService();
+        restartKueService();
     });
 
     kuequeue.watchStuckJobs(30*1000);
@@ -393,6 +451,19 @@ if (cluster.isMaster) {
     app.listen(SERVER_PORT);
     console.log('Magic happens on port ' + SERVER_PORT);
 } else {
+    process.on('message', function(obj) {
+        var msg = JSON.parse(obj);
+        console.log("msg = "+JSON.stringify(msg));
+        if (msg.type === 'restartKueService') {
+          console.log("Received restartKueService message from Master.");
+          process.exit(0);
+        } else if (msg.type === 'abortImport') {
+          console.log("Received abortImport message from Master.");
+          Task.add(msg.unique_id, '', '');
+          Task.update(msg.unique_id, 'cancel');
+          Task.cancel(msg.unique_id);
+        }
+    });
     startKueService();
     abornalDispose();
 }
