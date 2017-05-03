@@ -20,7 +20,12 @@ function testLogin(callback){
     ddpClient.connect(function (err) {
         if (err) {
             reportToWechatRoomAlertALL('机器人助理 无法通过DDP连接到服务器 '+host+':'+port);
+            try{
+                ddpClient.close()
+            } catch(e){
+            }
             callback('Error')
+            return
         }
 
         login(ddpClient,
@@ -39,7 +44,9 @@ function testLogin(callback){
                 if (error) {
 
                     reportToWechatRoomAlertALL('机器人助理 登陆故事贴失败')
+                    ddpClient.close()
                     callback('Error')
+                    return
                 } else {
                     // We are now logged in, with userInfo.token as our session auth token.
                     token = userInfo.token;
@@ -47,6 +54,7 @@ function testLogin(callback){
                     reportToWechatRoom('机器人助理 成功登陆故事贴,耗时'+timeDiff+'ms')
                     ddpClient.close()
                     callback(null,'Success')
+                    return
                 }
             }
         );
