@@ -9,7 +9,6 @@
   "dependencies": {
     "ddp":"^0.12.1",
     "ddp-login":"^1.0.10",
-    "wechaty":"0.7.95",
     "async":"2.4.0"
   },
   "devDependencies": {
