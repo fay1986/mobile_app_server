@@ -4,7 +4,7 @@ var hour = minute * 60;
 var day = hour * 24;
 var halfamonth = day * 15;
 var month = day * 30;
-var now = new Date().getTime();
+var now = Date.now() + MQTT_TIME_DIFF;
 var diffValue = now - dateTimeStamp;
 if(diffValue < 0){return;}
 var monthC =diffValue/month;
@@ -32,4 +32,29 @@ else if(minC>=1){
 }else
 result="刚刚";
 return result;
-}
+};
+
+format_date = function(val, format){
+  var now = null;
+  try{now = new Date(val);}catch(ex){return val;}
+  var o = {
+      "M+": now.getMonth() + 1,  //month
+      "d+": now.getDate(),     //day
+      "h+": now.getHours(),    //hour
+      "m+": now.getMinutes(),  //minute
+      "s+": now.getSeconds(), //second
+      "q+": Math.floor((now.getMonth() + 3) / 3),  //quarter
+      "S": now.getMilliseconds() //millisecond
+  };
+
+  if (/(y+)/.test(format)) {
+      format = format.replace(RegExp.$1, (now.getFullYear() + "").substr(4 - RegExp.$1.length));
+  }
+
+  for (var k in o) {
+      if (new RegExp("(" + k + ")").test(format)) {
+          format = format.replace(RegExp.$1, RegExp.$1.length == 1 ? o[k] : ("00" + o[k]).substr(("" + o[k]).length));
+      }
+  }
+  return format;
+};

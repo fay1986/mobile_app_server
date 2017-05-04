@@ -1,0 +1,74 @@
+<template name="_simpleChatListLayout">
+  <div class="simple-chat">
+    <div class="msg-box">
+      <div class="header">
+        <div class="left back"><i class="fa fa-angle-left fa-fw"></i></div>
+        <script type="text/javascript">
+        $('.header .back').click(function(){
+          var historyArr = Session.get("history_view");
+          if (historyArr && historyArr.length > 0) {
+            PUB.back();
+          }
+          else{
+            history.go(-1);
+          }
+        })
+        </script>
+        <span>{{title}}</span>
+        {{#if isGroups}}
+          <div class="right groupsProfile"></div>
+        {{else}}
+          <div class="right writeMeaaage">写私信</div>
+        {{/if}}
+
+        <!--<div class="right profile"></div>-->
+        {{#if loading}}
+        <div class="loading"></div>
+        {{/if}}
+      </div>
+      <div class="container-box">
+          {{> yield}}
+      </div>
+    </div>
+  </div>
+</template>
+<template name="_groupMessageList">
+  <ul class="simple-chat-medialist">
+    {{#each lists}}
+    <li id="{{toUserId}}">
+      <div class="left">
+        <img src="{{toUserIcon}}">
+        {{#if count}}
+        <span class="reddot"></span>
+        {{/if}}
+      </div>
+      <div class="right">
+       <h2>{{toUserName}}</h2>
+       <p>{{#if count}}[{{count}}条]{{/if}} {{lastText}}</p>
+      </div>
+      <span class="time">{{formatTime updateAt}}</span>
+    </li>
+    {{/each}}
+    <!--<li>
+      <div class="left">
+        <img src="http://imgtu.5011.net/uploads/content/20170309/6425471489051060.jpg">
+      </div>
+      <div class="right">
+       <h2>聊天室:一身冷汗！几十年前对中国人的40大批判，完全不过时</h2>
+       <p>[图片]</p>
+      </div>
+      <span class="time">2017/3/29</span>
+    </li>
+    <li>
+      <div class="left">
+        <img src="http://imgtu.5011.net/uploads/content/20170309/6425471489051060.jpg">
+        <span class="reddot"></span>
+      </div>
+      <div class="right">
+       <h2>电影控</h2>
+       <p>[2条] 18岁参军，港片演技派坏蛋，《鼠胆龙威》医生成经典，现已不在</p>
+      </div>
+      <span class="time">下午 3:40</span>
+    </li>-->
+  </ul>
+</template>

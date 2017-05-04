@@ -19,4 +19,4 @@
 @withSkypeWebReporter = true
 @withPostTitleMaxLength = 90      #byte
 @withPostSubTitleMaxLength = 60   #byte
-
+@MQTT_TIME_DIFF = 0

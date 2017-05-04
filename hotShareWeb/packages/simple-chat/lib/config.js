@@ -6,5 +6,12 @@ AppConfig = {
   get_user_icon: function(doc){
     return doc.profile && doc.profile.icon ? doc.profile.icon : '/userPicture.png'
   },
+  get_post_title: function(){
+    var title = '聊天室'
+    var post = Session.get('postContent');
+    if (post)
+      title += ':'+post.title;
+    return title;
+  },
   upload_cordova_image: function(file, callback){}
 };
