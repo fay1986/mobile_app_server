@@ -24,7 +24,10 @@ function testLogin(callback){
                 ddpClient.close()
             } catch(e){
             }
-            callback('Error')
+            try {
+                callback('Error')
+            } catch(e){
+            }
             return
         }
 
@@ -36,7 +39,7 @@ function testLogin(callback){
                 method: 'account',    // Login method: account, email, username or token
                 account: 'monitor@163.com',        // Prompt for account info by default
                 pass: 'qwezxc',           // Prompt for password by default
-                retry: 5,             // Number of login attempts to make
+                retry: 1,             // Number of login attempts to make
                 plaintext: false      // Do not fallback to plaintext password compatibility
                                       // for older non-bcrypt accounts
             },
@@ -45,7 +48,11 @@ function testLogin(callback){
 
                     reportToWechatRoomAlertALL('机器人助理 登陆故事贴失败')
                     ddpClient.close()
-                    callback('Error')
+                    try{
+                        callback('Error')
+                    } catch (e){
+
+                    }
                     return
                 } else {
                     // We are now logged in, with userInfo.token as our session auth token.
@@ -53,7 +60,10 @@ function testLogin(callback){
                     var timeDiff = new Date() - begin
                     reportToWechatRoom('机器人助理 成功登陆故事贴,耗时'+timeDiff+'ms')
                     ddpClient.close()
-                    callback(null,'Success')
+                    try{
+                        callback(null,'Success')
+                    } catch (e){
+                    }
                     return
                 }
             }
