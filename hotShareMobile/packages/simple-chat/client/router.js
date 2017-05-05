@@ -1080,6 +1080,9 @@ SimpleChat.onMqttMessage = function(topic, msg) {
       msgObj.images[i].id = msgObj.people_id;
   }
 
+  if (Messages.find({_id: msgObj._id}).count() > 0)
+    return console.log('已存在此消息:', msgObj._id);
+
   if (msgObj.wait_lable){where.people_uuid = msgObj.people_uuid}
   else if (!msgObj.wait_lable && msgObj.images && msgObj.images.length > 0) {where['images.label'] = msgObj.images[0].label}
   else {return Messages.insert(msgObj)}
@@ -1087,8 +1090,6 @@ SimpleChat.onMqttMessage = function(topic, msg) {
   console.log('SimpleChat.SimpleChat where:', where);
   var targetMsg = Messages.findOne(where, {sort: {create_time: -1}});
 
-  if (Messages.find({_id: msgObj._id}).count() > 0)
-    return console.log('已存在此消息:', msgObj._id);
   if (!targetMsg || !targetMsg.images || targetMsg.images.length <= 0)
     return insertMsg(msgObj, '无需合并消息');
   if (!msgObj.images || msgObj.images.length <= 0)
