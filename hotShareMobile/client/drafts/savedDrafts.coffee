@@ -32,6 +32,7 @@ if Meteor.isClient
             .find {owner: Meteor.userId()}
             .forEach (saveddrafts)->
               SavedDrafts.remove saveddrafts._id
+              Posts.remove saveddrafts._id
           Session.setPersistent('mySavedDraftsCount',0)
           Session.setPersistent('persistentMySavedDrafts',null)
           window.plugins.shareExtension.deleteFiles()

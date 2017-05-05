@@ -558,6 +558,7 @@ if Meteor.isClient
           Session.setPersistent('mySavedDraftsCount',0)
           Session.setPersistent('persistentMySavedDrafts',null)
         SavedDrafts.remove draftId
+        Posts.remove draftId
         Session.set 'showDraft', false
         # draftImageData = Drafts.find({type:'image'}).fetch()
         # removeImagesFromCache(draftImageData)
