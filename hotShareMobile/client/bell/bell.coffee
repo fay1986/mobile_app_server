@@ -24,6 +24,16 @@ if Meteor.isClient
             limit: 99
           }).count()
     notReadCountPersonalletter: ()->
+      Feeds.find({
+        followby: Meteor.userId(),
+        isRead: {$ne: true},
+        checked: {$ne: true},
+        eventType: 'personalletter',
+        createdAt: {$gt: new Date((new Date()).getTime() - 7 * 24 * 3600 * 1000)}
+      },{
+        limit:99
+      }).count()
+    notReadCountMqttMessage: ()->
       counts = 0
       lists = SimpleChat.MsgSession.find({userId: Meteor.userId(),sessionType:'user'}).fetch()
       getLetterCounts = (item)->
@@ -77,7 +87,7 @@ if Meteor.isClient
   Template.bell.events
     'click .bell-line': (e)->
       currentType = e.currentTarget.id
-      if currentType is 'personal-letter'
+      if currentType is 'mqtt-message'
         history_view = Session.get('history_view') || []
         history_view.push({view:'bell'})
         Session.set('history_view',history_view)

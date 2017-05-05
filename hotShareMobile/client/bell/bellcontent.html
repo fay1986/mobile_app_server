@@ -46,11 +46,11 @@
             <div class="readTips"></div>
             {{/if}}
             <img class="icon" src="{{userIcon}}" width='30' height='30'>
-            <div id="{{_id}}" class="alarm">{{userName}} 给您发来一条私信</div>
+            <div id="{{_id}}" class="alarm">{{userName}} 给您发来一封站内信</div>
             <div class="createAt">{{time_diff createdAt}}</div>
         </a>
         <div id="{{_id}}content" class="personalLetterContent">
-          <div class="LetterHead">来自 <strong>{{userName}}</strong> 的私信</div>
+          <div class="LetterHead">来自 <strong>{{userName}}</strong> 的站内信</div>
           <div class="closePersonalLetter"><i class="fa fa-angle-left fa-fw"></i></div>
           <div class="LetterContent">{{content}}</div>
           <a href="mailto:{{userEmail}}?subject=故事贴上的{{userName}}，{{ownerName}}给你写了一封邮件"><div class="LetterFooter">

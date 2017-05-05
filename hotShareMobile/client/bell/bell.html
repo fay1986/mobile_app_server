@@ -10,7 +10,7 @@
       <div id="follow" class="leftButton"><span class="fa fa-plus"></span><i class="fa fa-user"></i></div>
     </div>
     <div class="content">
-      <div id="new-story" class="bell-line"><img class="before-title" src="/img/bellicon1.png" alt=""><span class="title">新故事</span>
+      <div id="new-story" class="bell-line"><img class="before-title" src="/img/bellicon1.png" alt=""><span class="title">新 故 事</span>
       {{#if is_wait_read_count notReadCountNewposts}}
         {{#if limit_top_read_count notReadCountNewposts}}
         <div class="msg_count">99+</div>
@@ -26,12 +26,20 @@
         <div class="msg_count">{{notReadCountPcomment}}</div>
         {{/if}}
       {{/if}}<i class="fa fa-angle-right after-title" aria-hidden="true"></i></div>
-      <div id="personal-letter" class="bell-line last-bell-line"><img class="before-title" src="/img/bellicon3.png" alt=""><span class="title">站内信</span>
+      <div id="personal-letter" class="bell-line"><img class="before-title" src="/img/bellicon3.png" alt=""><span class="title">站 内 信</span>
       {{#if is_wait_read_count notReadCountPersonalletter}}
         {{#if limit_top_read_count notReadCountPersonalletter}}
         <div class="msg_count">99+</div>
         {{else}}
         <div class="msg_count">{{notReadCountPersonalletter}}</div>
+        {{/if}}
+      {{/if}}<i class="fa fa-angle-right after-title" aria-hidden="true"></i></div>
+      <div id="mqtt-message" class="bell-line last-bell-line"><img class="before-title" src="/img/bellicon4.png" alt="" style="height: 60%;"><span class="title">私 信</span>
+      {{#if is_wait_read_count notReadCountMqttMessage}}
+        {{#if limit_top_read_count notReadCountMqttMessage}}
+        <div class="msg_count">99+</div>
+        {{else}}
+        <div class="msg_count">{{notReadCountMqttMessage}}</div>
         {{/if}}
       {{/if}}<i class="fa fa-angle-right after-title" aria-hidden="true"></i></div>
     </div>

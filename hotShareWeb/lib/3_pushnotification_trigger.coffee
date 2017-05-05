@@ -93,7 +93,7 @@ if Meteor.isServer
     else if type is "personalletter"
       post = Posts.findOne({_id: doc.postId})
       commentText = doc.content;
-      content = '您收到了一条来自' + doc.userName + '的私信'
+      content = '您收到了一封来自' + doc.userName + '的站内信'
       extras = {
         type: "personalletter"
         postId: doc.postId
