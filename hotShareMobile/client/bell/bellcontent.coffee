@@ -122,7 +122,7 @@ if Meteor.isClient
     'click .contentList': (e)->
       history = []
       history.push {
-          view: 'bell'
+          view: 'bellcontent'
           scrollTop: document.body.scrollTop
       }
       Session.set "history_view", history
