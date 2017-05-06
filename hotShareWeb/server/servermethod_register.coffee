@@ -869,16 +869,29 @@ if Meteor.isServer
         Meteor.defer ()->
           feeds = []
           readers = []
-          Viewers.find({postId: {$in: groups}}).forEach((item)->
-            if !~readers.indexOf(item.userId) and item.userId isnt self.userId
-              readers.push(item.userId)
-              feedItem = _.extend(feed, {followby: item.userId})
-              #feeds.push(feedItem)
-              Feeds.insert(feedItem)
+          Viewers.find({postId: {$in: groups}}).observeChanges({
+            added:  (id, fields)->
+              # console.log 'fields is  ' + fields
+              if !~readers.indexOf(fields.userId) and fields.userId isnt self.userId
+                readers.push(fields.userId)
+                feedItem = _.extend(feed, {followby: fields.userId})
+                #feeds.push(feedItem)
+                Feeds.insert(feedItem)
+                # console.log 'feedItem is ' + feedItem
 
-              Meteor.users.update({_id: item.userId}, {$inc: {'profile.waitReadCount': 1}})
-              pushnotification("newpost", {_id: feedItem.postId, ownerName: feedItem.ownerName, title: feedItem.postTitle}, item.userId)
-          )
+                Meteor.users.update({_id: fields.userId}, {$inc: {'profile.waitReadCount': 1}})
+                pushnotification("newpost", {_id: feedItem.postId, ownerName: feedItem.ownerName, title: feedItem.postTitle}, fields.userId)
+          })
+          # Viewers.find({postId: {$in: groups}}).forEach((item)->
+          #   if !~readers.indexOf(item.userId) and item.userId isnt self.userId
+          #     readers.push(item.userId)
+          #     feedItem = _.extend(feed, {followby: item.userId})
+          #     #feeds.push(feedItem)
+          #     Feeds.insert(feedItem)
+
+          #     Meteor.users.update({_id: item.userId}, {$inc: {'profile.waitReadCount': 1}})
+          #     pushnotification("newpost", {_id: feedItem.postId, ownerName: feedItem.ownerName, title: feedItem.postTitle}, item.userId)
+          # )
 
           relatedUserIds = []
           Posts.find({_id: {$in: groups}}).forEach((item)->
