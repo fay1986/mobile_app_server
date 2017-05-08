@@ -834,9 +834,11 @@ Template._simpleChatToChatLayout.events({
     Router.go('reportPost')
   },
   'focus .input-text': function(){
-    Meteor.setTimeout(function(){
-      $('body').scrollTop(999999);
-    }, 500);
+    $('.box').animate({scrollTop:'999999px'},800)
+    $('html,body').animate({scrollTop:'999999px'},800);
+    // Meteor.setTimeout(function(){
+    //   $('body').scrollTop(999999);     
+    // }, 500);
   },
   'submit .input-form': function(e, t){
     try{
