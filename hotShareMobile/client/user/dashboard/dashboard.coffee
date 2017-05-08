@@ -265,9 +265,9 @@ if Meteor.isClient
     # blackList = BlackList.findOne({blackBy: Meteor.userId()}) || {}
     # blackers = blackList.blacker
     blackers = []
-    blackList = BlackList.find({blackBy: Meteor.userId()}).fetch()
+    blackLists = BlackList.find({blackBy: Meteor.userId()}).fetch()
     i = 0
-    while i < blackList.length
+    while i < blackLists.length
       blackers = blackers.concat(blackLists[i].blacker)
       i++
     Session.set('userBlackers',blackers)
