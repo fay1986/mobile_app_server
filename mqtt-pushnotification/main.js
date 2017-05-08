@@ -1,5 +1,6 @@
 var mqtt = require('mqtt')
 var MongoClient = require('mongodb').MongoClient;
+var redisClient = require('./lib/redis.js')
 
 var serverUrl = process.env.SERVER_URL || 'http://host1.tiegushi.com/';
 var MQTT_URL = process.env.MQTT_URL;
@@ -12,6 +13,8 @@ var projectName = process.env.PROJECT_NAME || null; // '故事贴：t , 点圈�
 var client  = mqtt.connect(MQTT_URL);
 
 var Array = require('node-array');
+
+redisClient.redisClientInit();
 
 MongoClient.connect(DB_CONN, {poolSize:20 , reconnectTries: Infinity}, function(err, mongodb){
   if (err) {
@@ -35,12 +38,12 @@ client.on('connect', function () {
   }
   client.unsubscribe(subscribeTopic);
   client.subscribe(subscribeTopic,{qos:1},function(err,granted){
-    console.log('Granted is '+JSON.stringify(granted)) 
+    console.log('Granted is '+JSON.stringify(granted))
   });
 });
- 
+
 client.on('message', function (topic, message) {
-  // message is Buffer 
+  // message is Buffer
   debug_on && console.log(topic)
   var msgObj = JSON.parse(message.toString());
   debug_on && console.log(msgObj)
@@ -48,9 +51,10 @@ client.on('message', function (topic, message) {
   if(allowGroupNotification && topic.match('/msg/g/')){
     if(msgObj.is_people){
     } else {
-      sendGroupNotification(db,msgObj,'groupmessage');
+       //if(msgObj.to.id === '953386e352c1ae0e95a24b8a')
+       sendGroupNotification(db,msgObj,'groupmessage');
     }
-  } 
+  }
   if(topic.match('/msg/u/')){
       // sendNotification(db,msgObj, msgObj.to.id,'usermessage');
       sendUserNotification(db, msgObj, 'usermessage');
@@ -64,7 +68,7 @@ client.on('disconnect', function (topic, message) {
 function sendNotification(db,message, toUserId ,type) {
   var toUserId = toUserId;
   var userId = message.form.id;
-  
+
   var users = db.collection('users');
   var pushTokens = db.collection('pushTokens');
   var PushMessages = db.collection('pushmessages');
@@ -171,19 +175,27 @@ function sendGroupNotification(db, message, type){
     }
 
     docs.forEachAsync(function(doc,index, arr,next){
-      // continue after 100ms
       if(message.form.id === doc.user_id) {
           next();
       }
       else {
-          setTimeout(function() {
-              sendNotification(db,message,doc.user_id,type)
-              next();
-          }, 100);
+          var keystring = groupId + '_' + doc.user_id;
+          redisClient.redisUpdateKey(keystring, function(ttl) {
+              console.log('>>> main.js ttl='+ttl)
+              if(ttl > 1)
+                  next();
+              else {
+                  // continue after 100ms
+                  setTimeout(function() {
+                      sendNotification(db,message,doc.user_id,type)
+                      next();
+                  }, 100);
+              }
+          });
       }
       return true;
     },function(){
       debug_on && console.log('send GroupNotification complete, messageForm:',JSON.stringify(message.form));
     })
-  }); 
+  });
 };

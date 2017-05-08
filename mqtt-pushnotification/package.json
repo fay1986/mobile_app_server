@@ -15,6 +15,7 @@
   "license": "ISC",
   "dependencies": {
     "mongodb": "^2.2.26",
+    "redis": "^2.7.1",
     "mqtt": "^2.6.2",
     "node-array": "0.0.7"
   }
