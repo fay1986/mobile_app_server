@@ -115,14 +115,21 @@ if Meteor.isServer
           return {msg: 'failed'}
         console.log('user='+userId+', post=='+postId)
         Feeds.update({followby:userId,checked:false, eventType: {$nin: ['share','personalletter']}},{$set: {checked: true}},{multi: true})
-        recommendPosts = Recommends.find({relatedPostId: postId}).fetch()
+        recommendPosts = Recommends.find({relatedPostId: postId})
         if recommendPosts and recommendPosts.length > 0
           userLists = []
-          recommendPosts.forEach (item)->
-            if item.readUsers
-              userLists = item.readUsers
-            userLists.push(userId)
-            Recommends.update({_id:item._id},{$set: {readUsers: userLists}})
+          recommendPosts.observeChanges({
+            added:  (id, fields)->
+              if fields.readUsers
+                userLists = fields.readUsers
+              userLists.push(userId)
+              Recommends.update({_id:id},{$set: {readUsers: userLists}})
+          })
+          # recommendPosts.forEach (item)->
+          #   if item.readUsers
+          #     userLists = item.readUsers
+          #   userLists.push(userId)
+          #   Recommends.update({_id:item._id},{$set: {readUsers: userLists}})
         return {msg: 'success'}
 
       'pushRecommendStoryToReaderGroups': (postId, storyId, userId)->
@@ -157,48 +164,51 @@ if Meteor.isServer
             retweet: 0,
             comment: 0
           }
-          Viewers.find({postId: postId}).forEach((item)->
-            if !~readers.indexOf(item.userId) and item.userId isnt self.userId
-              readers.push(item.userId)
-              console.log(item.userId)
-              feedItem = _.extend(feed, {followby: item.userId})
-              Feeds.insert(feedItem)
-              Meteor.users.update({_id: item.userId}, {$inc: {'profile.waitReadCount': 1}})
-              pushnotification("recommand", {postId: postId, ownerName: feedItem.ownerName, title: feedItem.postTitle, recommander: feedItem.recommander, followby: item.userId}, item.userId)
-          )
+          Viewers.find({postId: postId}).observeChanges({
+            added:  (id, fields)->
+              if !~readers.indexOf(fields.userId) and fields.userId isnt self.userId
+                readers.push(fields.userId)
+                console.log(fields.userId)
+                feedItem = _.extend(feed, {followby: fields.userId})
+                Feeds.insert(feedItem)
+                Meteor.users.update({_id: fields.userId}, {$inc: {'profile.waitReadCount': 1}})
+                pushnotification("recommand", {postId: postId, ownerName: feedItem.ownerName, title: feedItem.postTitle, recommander: feedItem.recommander, followby: fields.userId}, fields.userId)
+          })
 
           relatedUserIds = []
-          Posts.find({_id: postId}).forEach((item)->
-            if !~relatedUserIds.indexOf(item.owner)
-              relatedUserIds.push(item.owner)
+          Posts.find({_id: postId}).observeChanges({
+            added:  (id, fields)->
+              if !~relatedUserIds.indexOf(fields.owner)
+                relatedUserIds.push(fields.owner)
 
-              recommendItem = {
-                targetPostId: item._id
-                targetPostTitle: item.title
-                targetPostAddonTitle: item.addontitle
-                relatedUserId: item.owner
-                relatedUserName: item.ownerName
-                relatedUserIcon: item.ownerIcon
-                recommendUserId: feed.owner
-                recommendUserName: feed.ownerName
-                recommendUserIcon: feed.ownerIcon
-                recommendPostId: feed.postId
-                recommendPostTitle: feed.postTitle
-                recommendPostMainImage: feed.mainImage
-                recommendPostCreatedAt: feed.createdAt
-                readUsers: []
-                createdAt: new Date()
-              }
-              Recommends.insert(recommendItem)
-          )          
+                recommendItem = {
+                  targetPostId: id
+                  targetPostTitle: fields.title
+                  targetPostAddonTitle: fields.addontitle
+                  relatedUserId: fields.owner
+                  relatedUserName: fields.ownerName
+                  relatedUserIcon: fields.ownerIcon
+                  recommendUserId: feed.owner
+                  recommendUserName: feed.ownerName
+                  recommendUserIcon: feed.ownerIcon
+                  recommendPostId: feed.postId
+                  recommendPostTitle: feed.postTitle
+                  recommendPostMainImage: feed.mainImage
+                  recommendPostCreatedAt: feed.createdAt
+                  readUsers: []
+                  createdAt: new Date()
+                }
+                Recommends.insert(recommendItem)
+          })
         true
       'getRecommendStorys': (userId,limit,skip,isFav)->
         if isFav
           postIds = []
-          FavouritePosts.find({userId: userId}).forEach((item) ->
-            if !~postIds.indexOf(item.postId)
-              postIds.push(item.postId)
-          )
+          FavouritePosts.find({userId: userId}).observeChanges({
+            added:  (id, fields)->
+              if !~postIds.indexOf(fields.postId)
+                postIds.push(fields.postId)
+          })
           options = {_id: {$in: postIds}}
         else
           options = {owner: userId}
@@ -278,10 +288,11 @@ if Meteor.isServer
           console.log(error)
       'getMoreFavouritePosts': (userId, skip, limit)->
         postIds = []
-        FavouritePosts.find({userId: userId}).forEach((item) ->
-          if !~postIds.indexOf(item.postId)
-            postIds.push(item.postId)
-        )
+        FavouritePosts.find({userId: userId}).observeChanges({
+          added:  (id, fields)->
+            if !~postIds.indexOf(fields.postId)
+              postIds.push(fields.postId)
+        })
         favouritePosts = Posts.find({_id: {$in: postIds}},{fields:{mainImage:1,addontitle:1,title:1},sort:{createdAt:-1},limit: limit,skip:skip}).fetch()
         return favouritePosts
       'updateUserNike': (id, val)->
@@ -306,17 +317,20 @@ if Meteor.isServer
           return []
         this.unblock()
         viewPostIds = []
-        viewers = Viewers.find({userId: userId},{limit:10}).forEach((item) ->
-          if !~viewPostIds.indexOf(item.postId)
-            viewPostIds.push(item.postId)
-        )
+        viewers = Viewers.find({userId: userId},{limit:10}).observeChanges({
+          added:  (id, fields)->
+            if !~viewPostIds.indexOf(fields.postId)
+              viewPostIds.push(fields.postId)
+        })
+        console.log ('viewerssssssssssss is ')
         console.log(JSON.stringify(viewers))
         recentViewPosts = Posts.find({_id: {$in: viewPostIds}},{fields:{mainImage:1,addontitle:1,title:1},sort:{createdAt:-1},limit: 3}).fetch()
         postIds = []
-        FavouritePosts.find({userId: userId},{limit:10}).forEach((item) ->
-          if !~postIds.indexOf(item.postId)
-            postIds.push(item.postId)
-        )
+        FavouritePosts.find({userId: userId},{limit:10}).observeChanges({
+          added:  (id, fields)->
+            if !~postIds.indexOf(fields.postId)
+              postIds.push(fields.postId)
+        })
         favouritePosts = Posts.find({_id: {$in: postIds}},{fields:{mainImage:1,addontitle:1,title:1},sort:{createdAt:-1},limit: 10}).fetch()
         console.log('favouritePosts=='+JSON.stringify(favouritePosts))
         profileData = {
@@ -467,12 +481,14 @@ if Meteor.isServer
           })
           TPs=TopicPosts.find({postId:postId})
           if TPs.count()>0
-            TPs.forEach (data)->
-              PostsCount = Topics.findOne({_id:data.topicId}).posts
-              if PostsCount is 1
-                Topics.remove({_id:data.topicId})
-              else if PostsCount > 1
-                Topics.update({_id: data.topicId}, {$set: {'posts': PostsCount-1}})
+            TPs.observeChanges({
+              added:  (id, fields)->
+                PostsCount = Topics.findOne({_id:fields.topicId}).posts
+                if PostsCount is 1
+                  Topics.remove({_id:fields.topicId})
+                else if PostsCount > 1
+                  Topics.update({_id: fields.topicId}, {$set: {'posts': PostsCount-1}})
+            })
           TopicPosts.remove({postId:postId})
           return BackUpPosts.insert(post)
       'delectPostAndBackUp': (postId,userId)->
@@ -676,12 +692,14 @@ if Meteor.isServer
           FollowPosts.update({postId:postId},{$set:{publish:false}},{multi: true, upsert:true})
           TPs=TopicPosts.find({postId:postId})
           if TPs.count()>0
-              TPs.forEach (data)->
-                  PostsCount = Topics.findOne({_id:data.topicId}).posts
-                  if PostsCount is 1
-                    Topics.remove({_id:data.topicId})
-                  else if PostsCount > 1
-                    Topics.update({_id: data.topicId}, {$set: {'posts': PostsCount-1}})
+            TPs.observeChanges({
+              added:  (id, fields)->
+                PostsCount = Topics.findOne({_id:fields.topicId}).posts
+                if PostsCount is 1
+                  Topics.remove({_id:fields.topicId})
+                else if PostsCount > 1
+                  Topics.update({_id: fields.topicId}, {$set: {'posts': PostsCount-1}})
+            })
           TopicPosts.remove({postId:postId})
           FavouritePosts.remove({postId:postId})
           refreshPostsCDNCaches(postId)
@@ -695,12 +713,14 @@ if Meteor.isServer
             Feeds.remove({owner:userId,eventType:'SelfPosted',postId:postId})
             TPs=TopicPosts.find({postId:postId})
             if TPs.count()>0
-                TPs.forEach (data)->
-                    PostsCount = Topics.findOne({_id:data.topicId}).posts
-                    if PostsCount is 1
-                      Topics.remove({_id:data.topicId})
-                    else if PostsCount > 1
-                      Topics.update({_id: data.topicId}, {$set: {'posts': PostsCount-1}})
+              TPs.observeChanges({
+                added:  (id, fields)->
+                  PostsCount = Topics.findOne({_id:fields.topicId}).posts
+                  if PostsCount is 1
+                    Topics.remove({_id:fields.topicId})
+                  else if PostsCount > 1
+                    Topics.update({_id: fields.topicId}, {$set: {'posts': PostsCount-1}})
+              })
             TopicPosts.remove({postId:postId})
             FavouritePosts.remove({postId:postId})
           catch error
@@ -848,18 +868,21 @@ if Meteor.isServer
           return false
 
         Meteor.defer ()->
-          ReaderPopularPosts.find({userId: userId}).forEach((item)->
-            ReaderPopularPosts.remove({_id: item._id})
-          )
+          ReaderPopularPosts.find({userId: userId}).observeChanges({
+            added:  (id, fields)->
+              ReaderPopularPosts.remove({_id: id})
+          })
 
           postIds = []
-          Viewers.find({userId: userId}, {sort: {createdAt: -1}, limit: 50}).forEach((item)->
-            postIds.push(item.postId)
-          )
+          Viewers.find({userId: userId}, {sort: {createdAt: -1}, limit: 50}).observeChanges({
+            added:  (id, fields)->
+              postIds.push(fields.postId)
+          })
 
-          Posts.find({_id: {$in: postIds}, browse: {$gte: 5}}, {sort: {browse: -1}, limit: 9}).forEach((item)->
-            ReaderPopularPosts.insert({userId: userId, postId: item._id, title: item.title, browse: item.browse, createdAt: new Date()})
-          )
+          Posts.find({_id: {$in: postIds}, browse: {$gte: 5}}, {sort: {browse: -1}, limit: 9}).observeChanges({
+            added:  (id, fields)->
+              ReaderPopularPosts.insert({userId: userId, postId: id, title: fields.title, browse: fields.browse, createdAt: new Date()})
+          })
         true
       'pushPostToReaderGroups': (feed, groups)->
         if this.userId is null or feed is undefined or feed is null or groups is undefined or groups is null or groups.length is 0
@@ -894,30 +917,31 @@ if Meteor.isServer
           # )
 
           relatedUserIds = []
-          Posts.find({_id: {$in: groups}}).forEach((item)->
-            if !~relatedUserIds.indexOf(item.owner)
-              relatedUserIds.push(item.owner)
+          Posts.find({_id: {$in: groups}}).observeChanges({
+            added:  (id, fields)->
+              if !~relatedUserIds.indexOf(fields.owner)
+                relatedUserIds.push(fields.owner)
 
-              recommendItem = {
-                targetPostId: item._id
-                targetPostTitle: item.title
-                targetPostAddonTitle: item.addontitle
-                relatedPostId: item._id
-                relatedUserId: item.owner
-                relatedUserName: item.ownerName
-                relatedUserIcon: item.ownerIcon
-                recommendUserId: feed.owner
-                recommendUserName: feed.ownerName
-                recommendUserIcon: feed.ownerIcon
-                recommendPostId: feed.postId
-                recommendPostTitle: feed.postTitle
-                recommendPostMainImage: feed.mainImage
-                recommendPostCreatedAt: feed.createdAt
-                readUsers: []
-                createdAt: new Date()
-              }
-              Recommends.insert(recommendItem)
-          )          
+                recommendItem = {
+                  targetPostId: id
+                  targetPostTitle: fields.title
+                  targetPostAddonTitle: fields.addontitle
+                  relatedPostId: id
+                  relatedUserId: fields.owner
+                  relatedUserName: fields.ownerName
+                  relatedUserIcon: fields.ownerIcon
+                  recommendUserId: feed.owner
+                  recommendUserName: feed.ownerName
+                  recommendUserIcon: feed.ownerIcon
+                  recommendPostId: feed.postId
+                  recommendPostTitle: feed.postTitle
+                  recommendPostMainImage: feed.mainImage
+                  recommendPostCreatedAt: feed.createdAt
+                  readUsers: []
+                  createdAt: new Date()
+                }
+                Recommends.insert(recommendItem)
+          })         
         true
 
       'pushPostToHotPostGroups': (feed, groups)->
@@ -928,16 +952,17 @@ if Meteor.isServer
         Meteor.defer ()->
           feeds = []
           readers = []
-          Viewers.find({postId: {$in: groups}}).forEach((item)->
-            if !~readers.indexOf(item.userId) and item.userId isnt self.userId
-              readers.push(item.userId)
-              feedItem = _.extend(feed, {followby: item.userId})
-              #feeds.push(feedItem)
-              Feeds.insert(feedItem)
+          Viewers.find({postId: {$in: groups}}).observeChanges({
+            added:  (id, fields)->
+              if !~readers.indexOf(fields.userId) and fields.userId isnt self.userId
+                readers.push(fields.userId)
+                feedItem = _.extend(feed, {followby: fields.userId})
+                #feeds.push(feedItem)
+                Feeds.insert(feedItem)
 
-              Meteor.users.update({_id: item.userId}, {$inc: {'profile.waitReadCount': 1}})
-              pushnotification("newpost", {_id: feedItem.postId, ownerName: feedItem.ownerName, title: feedItem.postTitle}, item.userId)
-          )
+                Meteor.users.update({_id: fields.userId}, {$inc: {'profile.waitReadCount': 1}})
+                pushnotification("newpost", {_id: feedItem.postId, ownerName: feedItem.ownerName, title: feedItem.postTitle}, item.userId)
+          })
           Posts.update({_id: {$in: groups}}, {$set: {hasPush: true}}, {multi: true})
         true
 
@@ -1179,8 +1204,10 @@ if Meteor.isServer
               break
           text = text.replace('{{post-content}}', content)
           userEmail = []
-          Follower.find({followerId: slef.userId, fromWeb: true}).fetch().forEach (item)->
-            userEmail.push(item.userEmail)
+          Follower.find({followerId: slef.userId, fromWeb: true}).observeChanges({
+            added:  (id, fields)->
+              userEmail.push(fields.userEmail)
+          })
           try
               Email.send {
                 bcc: userEmail
