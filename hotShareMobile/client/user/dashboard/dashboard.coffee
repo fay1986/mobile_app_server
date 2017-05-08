@@ -262,16 +262,24 @@ if Meteor.isClient
   Template.my_blacklist.rendered=->
     $('.dashboard').css 'min-height', $(window).height()
     # Meteor.subscribe("allBlackList")
-    blackList = BlackList.findOne({blackBy: Meteor.userId()}) || {}
-    blackers = blackList.blacker
+    # blackList = BlackList.findOne({blackBy: Meteor.userId()}) || {}
+    # blackers = blackList.blacker
+    blackers = []
+    blackList = BlackList.find({blackBy: Meteor.userId()}).fetch()
+    i = 0
+    while i < blackList.length
+      blackers = blackers.concat(blackLists[i].blacker)
+      i++
+    Session.set('userBlackers',blackers)
     Meteor.subscribe('allBlackListUsers',blackers)
     # Meteor.subscribe('allUsers')
     return
   Template.my_blacklist.helpers
     myBlackers :->
-      blackList = BlackList.findOne({blackBy: Meteor.userId()}) || {}
-      if blackList
-        blackList.blacker
+      # blackList = BlackList.findOne({blackBy: Meteor.userId()}) || {}
+      # if blackList
+      #   blackList.blacker
+      Session.get('userBlackers')
   Template.my_blacklist_item.helpers
     profile :->
       id = this.toString()
@@ -286,12 +294,13 @@ if Meteor.isClient
   Template.my_blacklist_item.events
     'click .remove' :(e)->
       id = this.toString()
-      blackId = BlackList.findOne({blackBy: Meteor.userId()})._id
+      # blackId = BlackList.findOne({blackBy: Meteor.userId()})._id
       menus = ['从黑名单中移除']
       menuTitle = ''
       callback = (buttonIndex)->
         if buttonIndex is 1
-          BlackList.update({_id: blackId}, {$pull: {blacker: id}})
+          # BlackList.update({_id: blackId}, {$pull: {blacker: id}})
+          BlackList.update({blackBy: Meteor.userId(), blacker:{$in: [id]}}, {$pull: {blacker: id}},{multi: true})
           blacker = Meteor.users.findOne({_id: id})
           blackerName = if blacker.profile.fullname then blacker.profile.fullname else blacker.username
           Follower.insert {

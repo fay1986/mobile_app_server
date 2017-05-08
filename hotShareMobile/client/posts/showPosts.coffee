@@ -358,7 +358,7 @@ if Meteor.isClient
     Session.set("Social.LevelOne.Menu",'discover')
     Session.set("SocialOnButton",'postBtn')
     Meteor.subscribe("follower")
-    Meteor.subscribe("allBlackList")
+    Meteor.subscribe("myBlackList")
     if not Meteor.isCordova
       favicon = document.createElement('link');
       favicon.id = 'icon';
@@ -998,8 +998,9 @@ if Meteor.isClient
               Session.set('fromeaddblacllist', true)
               Router.go '/my_blacklist'
           else
-            id = BlackList.findOne({blackBy: Meteor.userId(), blacker:{$in: [blackerId]}})._id
-            BlackList.update({_id: id}, {$pull: {blacker: blackerId}})
+            # id = BlackList.findOne({blackBy: Meteor.userId(), blacker:{$in: [blackerId]}})._id
+            # BlackList.update({_id: id}, {$pull: {blacker: blackerId}})
+            BlackList.update({blackBy: Meteor.userId(), blacker:{$in: [blackerId]}}, {$pull: {blacker: blackerId}},{multi: true})
       PUB.actionSheet(menus, menuTitle, callback)
     'click .postImageItem': (e)->
       swipedata = []
