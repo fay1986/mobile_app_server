@@ -160,6 +160,16 @@ if Meteor.isClient
       # $('#pcommitReport').focus()
 
     'click .play_area': (e)->
+      current_id = $(e.currentTarget).find('audio').attr('id')
+      $content = $('.showPosts .content')
+      $node = $content.find('.play_area')
+      for item in $node
+        #console.log item
+        if item.classList.contains('music_playing')
+          audio=item.lastElementChild
+          unless audio.id is current_id
+            item.classList.remove('music_playing')
+            audio.pause()
       $node=$(e.currentTarget)
       $audio=$node.find('audio')
       if $node.hasClass('music_playing')
