@@ -172,10 +172,15 @@ function sendGroupNotification(db, message, type){
 
     docs.forEachAsync(function(doc,index, arr,next){
       // continue after 100ms
-      setTimeout(function() {
-          sendNotification(db,message,docs.user_id,type)
+      if(message.form.id === doc.user_id) {
           next();
-      }, 100);
+      }
+      else {
+          setTimeout(function() {
+              sendNotification(db,message,doc.user_id,type)
+              next();
+          }, 100);
+      }
       return true;
     },function(){
       debug_on && console.log('send GroupNotification complete, messageForm:',JSON.stringify(message.form));
