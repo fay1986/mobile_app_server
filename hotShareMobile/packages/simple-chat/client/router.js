@@ -74,9 +74,25 @@ Router.route(AppConfig.path + '/user-list/:_user',{
 
 Template._simpleChatToChatLayout.onRendered(function(){
   page_data = this.data;
+  if(Meteor.isCordova && device.platform === 'iOS'){
+    try{
+      Keyboard.shrinkView(true);
+      Keyboard.disableScrollingInShrinkView(true);
+    } catch (err){
+      console.log(err)
+    }
+  }
 });
 Template._simpleChatToChatLayout.onDestroyed(function(){
   page_data = null;
+  if(Meteor.isCordova && device.platform === 'iOS'){
+    try{
+      Keyboard.shrinkView(false);
+      Keyboard.disableScrollingInShrinkView(false);
+    } catch (err){
+      console.log(err)
+    }
+  }
 });
 
 var time_list = [];
