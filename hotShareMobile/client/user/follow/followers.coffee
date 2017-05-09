@@ -3,9 +3,8 @@ if Meteor.isClient
   @addFollower = (data)->
     followerId = data.followerId
     callback = ()->
-      # blackId = BlackList.findOne({blackBy: Meteor.userId()})._id
-      # BlackList.update({_id: blackId}, {$pull: {blacker: followerId}})
-      BlackList.update({blackBy: Meteor.userId(), blacker:{$in: [followerId]}}, {$pull: {blacker: followerId}},{multi: true})
+      blackId = BlackList.findOne({blackBy: Meteor.userId()})._id
+      BlackList.update({_id: blackId}, {$pull: {blacker: followerId}})
       Follower.insert data
     #对方在黑名单中
     if BlackList.find({blackBy: Meteor.userId(), blacker:{$in: [followerId]}}).count() > 0

@@ -3,9 +3,8 @@ if Meteor.isClient
   @writeLetterTo = (userId)->
     Session.set('simpleChatFormPage',Router.current().route.getName())
     callback = ()->
-      # blackId = BlackList.findOne({blackBy: Meteor.userId()})._id
-      # BlackList.update({_id: blackId}, {$pull: {blacker: userId}})
-      BlackList.update({blackBy: Meteor.userId(), blacker:{$in: [userId]}}, {$pull: {blacker: userId}},{multi: true})
+      blackId = BlackList.findOne({blackBy: Meteor.userId()})._id
+      BlackList.update({_id: blackId}, {$pull: {blacker: userId}})
       Router.go('/simple-chat/to/user?id='+userId)
     #对方在黑名单中
     if BlackList.find({blackBy: Meteor.userId(), blacker:{$in: [userId]}}).count() > 0
