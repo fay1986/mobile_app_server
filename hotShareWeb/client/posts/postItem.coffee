@@ -136,7 +136,8 @@ if Meteor.isClient
         name: postData.ownerName,
         icon: postData.ownerIcon
       }
-      sendMqttMessageToUser(type,to,postData)
+      if to.id isnt Meteor.userId()
+        sendMqttMessageToUser(type,to,postData)
     'click .thumbsDown': (e)->
       Session.set("pcommetsId","")
       thumbsDownHandler(e,this)
@@ -148,7 +149,8 @@ if Meteor.isClient
         name: postData.ownerName,
         icon: postData.ownerIcon
       }
-      sendMqttMessageToUser(type,to,postData)
+      if to.id isnt Meteor.userId()
+        sendMqttMessageToUser(type,to,postData)
     'click .pcomments': (e)->
       otherElementShowOrHidden(false)
       #console.log($(e.currentTarget).parent().parent().parent())
@@ -181,7 +183,8 @@ if Meteor.isClient
         name: postData.ownerName,
         icon: postData.ownerIcon
       }
-      sendMqttMessageToUser(type,to,postData)
+      if to.id isnt Meteor.userId()
+        sendMqttMessageToUser(type,to,postData)
     'click .bubble':(e)->
       otherElementShowOrHidden(false)
       Session.set "pcommentIndexNum", $(e.currentTarget).parent().parent().parent().index(".element")
