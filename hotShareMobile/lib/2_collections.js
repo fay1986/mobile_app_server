@@ -3501,7 +3501,10 @@ if(Meteor.isClient){
             onReady: function(){
                 console.log('author publish posts loaded');
                 count = Posts.find({owner:Meteor.userId(),publish:{"$ne":false}}).count();
-                if(count === Session.get('seriesAuthorPostsCount')){
+                if (count < Session.get('seriesAuthorPostsLimit')) {
+                    Session.set('authorPublishPostForSeries','loadedall');
+                }
+                else if(count === Session.get('seriesAuthorPostsCount')){
                     Session.set('authorPublishPostForSeries','loadedall');
                 } else {
                     Session.set('authorPublishPostForSeries','loaded');

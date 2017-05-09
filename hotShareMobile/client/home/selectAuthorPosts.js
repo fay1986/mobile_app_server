@@ -31,6 +31,13 @@ Template.selectAuthorPosts.helpers({
   },
   allPostsLoaded: function() {
     return Session.equals('authorPublishPostForSeries','loadedall');
+  },
+  loadingStatusInfo:function(){
+     var postsCount = Template.selectAuthorPosts.__helpers.get('userPostsLists')().count();
+     if (postsCount > 0) {
+      return '已显示全部';
+     }
+     return '没有可添加的故事啦~'
   }
 });
 
