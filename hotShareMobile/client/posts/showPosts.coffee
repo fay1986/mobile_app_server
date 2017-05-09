@@ -1526,6 +1526,15 @@ if Meteor.isClient
       Session.set('storyListsType',e.currentTarget.id)
 
     Tracker.autorun ()->
+      if Session.get('addPostTheme')
+        style = Session.get('addPostTheme')
+        if !style or style is 'default'
+          return $('head link#post-theme').remove()
+        $theme = $('head link#post-theme')
+        if ($theme.length > 0)
+          return $theme.attr('href', theme_host_url + style)
+        $('head').append('<link id="post-theme" rel="stylesheet" type="text/css" href="'+theme_host_url + style+'">')
+        return
       if Session.get('postContent')
         style = Session.get('postContent').style
         if !style

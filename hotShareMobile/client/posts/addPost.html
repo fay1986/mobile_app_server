@@ -1,5 +1,20 @@
 <template name="addPost">
-  <div class="addPost">
+  <div class="post-theme-btn"><div>模板</div></div>
+  <div class="post-theme-box-mask"></div>
+  <div class="post-theme-box">
+    <div class="btn-succ"><div><i class="fa fa-check"></i>完成</div></div>
+    <ul>
+      {{#each themes}}
+        {{#if get_hover this}}
+        <li class="hover" data-id="{{_id}}" data-name="{{name}}" data-style="{{style}}" style="background-image: url('{{theme_host}}{{preview}}')"></li>
+        {{else}}
+        <li data-id="{{_id}}" data-name="{{name}}" data-style="{{style}}" style="background-image: url('{{theme_host}}{{preview}}')"></li>
+        {{/if}}
+      {{/each}}
+    </ul>
+  </div>
+
+  <div class="addPost post-add-page">
     <div id="show_hyperlink">
       <div class="head">
         <div class="leftButton" id="hyperlink_back"><i class="fa fa-angle-left fa-fw"></i></div>
@@ -64,7 +79,8 @@
       <div id="add_posts_content" class="content">
           {{>addPostMainImage}}
           <div class="gridster">
-              <ul id="display" style="background-color:white !important;">
+              <!--<ul id="display" style="background-color:white !important;">-->
+              <ul id="display" style="background-color:white;">
                   {{#if showContent}}
                       {{#each pub}}
                           {{>addPostItem}}

@@ -1021,6 +1021,9 @@ if Meteor.isClient
     pub = new_pub
     browseTimes = 0
 
+    # theme
+    style = if !Session.get('addPostTheme') or Session.get('addPostTheme') is 'default' then '' else Session.get('addPostTheme')
+
     if Session.get('isReviewMode') is '2' or Posts.find({_id:postId}).count()>0
       browseTimes = Posts.findOne({_id:postId}).browse 
       Posts.update(
@@ -1043,7 +1046,8 @@ if Meteor.isClient
             owner:ownerUser._id,
             ownerName:ownerName,
             ownerIcon:ownerIcon,
-            createdAt: new Date()
+            createdAt: new Date(),
+            style: style
           }
         }
       )
@@ -1066,7 +1070,8 @@ if Meteor.isClient
         owner:ownerUser._id,
         ownerName:ownerName,
         ownerIcon:ownerIcon,
-        createdAt: new Date()
+        createdAt: new Date(),
+        style: style
       })
     newPostData = {
         _id:postId,
@@ -1086,7 +1091,8 @@ if Meteor.isClient
         ownerName:ownerName,
         ownerIcon:ownerIcon,
         isReview: true,
-        createdAt: new Date()
+        createdAt: new Date(),
+        style: style
     }
     Session.set('newpostsdata', newPostData)
     #Delete from SavedDrafts if it is a saved draft.
@@ -1893,4 +1899,31 @@ if Meteor.isClient
     "click .modal-body dl": (e, t)->
       t.$("dt.active").removeClass("active")
       $(e.currentTarget).find("dt").addClass('active')
+
+  Template.addPost.onRendered ()->
+      Session.set('addPostTheme', 'default')
+      draft = Drafts.findOne()
+      post = if draft then Posts.findOne({_id: draft._id}) else null
+      post and Session.set('addPostTheme', post.style)
+  Template.addPost.onDestroyed ()->
+      Session.set('addPostTheme', '')
+  Template.addPost.helpers
+      themes: ()->
+        return Themes.find({})
+      theme_host: ()->
+        return theme_host_url
+      get_hover: (theme)->
+        return theme.style is Session.get('addPostTheme') or (!Session.get('addPostTheme') and theme.default is true)
+    Template.addPost.events
+      'click .post-theme-btn': ()->
+        $('.post-theme-box').show()
+        $('.post-theme-box-mask').show()
+      'click .post-theme-box-mask': ()->
+        $('.post-theme-box').hide()
+        $('.post-theme-box-mask').hide()
+      'click .post-theme-box li': ()->
+        Session.set('addPostTheme', this.style)
+      'click .post-theme-box .btn-succ': ()->
+        $('.post-theme-box').hide()
+        $('.post-theme-box-mask').hide()
 
