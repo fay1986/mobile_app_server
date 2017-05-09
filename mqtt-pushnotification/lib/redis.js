@@ -5,7 +5,7 @@ var redis = require('redis'),
     RDS_HOST = 'rds.tiegushi.com' || process.env.REDIS_HOST,
     RDS_PWD = process.env.REDIS_PASSWORD,
     RDS_OPTS = {},
-    redisClient = redis.createClient(RDS_PORT,RDS_HOST,RDS_OPTS);
+    redisClient = null;
 
 module.exports = RedisClient
 function RedisClient(){
@@ -14,6 +14,7 @@ RedisClient.redisClientInit = redisClientInit;
 RedisClient.redisUpdateKey= redisUpdateKey;
 
 function redisClientInit() {
+    redisClient = redis.createClient(RDS_PORT,RDS_HOST,RDS_OPTS);
     var client = redisClient;
 
     client.auth(RDS_PWD,function(){
