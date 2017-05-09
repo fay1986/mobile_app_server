@@ -145,7 +145,7 @@ if (Meteor.isCordova) {
     function eventResume(){
         if (Meteor.status().connected !== true)
           Meteor.reconnect();
-
+        
         if (Meteor.user()) {
             console.log('Refresh Main Data Source when resume');
             if (Meteor.isCordova) {
@@ -166,6 +166,15 @@ if (Meteor.isCordova) {
                   window.plugins.shareExtension.emptyData(function(result) {}, function(err) {});
                 }
             }
+        }
+
+        try{
+          if(mqtt_connection){
+            console.log('try reconnect mqtt')
+            mqtt_connection._reconnect();
+          }
+        } catch (error) {
+          console.log('mqtt reconnect Error=',error);
         }
     }
     function eventPause(){
