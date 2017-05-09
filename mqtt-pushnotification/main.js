@@ -1,20 +1,20 @@
 var mqtt = require('mqtt')
 var MongoClient = require('mongodb').MongoClient;
 var redisClient = require('./lib/redis.js')
+var f = require('./lib/foreach.js')
 
 var serverUrl = process.env.SERVER_URL || 'http://host1.tiegushi.com/';
 var MQTT_URL = process.env.MQTT_URL;
 var DB_CONN = process.env.MONGO_URL;
-// var DB_CONN = 'mongodb://workAIAdmin:weo23biHUI@aidb.tiegushi.com:27017/workai';
 var db = null;
 var debug_on = process.env.DEBUG_MESSAGE || false;
 var allowGroupNotification = process.env.ALLOW_GROUP_NOTIFICATION || false;
 var projectName = process.env.PROJECT_NAME || null; // '故事贴：t , 点圈： d'
 var client  = mqtt.connect(MQTT_URL);
 
-var Array = require('node-array');
-
-redisClient.redisClientInit();
+if(process.env.REDIS_HOST && process.env.REDIS_PASSWORD) {
+    redisClient.redisClientInit();
+}
 
 MongoClient.connect(DB_CONN, {poolSize:20 , reconnectTries: Infinity}, function(err, mongodb){
   if (err) {
@@ -46,13 +46,15 @@ client.on('message', function (topic, message) {
   // message is Buffer
   debug_on && console.log(topic)
   var msgObj = JSON.parse(message.toString());
-  debug_on && console.log(msgObj)
+  if(msgObj && msgObj.to && msgObj.to.id)
+      debug_on && console.log(msgObj)
   // client.end()
   if(allowGroupNotification && topic.match('/msg/g/')){
     if(msgObj.is_people){
     } else {
        //if(msgObj.to.id === '953386e352c1ae0e95a24b8a')
-       sendGroupNotification(db,msgObj,'groupmessage');
+       if(msgObj && msgObj.to && msgObj.to.id && msgObj.to.id)
+           sendGroupNotification(db,msgObj,'groupmessage');
     }
   }
   if(topic.match('/msg/u/')){
@@ -65,7 +67,7 @@ client.on('disconnect', function (topic, message) {
     console.log('disconnected')
 });
 
-function sendNotification(db,message, toUserId ,type) {
+function sendNotification(db,message, toUserId ,type, cb) {
   var toUserId = toUserId;
   var userId = message.form.id;
 
@@ -76,16 +78,16 @@ function sendNotification(db,message, toUserId ,type) {
   users.findOne({ _id: toUserId }, function (err, toUser) {
     if (err) {
       console.log('Error:'+err)
-      return
+      return cb && cb(err);
     }
     if (toUser && toUser.type && toUser.token) {
       pushTokens.findOne({ type: toUser.type, token: toUser.token }, function (err, pushTokenObj) {
         if (err) {
           console.log('Error:' + err);
-          return
+          return cb && cb(err);
         }
         if (!pushTokenObj || pushTokenObj.userId !== toUser._id) {
-          return
+          return cb && cb('pushToken not found');
         }
         var content = '';
         var msgText = '';
@@ -137,11 +139,16 @@ function sendNotification(db,message, toUserId ,type) {
         PushMessages.insert({pushMessage: dataArray, createAt: new Date()},function(err,result){
           if(err){
             console.log('Error:'+err);
+            return cb && cb(err);
           } else {
             debug_on && console.log(result)
+            return cb && cb(null);
           }
         })
       });
+    }
+    else {
+      return cb && cb('toUser/type/token not found');
     }
   });
 }
@@ -160,7 +167,10 @@ function sendUserNotification(db, message, type){
       debug_on && console.log('在对方黑名单中， userId='+ userId +' ,toUserId='+ toUserId);
       return
     }
-    sendNotification(db, message, toUserId, type);
+    sendNotification(db, message, toUserId, type, function(err) {
+        if(err)
+            console.log('sendUserNotification: err=' + err);
+    });
   });
 };
 
@@ -174,28 +184,29 @@ function sendGroupNotification(db, message, type){
       return
     }
 
-    docs.forEachAsync(function(doc,index, arr,next){
-      if(message.form.id === doc.user_id) {
-          next();
-      }
-      else {
-          var keystring = groupId + '_' + doc.user_id;
-          redisClient.redisUpdateKey(keystring, function(ttl) {
-              console.log('>>> main.js ttl='+ttl)
-              if(ttl > 1)
-                  next();
-              else {
-                  // continue after 100ms
-                  setTimeout(function() {
-                      sendNotification(db,message,doc.user_id,type)
-                      next();
-                  }, 100);
-              }
-          });
-      }
-      return true;
-    },function(){
-      debug_on && console.log('send GroupNotification complete, messageForm:',JSON.stringify(message.form));
+    forEachAsynSeriesWait(docs, 5, 200, function(doc, index, callback) {
+        if(message.form.id != doc.user_id) {
+            var keystring = 'Train_' + groupId + '_' + doc.user_id;
+            redisClient.redisUpdateKey(keystring, function(ttl) {
+                if(ttl <= 1) {
+                    sendNotification(db,message,doc.user_id,type, function(err) {
+                        if(err)
+                            console.log('sendGroupNotification: err=' + err);
+                        else
+                            console.log('sendGroupNotification: send to ' + doc.user_id + ' index=' + index);
+                        return callback && callback();
+                    })
+                }
+                else {
+                    console.log('Notification ' + keystring + ' ttl=' + ttl)
+                    return callback && callback();
+                }
+            });
+        }
+        else
+            return callback && callback();
+    }, function() {
+        console.log('send GroupNotification complete, messageForm:',JSON.stringify(message.form));
     })
   });
 };

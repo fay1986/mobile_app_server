@@ -13,7 +13,6 @@ function RedisClient(){
 RedisClient.redisClientInit = redisClientInit;
 RedisClient.redisUpdateKey= redisUpdateKey;
 
-
 function redisClientInit() {
     var client = redisClient;
 
@@ -33,6 +32,9 @@ function redisClientInit() {
 
 function redisUpdateKey(key_str, cb) {
     client = redisClient;
+
+    if(!client || client.connected == false)
+        return cb && cb(0);
 
     client.get(key_str, function (err, reply) {
         if(reply) {
