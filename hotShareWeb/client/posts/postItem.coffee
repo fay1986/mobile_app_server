@@ -1,5 +1,31 @@
 
 if Meteor.isClient
+  @sendMqttMessageToUser=(type,to,postData)->
+    username = Meteor.user().profile.fullname || Meteor.user().username
+    if type is 'thumbsUp'
+      text = '我赞了你的文章《' + postData.title + '》哦~'
+    else if type is 'thumbsDown'
+      text = '我踩了你的文章《' + postData.title + '》哦~'
+    else
+      text = '我评论了你的文章《' + postData.title + '》哦~'
+    msg = {
+        _id: new Mongo.ObjectID()._str,
+        form:{
+          id: Meteor.userId(),
+          name: username,
+          icon: Meteor.user().profile.icon || '/userPicture.png'
+        },
+        to: to,
+        to_type: 'user',
+        type: 'text',
+        text: text,
+        create_time: new Date(Date.now() + MQTT_TIME_DIFF),
+        is_read: false
+      }
+    console.log('msg data is ' + msg)
+    SimpleChat.Messages.insert msg, ()->
+      console.log 'Messages insert.'
+      sendMqttUserMessage(msg.to.id, msg)
   getBaseWidth=()->
     ($('.showPosts').width()-30)/6
   getBaseHeight=()->
@@ -103,10 +129,26 @@ if Meteor.isClient
       Session.set("pcommetsId","")
       thumbsUpHandler(e,this)
       Session.set('postPageScrollTop',document.body.scrollTop)
+      type = 'thumbsUp'
+      postData = Session.get('postContent')
+      to = {
+        id: postData.owner,
+        name: postData.ownerName,
+        icon: postData.ownerIcon
+      }
+      sendMqttMessageToUser(type,to,postData)
     'click .thumbsDown': (e)->
       Session.set("pcommetsId","")
       thumbsDownHandler(e,this)
       Session.set('postPageScrollTop',document.body.scrollTop)
+      type = 'thumbsDown'
+      postData = Session.get('postContent')
+      to = {
+        id: postData.owner,
+        name: postData.ownerName,
+        icon: postData.ownerIcon
+      }
+      sendMqttMessageToUser(type,to,postData)
     'click .pcomments': (e)->
       otherElementShowOrHidden(false)
       #console.log($(e.currentTarget).parent().parent().parent())
@@ -130,9 +172,16 @@ if Meteor.isClient
       pcommentPlaceHolderText = getPcommentPlaceHolder()
       $pcommentInput = $(e.currentTarget).parent()
       $pcommentInput.after('<div id="pcommentInput" class="pcommentInput"><div class="input-group"><form onsubmit="return" class="pcommentInput-form"><input type="text" id="pcommitReport" autofocus="autofocus" class="form-control" maxlength="180" placeholder="' + pcommentPlaceHolderText + '" /></form><div onclick="pcommitReport()" id="pcommitReportBtn">发送</div></div></div><div onclick="hidePcomments()" class="newalertBackground"></div>')
-      
       # $('.showBgColor').css('min-width',$(window).width())
       Session.set "pcommentIndexNum", this.index
+      type = 'pcomments'
+      postData = Session.get('postContent')
+      to = {
+        id: postData.owner,
+        name: postData.ownerName,
+        icon: postData.ownerIcon
+      }
+      sendMqttMessageToUser(type,to,postData)
     'click .bubble':(e)->
       otherElementShowOrHidden(false)
       Session.set "pcommentIndexNum", $(e.currentTarget).parent().parent().parent().index(".element")

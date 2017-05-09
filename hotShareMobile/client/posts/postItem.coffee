@@ -1,5 +1,31 @@
 
 if Meteor.isClient
+  @sendMqttMessageToUser=(type,to,postData)->
+    username = Meteor.user().profile.fullname || Meteor.user().username
+    if type is 'thumbsUp'
+      text = '我赞了你的文章《' + postData.title + '》哦~'
+    else if type is 'thumbsDown'
+      text = '我踩了你的文章《' + postData.title + '》哦~'
+    else
+      text = '我评论了你的文章《' + postData.title + '》哦~'
+    msg = {
+        _id: new Mongo.ObjectID()._str,
+        form:{
+          id: Meteor.userId(),
+          name: username,
+          icon: Meteor.user().profile.icon || '/userPicture.png'
+        },
+        to: to,
+        to_type: 'user',
+        type: 'text',
+        text: text,
+        create_time: new Date(Date.now() + MQTT_TIME_DIFF),
+        is_read: false
+      }
+    console.log('msg data is ' + msg)
+    SimpleChat.Messages.insert msg, ()->
+      console.log 'Messages insert.'
+      sendMqttUserMessage(msg.to.id, msg)
   @getLocalImagePath=(path,uri,id)->
     if !path or !id
       return ''
@@ -134,9 +160,25 @@ if Meteor.isClient
     'click .thumbsUp': (e)->
       Session.set("pcommetsId","")
       thumbsUpHandler(e,this)
+      type = 'thumbsUp'
+      postData = Session.get('postContent')
+      to = {
+        id: postData.owner,
+        name: postData.ownerName,
+        icon: postData.ownerIcon
+      }
+      sendMqttMessageToUser(type,to,postData)
     'click .thumbsDown': (e)->
       Session.set("pcommetsId","")
       thumbsDownHandler(e,this)
+      type = 'thumbsDown'
+      postData = Session.get('postContent')
+      to = {
+        id: postData.owner,
+        name: postData.ownerName,
+        icon: postData.ownerIcon
+      }
+      sendMqttMessageToUser(type,to,postData)
     'click .pcomments': (e)->
       Session.set("pcommetsClicked",true)
       Session.set("pcommetsReply",false)
@@ -152,9 +194,16 @@ if Meteor.isClient
       $('.pcommentInput,.alertBackground').fadeIn 300, ()->
         $('#pcommitReport').focus()
       $('#pcommitReport').focus()
-
       # $('.showBgColor').css('min-width',$(window).width())
       Session.set "pcommentIndexNum", this.index
+      type = 'pcomments'
+      postData = Session.get('postContent')
+      to = {
+        id: postData.owner,
+        name: postData.ownerName,
+        icon: postData.ownerIcon
+      }
+      sendMqttMessageToUser(type,to,postData)
     'click .bubble':(e)->
       Session.set("pcommetsClicked",true)
       Session.set "pcommentIndexNum", $(e.currentTarget).parent().parent().parent().index(".element")
