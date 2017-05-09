@@ -48,14 +48,10 @@ client.on('message', function (topic, message) {
   var msgObj = JSON.parse(message.toString());
   if(msgObj && msgObj.to && msgObj.to.id)
       debug_on && console.log(msgObj)
-  // client.end()
+
   if(allowGroupNotification && topic.match('/msg/g/')){
-    if(msgObj.is_people){
-    } else {
-       //if(msgObj.to.id === '953386e352c1ae0e95a24b8a')
-       if(msgObj && msgObj.to && msgObj.to.id && msgObj.to.id)
-           sendGroupNotification(db,msgObj,'groupmessage');
-    }
+      if(msgObj && msgObj.to && msgObj.to.id)
+          sendGroupNotification(db,msgObj,'groupmessage');
   }
   if(topic.match('/msg/u/')){
       // sendNotification(db,msgObj, msgObj.to.id,'usermessage');
@@ -101,10 +97,13 @@ function sendNotification(db,message, toUserId ,type, cb) {
           msgText = message.text;
         }
         if(type == 'usermessage'){
-            content = message.form.name+ ':' + msgText;
+            content = message.form.name+ ': ' + msgText;
         }
         if(type === 'groupmessage'){
-          content = message.to.name+ ':' + msgText;
+          if(message.is_people)
+            content = message.to.name+ ': ' + ' 有新消息';
+          else
+            content = message.to.name+ ': ' +  msgText;
         }
         var commentText = '';
         var extras = {
