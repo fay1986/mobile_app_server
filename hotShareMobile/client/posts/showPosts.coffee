@@ -787,6 +787,8 @@ if Meteor.isClient
       Session.set("currentPageIndex",-1)
       Meteor.subscribe("userinfo", this.owner)
       Meteor.subscribe("recentPostsViewByUser", this.owner)
+      Session.set('pageToProfile','/posts/'+ Session.get('postContent')._id)
+      Session.set('pageScrollTop',$(window).scrollTop())
       onUserProfile()
     "click .showPostsFollowMe span a":->
       if Meteor.isCordova
@@ -890,6 +892,9 @@ if Meteor.isClient
         else if Session.get("backtoalldrafts") is true
           Session.set("backtoalldrafts",false)
           PUB.page('/allDrafts')
+        else if Session.get('fromUserProfile') is true and Session.get('pageToProfile')
+          Session.set("fromUserProfile",false)
+          onUserProfile()
         else
           PUB.postPageBack()
         if Session.get("Social.LevelOne.Menu") is 'userProfile'

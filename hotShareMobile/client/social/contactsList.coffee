@@ -151,6 +151,9 @@ if Meteor.isClient
       Session.set("ProfileUserId1", this.ta)
       Session.set("ProfileUserId3", userProfileList[prevProfileIndex].ta)
       Session.set("ProfileUserId2", userProfileList[nextProfileIndex].ta)
+      Session.set('pageToProfile','/posts/'+ Session.get('postContent')._id)
+      Session.set('pageScrollTop',$(window).scrollTop())
+      Session.set('fromContactsList',true)
       #click on suggest friends list
       onUserProfile()
       #PUB.page('userProfilePage1')

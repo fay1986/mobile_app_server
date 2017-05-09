@@ -142,6 +142,8 @@ if Meteor.isClient
       Session.set("currentPageIndex",-1)
       Meteor.subscribe("usersById", userId)
       Meteor.subscribe("recentPostsViewByUser", userId)
+      Session.set('pageToProfile','/followers')
+      Session.set('pageScrollTop',$(window).scrollTop())
       onUserProfile()
     'click .contentList .userName': (e)->
       userId = e.currentTarget.id
@@ -151,4 +153,6 @@ if Meteor.isClient
       Session.set("currentPageIndex",-1)
       Meteor.subscribe("usersById", userId)
       Meteor.subscribe("recentPostsViewByUser", userId)
+      Session.set('pageToProfile','/followers')
+      Session.set('pageScrollTop',$(window).scrollTop())
       onUserProfile()

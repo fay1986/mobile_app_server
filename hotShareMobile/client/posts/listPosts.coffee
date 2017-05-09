@@ -78,6 +78,8 @@ if Meteor.isClient
       Session.set("currentPageIndex",-1)
       Meteor.subscribe("usersById", this.owner)
       Meteor.subscribe("recentPostsViewByUser", this.owner)
+      Session.set('pageToProfile','/')
+      Session.set('pageScrollTop',$(window).scrollTop())
       onUserProfile()
     'click .footer .name': (e)->
       console.log 'i clicked a name'
@@ -85,4 +87,6 @@ if Meteor.isClient
       Session.set("currentPageIndex",-1)
       Meteor.subscribe("usersById", this.owner)
       Meteor.subscribe("recentPostsViewByUser", this.owner)
+      Session.set('pageToProfile','/')
+      Session.set('pageScrollTop',$(window).scrollTop())
       onUserProfile()

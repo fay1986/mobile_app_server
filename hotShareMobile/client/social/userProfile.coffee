@@ -384,7 +384,22 @@ if Meteor.isClient
       Session.set("Social.LevelOne.Menu",'contactsList')
       if PopUpBox
         PopUpBox.close()
-        # $('.popUpBox, .b-modal').hide()
+        $('.popUpBox, .b-modal').hide()
+      if Session.get('pageToProfile')
+        Meteor.setTimeout ()->
+          Router.go Session.get('pageToProfile')
+          Session.set('pageToProfile',null)
+          scrollTop = Session.get('pageScrollTop')
+          if scrollTop and scrollTop isnt 0
+            document.body.scrollTop = Session.get('pageScrollTop')
+            Session.set('pageScrollTop',0)
+          if Session.get('fromContactsList') is true
+            Session.set('fromContactsList',false)
+            Session.set("SocialOnButton",'contactsList')
+            $('.div_contactsList').css('display',"block")
+            $('.div_discover').css('display',"none")
+            $('.div_me').css('display',"none")
+        ,300
     # 'click #suggestCurrentPost': ()->
     #   suggestCurrentPost("ProfileUserId1")
     # 'click #sendChatMessage': ()->
@@ -396,11 +411,13 @@ if Meteor.isClient
       $(window).unbind('scroll')
       if PopUpBox
         PopUpBox.close()
-        # $('.popUpBox, .b-modal').hide()
+        $('.popUpBox, .b-modal').hide()
         
       Meteor.setTimeout ()->
         Session.set("Social.LevelOne.Menu",'contactsList')
+        Session.set('fromUserProfile',true)
         Router.go '/posts/'+postId
+        document.body.scrollTop = 0
       ,300
     'click #addToContactList': ()->
       addToContactList("ProfileUserId1")
@@ -522,7 +539,22 @@ if Meteor.isClient
       Session.set("Social.LevelOne.Menu",'contactsList')
       if PopUpBox
         PopUpBox.close()
-        # $('.popUpBox, .b-modal').hide()
+        $('.popUpBox, .b-modal').hide()
+      if Session.get('pageToProfile')
+        Meteor.setTimeout ()->
+          Router.go Session.get('pageToProfile')
+          Session.set('pageToProfile',null)
+          scrollTop = Session.get('pageScrollTop')
+          if scrollTop and scrollTop isnt 0
+            document.body.scrollTop = Session.get('pageScrollTop')
+            Session.set('pageScrollTop',0)
+          if Session.get('fromContactsList') is true
+            Session.set('fromContactsList',false)
+            Session.set("SocialOnButton",'contactsList')
+            $('.div_contactsList').css('display',"block")
+            $('.div_discover').css('display',"none")
+            $('.div_me').css('display',"none")
+        ,300
     # 'click #suggestCurrentPost': ()->
     #   suggestCurrentPost("ProfileUserId2")
     # 'click #sendChatMessage': ()->
@@ -534,10 +566,12 @@ if Meteor.isClient
       $(window).unbind('scroll')
       if PopUpBox
         PopUpBox.close()
-        # $('.popUpBox, .b-modal').hide()
+        $('.popUpBox, .b-modal').hide()
       Meteor.setTimeout ()->
         Session.set("Social.LevelOne.Menu",'contactsList')
+        Session.set('fromUserProfile',true)
         Router.go '/posts/'+postId
+        document.body.scrollTop = 0
       ,300
     'click #addToContactList': ()->
       addToContactList("ProfileUserId2")
@@ -659,7 +693,23 @@ if Meteor.isClient
       Session.set("Social.LevelOne.Menu",'contactsList')
       if PopUpBox
         PopUpBox.close()
-        # $('.popUpBox, .b-modal').hide()
+        $('.popUpBox, .b-modal').hide()
+      if Session.get('pageToProfile')
+        Meteor.setTimeout ()->
+          Router.go Session.get('pageToProfile')
+          Session.set('pageToProfile',null)
+          scrollTop = Session.get('pageScrollTop')
+          if scrollTop and scrollTop isnt 0
+            document.body.scrollTop = Session.get('pageScrollTop')
+            Session.set('pageScrollTop',0)
+          if Session.get('fromContactsList') is true
+            Session.set('fromContactsList',false)
+            Session.set("SocialOnButton",'contactsList')
+            $('.div_contactsList').css('display',"block")
+            $('.div_discover').css('display',"none")
+            $('.div_me').css('display',"none")
+        ,300
+
     # 'click #suggestCurrentPost': ()->
     #   suggestCurrentPost("ProfileUserId3")
     # 'click #sendChatMessage': ()->
@@ -671,10 +721,12 @@ if Meteor.isClient
       $(window).unbind('scroll')
       if PopUpBox
         PopUpBox.close()
-        # $('.popUpBox, .b-modal').hide()
+        $('.popUpBox, .b-modal').hide()
       Meteor.setTimeout ()->
         Session.set("Social.LevelOne.Menu",'contactsList')
+        Session.set('fromUserProfile',true)
         Router.go '/posts/'+postId
+        document.body.scrollTop = 0
       ,300
     'click #addToContactList': ()->
       addToContactList("ProfileUserId3")
@@ -798,17 +850,34 @@ if Meteor.isClient
       Session.set("Social.LevelOne.Menu",'contactsList')
       if PopUpBox
         PopUpBox.close()
-        # $('.popUpBox, .b-modal').hide()
+        $('.popUpBox, .b-modal').hide()
+      if Session.get('pageToProfile')
+        Meteor.setTimeout ()->
+          Router.go Session.get('pageToProfile')
+          Session.set('pageToProfile',null)
+          scrollTop = Session.get('pageScrollTop')
+          if scrollTop and scrollTop isnt 0
+            document.body.scrollTop = Session.get('pageScrollTop')
+            Session.set('pageScrollTop',0)
+          if Session.get('fromContactsList') is true
+            Session.set('fromContactsList',false)
+            Session.set("SocialOnButton",'contactsList')
+            $('.div_contactsList').css('display',"block")
+            $('.div_discover').css('display',"none")
+            $('.div_me').css('display',"none")
+        ,300
     'click .postImages ul li':(e)->
       postId = e.currentTarget.id
       $(window).children().off()
       $(window).unbind('scroll')
       if PopUpBox
         PopUpBox.close()
-        # $('.popUpBox, .b-modal').hide()
+        $('.popUpBox, .b-modal').hide()
       Meteor.setTimeout ()->
         Session.set("Social.LevelOne.Menu",'contactsList')
+        Session.set('fromUserProfile',true)
         Router.go '/posts/'+postId
+        document.body.scrollTop = 0
       ,300
   Template.favoritePosts.rendered=->
     $(window).scroll (event)->
