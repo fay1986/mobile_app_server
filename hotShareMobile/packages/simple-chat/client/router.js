@@ -851,7 +851,6 @@ Template._simpleChatToChatLayout.events({
   },
   'focus .input-text': function(){
     $('.box').animate({scrollTop:'999999px'},800)
-    $('html,body').animate({scrollTop:'999999px'},800);
     // Meteor.setTimeout(function(){
     //   $('body').scrollTop(999999);     
     // }, 500);
