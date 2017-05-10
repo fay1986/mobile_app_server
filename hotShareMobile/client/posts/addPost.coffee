@@ -1915,6 +1915,25 @@ if Meteor.isClient
       get_hover: (theme)->
         return theme.style is Session.get('addPostTheme') or (!Session.get('addPostTheme') and theme.default is true)
     Template.addPost.events
+      'click .btn-title': ()->
+        $('.post-theme-box').hide()
+        $('.post-theme-box-mask').hide()
+        
+        pubImages=[]
+        draftData = Drafts.find().fetch()
+        for i in [0..(draftData.length-1)]
+          if draftData[i].isImage is true
+            doc = {
+              imageId: draftData[i]._id,
+              URI: draftData[i].URI,
+              imgUrl: draftData[i].imgUrl,
+              filename: draftData[i].filename
+            }
+            pubImages.push(doc)
+        Session.set('pubImages',pubImages)
+        $('body').attr('style', 'background-color:#fff;')
+        $('.addPost').hide()
+        $('.mainImagesList').show()
       'click .post-theme-btn': ()->
         $('.post-theme-box').show()
         $('.post-theme-box-mask').show()

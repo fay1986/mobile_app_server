@@ -1,15 +1,16 @@
-.post-detail-page .showPosts{background-color: transparent;}
-.post-detail-page .mainImage img{display: none;}
-.post-detail-page #wrapper .mainImage > header{background: none !important;}
-.post-detail-page .showPostsBox .post-add-page .gridster{background-position: center top; background-repeat: no-repeat;}
+.post-detail-page .showPosts, .post-add-page{background-color: transparent;}
+.post-detail-page .mainImage img, .post-add-page .mainImage img{display: none;}
+.post-detail-page #wrapper .mainImage > header, .post-add-page .mainImage > header{background: none !important;}
+.post-detail-page .showPostsBox, .post-add-page{background-position: center top; background-repeat: no-repeat;}
 .post-detail-page .showPostsBox .postImageItem img, .post-add-page .gridster .resortitem img{background-color: transparent !important;}
 
-.post-detail-page #wrapper .mainImage{height: auto !important;}
-.post-detail-page #wrapper .mainImage > header{position: relative !important;}
-.post-detail-page #wrapper .mainImage > header:after{content: "";position: absolute;left: 0;bottom: 0;width: 90%;height: 2px;overflow: hidden;border-bottom: 2px dotted #A77A47;margin-left: 5%;}
-.post-detail-page .showPosts > .content, .post-add-page .gridster{background-image: url('bg.jpg'); background-repeat: repeat;}
+.post-detail-page #wrapper .mainImage, .post-add-page .mainImage{height: auto !important;}
+.post-detail-page #wrapper .mainImage > header, .post-add-page .mainImage > header{position: relative !important;}
+.post-detail-page #wrapper .mainImage > header:after, .post-add-page .mainImage > header:after{content: "";position: absolute;left: 0;bottom: 0;width: 90%;height: 2px;overflow: hidden;border-bottom: 2px dotted #A77A47;margin-left: 5%;}
+.post-detail-page .showPosts > .content, .post-add-page{background-image: url('bg.jpg'); background-repeat: repeat;}
 .post-detail-page .showPosts > .content .postImageItem img, .post-add-page .gridster .resortitem img{border: 1px solid #2d2926; border-image: url('img_border.png') 54 58 60 58 repeat; border-width: 12px; }
 .post-detail-page .showPosts > .content .gridster .textDiv1{color: #FFE2C0 !important;}
 .post-add-page .gridster ul{background-color: transparent !important;}
 .post-add-page .gridster .textdiv textarea{border-width: 0px !important; color: #FFE2C0 !important;}
 .post-add-page .gridster ul .resortitem.hastextarea.pressed .textdiv textarea{border-width: 1px !important;}
+.post-add-page .gridster ul .resortitem.hastextarea.edit .textdiv textarea{color: #000 !important;}
