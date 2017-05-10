@@ -45,7 +45,6 @@ function testLogin(callback){
             },
             function (error, userInfo) {
                 if (error) {
-
                     reportToWechatRoomAlertALL('机器人助理 登陆故事贴失败')
                     ddpClient.close()
                     try{
@@ -59,7 +58,7 @@ function testLogin(callback){
                     token = userInfo.token;
                     var timeDiff = new Date() - begin
                     reportToWechatRoom('机器人助理 成功登陆故事贴,耗时'+timeDiff+'ms')
-                    ddpClient.close()
+                    // ddpClient.close()
                     try{
                         callback(null,'Success')
                     } catch (e){
@@ -71,51 +70,38 @@ function testLogin(callback){
     });
 }
 
-function testOpenShowPost(callback){
+function testSubscribeShowPost(callback){
     var begin = new Date()
-    ddpClient.connect(function (err) {
-        if (err) {
-            reportToWechatRoomAlertALL('机器人助理 无法通过DDP连接到服务器 '+host+':'+port);
-            try{
+    ddpClient.subscribe(
+        'postInfoById',                  // name of Meteor Publish function to subscribe to 
+        ['WrnSqg89a3r4nPwXr'],                       // any parameters used by the Publish function 
+        function (error) {
+            if (error) {
+                reportToWechatRoomAlertALL('获取一篇帖子数据  失败！')
+                reportToWechatRoomAlertALL(error)
+                ddpClient.unsubscribe('WrnSqg89a3r4nPwXr')
                 ddpClient.close()
-            } catch(e){
-            }
-            try {
-                callback('Error')
-            } catch(e){
-            }
-            return
-        }
-        ddpClient.subscribe(
-            'postInfoById',                  // name of Meteor Publish function to subscribe to 
-            ['WrnSqg89a3r4nPwXr'],                       // any parameters used by the Publish function 
-            function (error) {
-                if (error) {
+                try{
+                    callback('Error')
+                } catch (e){
 
-                    reportToWechatRoomAlertALL('获取一篇帖子数据  失败！')
-                    reportToWechatRoomAlertALL(error)
-                    ddpClient.unsubscribe('WrnSqg89a3r4nPwXr')
-                    try{
-                        callback('Error')
-                    } catch (e){
-
-                    }
-                    return
-                } else {
-                    console.log('posts complete:');
-                    console.log(ddpClient.collections.posts);
-                    var timeDiff = new Date() - begin
-                    reportToWechatRoom('获取一篇帖子数据,  耗时'+timeDiff+'ms')
-                    ddpClient.unsubscribe('WrnSqg89a3r4nPwXr')
-                    try{
-                        callback(null,'Success')
-                    } catch (e){
-                    }
-                    return
                 }
+                return
+            } else {
+                console.log('posts complete:');
+                console.log(ddpClient.collections.posts);
+                var timeDiff = new Date() - begin
+                reportToWechatRoom('获取一篇帖子数据,  耗时'+timeDiff+'ms')
+                ddpClient.unsubscribe('WrnSqg89a3r4nPwXr')
+                ddpClient.close()
+                try{
+                    callback(null,'Success')
+                } catch (e){
+                }
+                return
             }
-        );
-    });
+        }
+    );
 }
 
 var globalRoom = null
@@ -135,7 +121,7 @@ wechatInstance.on('scan', (url, code) => console.log(`Scan QR Code to login: ${c
 wechatInstance.on('login',       user => console.log(`User ${user} logined`))
 wechatInstance.on('message', function(message){
     if(!globalRoom){
-        var room    = message.room()
+        var room = message.room()
         if(room && room.topic()==='故事贴监控群'){
             globalRoom = room;
             globalRoom.say('机器人助理 加入监控群，每次重启 机器人助理 后，需要任意人在监控群中发言激活功能')
@@ -149,7 +135,7 @@ wechatInstance.on('message', function(message){
 wechatInstance.init()
 
 
-taskList = [testLogin]
+taskList = [testLogin,testSubscribeShowPost]
 
 var intervalTask = function(){
     async.series(taskList,testOpenShowPost)
