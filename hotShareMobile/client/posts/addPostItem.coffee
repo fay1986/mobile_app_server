@@ -282,7 +282,33 @@ if Meteor.isClient
         grid.add_widget(node, parseInt(insertedObj.data_sizex,baseGap*2), parseInt(insertedObj.data_sizey,baseGap*2))
       else if insertedObj.inIframe and insertedObj.iframe
         console.log('to insert iframe')
-        grid.add_widget(node, parseInt(insertedObj.data_sizex,baseGap*2), parseInt(insertedObj.data_sizey,baseGap*2))
+        if sizeY
+          size_y = sizeY
+        else
+          size_y = 4
+        if window.unSelectedElem
+          currentCount = insertedObj.currentCount
+          totalCount = insertedObj.totalCount
+          Drafts.update({_id: node._id}, {$set: {currentCount:undefined,totalCount:undefined}});
+          if totalCount is 1 or !totalCount
+            insert_row = parseInt($(window.unSelectedElem).attr('data-row'))
+            window.unSelectedElem = undefined
+            console.log('Selected data-row is ' + insert_row)
+            grid.add_widget(node, 6, size_y, 1, insert_row)
+            #grid.add_widget(node, parseInt(insertedObj.data_sizex,baseGap*2), parseInt(insertedObj.data_sizey,baseGap*2),insert_row)
+          else
+            insert_row = parseInt($(window.unSelectedElem).attr('data-row'))
+            insert_sizey = parseInt($(window.unSelectedElem).attr('data-sizey'))
+            console.log 'insertRow:' + insert_row + 'insert_sizey:' + insert_sizey
+            if currentCount >= totalCount
+              window.unSelectedElem = undefined
+            else
+              window.unSelectedElem=node
+            grid.add_widget(node, 6, size_y, 1,insert_row + insert_sizey)
+            #grid.add_widget(node, parseInt(insertedObj.data_sizex,baseGap*2), parseInt(insertedObj.data_sizey,baseGap*2),insert_row + insert_sizey)
+        else
+          grid.add_widget(node, 6, size_y, 1)
+          #grid.add_widget(node, parseInt(insertedObj.data_sizex,baseGap*2), parseInt(insertedObj.data_sizey,baseGap*2))
       # Images loaded during rendering
       else if insertedObj.respectLayout
         grid.add_widget(node, parseInt(insertedObj.data_sizex,baseGap*2), parseInt(insertedObj.data_sizey,baseGap*2),parseInt(insertedObj.data_col),parseInt(insertedObj.data_row))
