@@ -71,6 +71,53 @@ function testLogin(callback){
     });
 }
 
+function testOpenShowPost(callback){
+    var begin = new Date()
+    ddpClient.connect(function (err) {
+        if (err) {
+            reportToWechatRoomAlertALL('机器人助理 无法通过DDP连接到服务器 '+host+':'+port);
+            try{
+                ddpClient.close()
+            } catch(e){
+            }
+            try {
+                callback('Error')
+            } catch(e){
+            }
+            return
+        }
+        ddpClient.subscribe(
+            'postInfoById',                  // name of Meteor Publish function to subscribe to 
+            ['WrnSqg89a3r4nPwXr'],                       // any parameters used by the Publish function 
+            function (error) {
+                if (error) {
+
+                    reportToWechatRoomAlertALL('获取一篇帖子数据  失败！')
+                    reportToWechatRoomAlertALL(error)
+                    ddpClient.unsubscribe('WrnSqg89a3r4nPwXr')
+                    try{
+                        callback('Error')
+                    } catch (e){
+
+                    }
+                    return
+                } else {
+                    console.log('posts complete:');
+                    console.log(ddpClient.collections.posts);
+                    var timeDiff = new Date() - begin
+                    reportToWechatRoom('获取一篇帖子数据,  耗时'+timeDiff+'ms')
+                    ddpClient.unsubscribe('WrnSqg89a3r4nPwXr')
+                    try{
+                        callback(null,'Success')
+                    } catch (e){
+                    }
+                    return
+                }
+            }
+        );
+    });
+}
+
 var globalRoom = null
 var reportToWechatRoom = function(string){
     if(string && globalRoom){
@@ -105,7 +152,7 @@ wechatInstance.init()
 taskList = [testLogin]
 
 var intervalTask = function(){
-    async.series(taskList)
+    async.series(taskList,testOpenShowPost)
 }
 
 
