@@ -856,6 +856,7 @@ Template._simpleChatToChatLayout.events({
     // }, 500);
   },
   'submit .input-form': function(e, t){
+    $('.input-text').focus();
     try{
       var data = Blaze.getData(Blaze.getView(document.getElementsByClassName('simple-chat')[0]));
       var text = $('.input-text').val();
