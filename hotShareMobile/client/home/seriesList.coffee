@@ -24,6 +24,15 @@ Template.seriesList.helpers
     mySeries = SeriesFollow.find({owner:Meteor.userId()}, {sort: {createdAt: -1}})
     Session.setPersistent('persistentFollowSeries', mySeries.fetch())
     return mySeries
+  isfollowerSeries:(seriesId)->
+    if SeriesFollow.find({seriesId:seriesId}).count() > 1 and seriesId isnt null
+      seriesFollowId = SeriesFollow.findOne({seriesId: seriesId})._id
+      SeriesFollow.remove({_id:seriesFollowId})
+      mySeries = SeriesFollow.find({owner:Meteor.userId()}, {sort: {createdAt: -1}})
+      Session.setPersistent('persistentFollowSeries',mySeries.fetch())
+      return true
+    else
+      return true
   moreResults:->
     !(SeriesFollow.find().count() < Session.get("followSeriesLimit"))
   loading:->

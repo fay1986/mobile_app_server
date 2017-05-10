@@ -27,6 +27,7 @@
             {{/if}}
             <ul style="padding: 0;">
               {{#each mySeries}}
+              {{#if isfollowerSeries seriesId}}
               <li id="{{seriesId}}">
                 {{#if mainImage}}
                   {{>padding noRandomBackgroundColor=true}}
@@ -41,6 +42,7 @@
                   <img src="{{creatorIcon}}" style="height: 24px; min-height: 24px;width: 24px;border-radius: 50%;box-shadow: 0 0 1px 1px #ccc;"/><span>{{creatorName}}</span>
                 </div>
               </li>
+              {{/if}}
               {{/each}}
             </ul>
             {{#if moreResults}}
