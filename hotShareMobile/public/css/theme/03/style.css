@@ -4,8 +4,8 @@
 .post-detail-page .showPostsBox, .post-add-page{background-position: center top; background-repeat: no-repeat;}
 .post-detail-page .showPostsBox .postImageItem img, .post-add-page .gridster .resortitem img{background-color: transparent !important;}
 
-.post-detail-page #wrapper .mainImage > header .title, .post-add-page .mainImage > header .title{text-shadow: 0px -1px 14px #f6f8f7 !important;color: #40484b !important;}
-.post-detail-page #wrapper .mainImage > header .addontitle, .post-add-page .mainImage > header .addontitle{text-shadow: 0px -1px 14px #f6f8f7 !important;color: #40484b !important;}
+.post-detail-page #wrapper .mainImage > header .title, .post-add-page .mainImage > header .title{text-shadow: 0px -1px 14px #05345b !important;color: #40484b !important;}
+.post-detail-page #wrapper .mainImage > header .addontitle, .post-add-page .mainImage > header .addontitle{text-shadow: 0px -1px 14px #05345b !important;color: #40484b !important;}
 .post-detail-page .showPostsBox, .post-add-page{background-image: url('bg.jpg');}
 .post-detail-page .showPostsBox .postImageItem img, .post-add-page .gridster .resortitem img{border: 1px solid #05345B;border-radius: 0;border-image: url('img_border.png') 22 repeat;border-width: 12px;box-sizing: border-box;}
 .post-add-page .gridster ul{background-color: transparent !important;}
