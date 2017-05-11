@@ -4,8 +4,8 @@
 .post-detail-page .showPostsBox, .post-add-page{background-position: center top; background-repeat: no-repeat;}
 .post-detail-page .showPostsBox .postImageItem img, .post-add-page .gridster .resortitem img{background-color: transparent !important;}
 
-.post-detail-page #wrapper .mainImage > header .title, .post-add-page .mainImage > header .title{color: #f35698 !important;font-weight: bold; text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.64); text-transform: uppercase;}
-.post-detail-page #wrapper .mainImage > header .addontitle, .post-add-page .mainImage > header .addontitle{color: #f35698 !important; font-weight: bold; text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.64);text-transform: uppercase;}
+.post-detail-page #wrapper .mainImage > header .title, .post-add-page .mainImage > header .title{color: #f35698 !important;font-weight: bold; text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.64) !important; text-transform: uppercase;}
+.post-detail-page #wrapper .mainImage > header .addontitle, .post-add-page .mainImage > header .addontitle{color: #f35698 !important; font-weight: bold; text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.64) !important;text-transform: uppercase;}
 
 .post-detail-page #wrapper .mainImage, .post-add-page .mainImage{height: auto !important;}
 .post-detail-page #wrapper .mainImage > header, .post-add-page .mainImage > header{position: relative !important;}
@@ -24,3 +24,4 @@
 .post-detail-page .showPosts > .content .postAudioItem .musicContainer, .post-add-page .gridster .resortitem .musicContainer{color: #f35698 !important;border: 1px solid #2d2926; border-image: url('img_border.png') 12% stretch; border-width: 12px; }
 .post-detail-page .showPosts > .content .gridster .postTextItem .pcomment{ background: rgba(243, 86, 152, 0.4); color: #ff006b !important;}
 .post-detail-page .showPosts > .content .gridster .postTextItem .pcomment:after{ border-bottom-color: rgba(243, 86, 152, 0.4) !important;}
+ .post-add-page .gridster .resortitem .musicContainer img{border: none !important;}

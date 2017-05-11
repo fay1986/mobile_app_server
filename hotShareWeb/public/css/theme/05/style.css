@@ -11,3 +11,8 @@
 .post-add-page .gridster ul{background-color: transparent !important;}
 .post-add-page .gridster .textdiv textarea{border-width: 0px !important; color: #40484b !important;}
 .post-add-page .gridster ul .resortitem.hastextarea.pressed .textdiv textarea{border-width: 1px !important;}
+
+ 
+.post-add-page .gridster .postAudioItem  img{border: none !important; border-radius: 0 !important;}
+.post-detail-page .showPosts > .content .postIframeItem iframe, .post-add-page .gridster .resortitem iframe{border: 1px solid #05345B;border-radius: 6px;border-image: url('img_border.png') 21 repeat;border-width: 7px;box-sizing: border-box;}
+.post-detail-page .showPostsBox .musicContainer, .post-add-page .gridster .musicContainer{border: 1px solid #05345B;border-radius: 6px;border-image: url('img_border.png') 21 repeat;border-width: 7px;box-sizing: border-box;}

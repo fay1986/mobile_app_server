@@ -14,3 +14,11 @@
 .post-add-page .gridster .textdiv textarea{border-width: 0px !important; color: #FFE2C0 !important;}
 .post-add-page .gridster ul .resortitem.hastextarea.pressed .textdiv textarea{border-width: 1px !important;}
 .post-add-page .gridster ul .resortitem.hastextarea.edit .textdiv textarea{color: #000 !important;}
+
+.post-add-page .gridster .postAudioItem  img{border: none !important; border-radius: 0 !important;}
+.post-detail-page .showPosts > .content .postIframeItem iframe, .post-add-page .gridster .resortitem iframe{border: 1px solid #2d2926; border-image: url('img_border.png') 54 58 60 58 repeat; border-width: 12px; }
+.post-detail-page .showPostsBox .musicContainer, .post-add-page .gridster .musicContainer{border: 1px solid #2d2926; border-image: url('img_border.png') 54 58 60 58 repeat; border-width: 12px; }
+.post-detail-page .showPosts > .content .gridster .postTextItem .pcomment{ background: rgba(247, 247, 247, 0.3); border-radius: 4px;}
+.post-detail-page .showPosts > .content .gridster .postTextItem .pcomment:after{ border-bottom-color: rgba(247, 247, 247, 0.3) !important;}
+.post-detail-page .showPosts > .content .gridster .postTextItem .pcomment .bubble{ color: #FFE2C0 !important;}
+.post-detail-page .showPosts > .content .gridster .postTextItem .pcomment .personName{ color: #debc8a !important;}
