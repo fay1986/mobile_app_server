@@ -526,6 +526,22 @@ if Meteor.isClient
             gridster.remove_widget2(node, false)
           Drafts.remove node.id
           resizeGridsterDisplayHeight()
+        else if buttonClicked.id == "modify"
+          console.log("modify")
+          mainImageId = node.id
+          
+          selectMediaFromAblum 1,(cancel, result)->
+            if cancel
+              if Drafts.find().count() is 0
+                PUB.back()
+              return
+            if result
+              console.log 'image url is ' + result.smallImage
+              if Drafts.find({_id:mainImageId}).count() > 0
+                mainImageDoc = Drafts.findOne({_id:mainImageId})
+                $(node).find(".image_" + mainImageDoc._id).attr('src',result.smallImage)
+                Drafts.update({_id: mainImageDoc._id}, {$set: {imgUrl:result.smallImage,filename:result.filename, URI:result.URI }});
+        
         else if buttonClicked.id is "crop"
           console.log("crop "+ node.id)
           cropHandlerOnImage(node)
