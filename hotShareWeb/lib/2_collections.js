@@ -68,6 +68,9 @@ if(Meteor.isServer){
   Meteor.publish('themes', function(){
     return Themes.find({}, {limit: 40});
   });
+  Meteor.publish('post-example', function(){
+    return Posts.find({_id: 'zwmXLe5tuWDKCZQM8'}, {limit: 1});
+  });
 
   PeopleHis.allow({
     update: function (userId, doc, fields, modifier) {
