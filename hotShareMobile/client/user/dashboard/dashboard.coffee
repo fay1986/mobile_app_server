@@ -112,6 +112,7 @@ if Meteor.isClient
         Session.setPersistent('persistentProfileName',null)
         Session.setPersistent('persistentMySavedDrafts',null)
         Session.setPersistent('persistentMyOwnPosts',null)
+        mqttEventPause()
         #console.log msg
         Meteor.call('updatePushToken' ,{type: thisUser.type, token: thisUser.token,userId:''});
         window.plugins.userinfo.setUserInfo '', ->
@@ -203,6 +204,7 @@ if Meteor.isClient
                 Session.set('changePasswordSaveBtnClicked', false)
                 $('.afterchangepassword').fadeOut 300
                 $('.show-change-userinfo').fadeIn 300
+                mqttEventPause()
               return
             # Meteor.call "changeMyPassword", new_pass, (error, result) ->
             #   if error

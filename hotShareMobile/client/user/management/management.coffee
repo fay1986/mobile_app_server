@@ -28,6 +28,7 @@ loginFn = (id)->
       ()->
         console.log("setUserInfo was Error!")
     )
+    mqttEventPause()
     Router.go '/my_accounts_management'
     Meteor.defer ()->
       Session.setPersistent('persistentMySavedDrafts', SavedDrafts.find({},{sort: {createdAt: -1},limit:2}).fetch())
@@ -37,6 +38,7 @@ loginFn = (id)->
       Session.setPersistent('myPostsCount',Counts.get('myPostsCount'))
       Session.setPersistent('myFollowToCount',Counts.get('myFollowToCount'))
       Session.setPersistent('myFollowToCount',Counts.get('myEmailFollowerCount'))
+      mqttEventResume()
 
     is_loading.set([])
     navigator.notification.confirm '切换帐号成功~', null, '提示', ['知道了']

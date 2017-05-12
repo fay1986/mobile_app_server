@@ -129,7 +129,8 @@ if(Meteor.isClient){
       console.log('##RDBG, mqttEventResume, reestablish mqtt connection');
       Meteor.setTimeout(function() {
         if(Meteor.userId()){
-          initMQTT(getMqttClientID());
+        //   initMQTT(getMqttClientID());
+            initMQTT(Meteor.userId());
         }
       }, 1000);
     };

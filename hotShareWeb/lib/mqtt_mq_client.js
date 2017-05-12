@@ -9,7 +9,7 @@ if(Meteor.isClient){
             var mqttOptions = {
                 clean:false,
                 keepalive:20,
-                reconnectPeriod:10*1000,
+                reconnectPeriod:1*1000,
                 /*incomingStore: mqtt_store_manager.incoming,
                 outgoingStore: mqtt_store_manager.outgoing,*/
                 clientId:clientId
@@ -129,7 +129,8 @@ if(Meteor.isClient){
       console.log('##RDBG, mqttEventResume, reestablish mqtt connection');
       Meteor.setTimeout(function() {
         if(Meteor.userId()){
-          initMQTT(getMqttClientID());
+        //   initMQTT(getMqttClientID());
+            initMQTT(Meteor.userId());
         }
       }, 1000);
     };
