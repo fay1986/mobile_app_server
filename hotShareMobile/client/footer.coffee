@@ -291,6 +291,32 @@ if Meteor.isClient
               ,100)
             else
               PUB.back()
+    'click #from-example': (e)->
+      post = Posts.findOne({_id: 'zwmXLe5tuWDKCZQM8'})
+      if !post
+        return PUB.toast('内部错误，请重试~')       
+
+      Meteor.defer ()->
+        $('.modal-backdrop.in').remove()
+      prepareToEditorMode()
+      PUB.page '/add'
+      Meteor.defer ()->
+        #Clear draft first
+        Drafts.remove({})
+        #Prepare data from post
+        fromUrl = ''
+        if post.fromUrl and post.fromUrl isnt ''
+          fromUrl = post.fromUrl
+        draft0 = {_id:post._id, type:'image', isImage:true, url: fromUrl, owner: Meteor.userId(), imgUrl:post.mainImage, filename:post.mainImage.replace(/^.*[\\\/]/, ''), URI:"", data_row:0,style:post.mainImageStyle}
+        Drafts.insert(draft0)
+        pub = post.pub;
+        if pub.length > 0
+          ###
+          Router.go('/add') will trigger addPost onRendered first, then defer function run.
+          The Drafts.insert will trigger addPostItem OnRendered function run, then do the layout thing. The 2nd defer function
+          will run after then. The final callback will be called after all item layout done, so closePreEditingPopup run.
+          ###
+          deferedProcessAddPostItemsWithEditingProcessBar(pub)
 
   Template.selectImportWay.helpers
     hasAssocaitedUsers: ()->
