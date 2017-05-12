@@ -10,7 +10,7 @@
 .post-detail-page #wrapper .mainImage, .post-add-page .mainImage{height: auto !important;}
 .post-detail-page #wrapper .mainImage > header, .post-add-page .mainImage > header{position: relative !important;}
 .post-detail-page #wrapper .mainImage > header:after, .post-add-page .mainImage > header:after{content: "";position: absolute;left: 0;bottom: 0;width: 90%;height: 2px;overflow: hidden;border-bottom: 2px dotted #000;margin-left: 5%;}
-.post-detail-page .showPosts > .content, .post-add-page{background-image: url('bg.jpg');     background-repeat: no-repeat;background-attachment: fixed; background-size: cover;}
+.post-detail-page .showPosts > .content, .post-add-page{background-image: url('bg.jpg'); background-repeat: repeat; background-size: 100%;}
 .post-detail-page .showPosts > .content .postImageItem img, .post-add-page .gridster .resortitem  img{border: 1px solid #2d2926; border-image: url('img_border.png') 6% stretch; border-width: 8px; }
 .post-detail-page .showPosts > .content .gridster .textDiv1{color: #000 !important;font-weight: bold;text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.64);}
 .post-add-page .gridster ul{background-color: transparent !important;}
