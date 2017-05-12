@@ -205,9 +205,11 @@ if Meteor.isClient
           ,300
         else
           document.body.scrollTop = 0
+    Template.recommends.rendered=->
+      Meteor.subscribe('list_recommends', Session.get("postContent")._id);
     Template.recommends.helpers
       hasRecommends: ()->
-        Meteor.subscribe('list_recommends', Session.get("postContent")._id);
+        # Meteor.subscribe('list_recommends', Session.get("postContent")._id);
         Recommends.find({relatedPostId: Session.get("postContent")._id}).count() > 0
       recommends: ()->
         # Meteor.subscribe('list_recommends', Session.get("postContent")._id);
