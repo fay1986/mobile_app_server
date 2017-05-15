@@ -4,6 +4,25 @@ if Meteor.isClient
   window.iabHandle = null
   Session.set('lastImportedUrl','')
   Session.setDefault('itemInAddPostPending',0)
+  @postThemeHepler=(style)->
+    postContent = Session.get('postContent')
+    postContent.style = style
+    if Drafts.findOne({_id: Session.get('postContent')._id})
+      Drafts.update {_id: Session.get('postContent')._id}, {$set: {style: style}}, (err, num)->
+        if err or num <= 0
+          return console.log('update SavedDrafts style error:', err)
+        console.log('update SavedDrafts style')
+    if SavedDrafts.findOne({_id: Session.get('postContent')._id})
+      SavedDrafts.update {_id: Session.get('postContent')._id}, {$set: {style: style}}, (err, num)->
+        if err or num <= 0
+          return console.log('update SavedDrafts style error:', err)
+        console.log('update SavedDrafts style')
+    if Posts.findOne({_id: Session.get('postContent')._id})
+      Posts.update {_id: Session.get('postContent')._id}, {$set: {style: style}}, (err, num)->
+        if err or num <= 0
+          return console.log('update Posts style error:', err)
+        console.log('update Posts style')
+    Session.set('postContent', postContent)
   @getDisplayElementWidth=()->
     $('.addPost').width()*0.9
   localUploading = false
@@ -849,7 +868,12 @@ if Meteor.isClient
     #Meteor.subscribe("saveddrafts")
 
     if Session.get('postContent') and Session.get('postContent')._id
-      Meteor.subscribe("savedDraftsWithID",Session.get('postContent')._id)
+      Meteor.subscribe("savedDraftsWithID",Session.get('postContent')._id,()->
+        saveddraft = SavedDrafts.findOne({_id:Session.get('postContent')._id})
+        if saveddraft and saveddraft.style
+          console.log('03====',saveddraft.style)
+          Session.set('addPostTheme', saveddraft.style)
+      )
       unless Posts.find({_id:Session.get('postContent')._id}).count() > 0
         Meteor.subscribe("ViewPostsList",Session.get('postContent')._id)
 
@@ -1902,9 +1926,17 @@ if Meteor.isClient
 
   Template.addPost.onRendered ()->
       Session.set('addPostTheme', 'default')
-      draft = Drafts.findOne()
-      post = if draft then Posts.findOne({_id: draft._id}) else null
-      post and Session.set('addPostTheme', post.style)
+      addPostTheme = 'default'
+      draft = Drafts.findOne({_id:Session.get('postContent')._id})
+      post = Posts.findOne({_id: Session.get('postContent')._id})
+      if post and post.style
+        addPostTheme = post.style
+        console.log('01====',post.style)
+      else if draft and draft.style
+        console.log('02====',draft.style)
+        addPostTheme = draft.style
+      console.log('04====',addPostTheme)
+      Session.set('addPostTheme', addPostTheme)
   Template.addPost.onDestroyed ()->
       Session.set('addPostTheme', '')
   Template.addPost.helpers
@@ -1942,6 +1974,7 @@ if Meteor.isClient
         $('.post-theme-box-mask').hide()
       'click .post-theme-box li': ()->
         Session.set('addPostTheme', this.style)
+        postThemeHepler(this.style)     
       'click .post-theme-box .btn-succ': ()->
         $('.post-theme-box').hide()
         $('.post-theme-box-mask').hide()

@@ -596,11 +596,8 @@ if Meteor.isClient
       $('.post-theme-box').hide()
       $('.post-theme-box-mask').hide()
     'click .post-theme-box li': ()->
-      Posts.update {_id: Session.get('postContent')._id}, {$set: {style: this.style}}, (err, num)->
-        if err or num <= 0
-          return console.log('update post style error:', err)
-        Session.set('postContent', Posts.findOne({_id: Session.get('postContent')._id}))
-        console.log('update post style')
+      Session.set('addPostTheme', this.style)
+      postThemeHepler(this.style)
     'click .post-theme-box .btn-succ': ()->
       $('.post-theme-box').hide()
       $('.post-theme-box-mask').hide()
