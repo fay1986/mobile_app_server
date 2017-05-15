@@ -578,3 +578,29 @@ if Meteor.isClient
       , '删除草稿', ['取消','确定']);
 
       return
+
+  Template.showDraftPosts.helpers
+    is_owner: ()->
+      return Meteor.userId() is Session.get('postContent').owner
+    themes: ()->
+      return Themes.find({})
+    theme_host: ()->
+      return theme_host_url
+    get_hover: (theme)->
+      return theme.style is Session.get('postContent').style or (!Session.get('postContent').style and theme.default is true)
+  Template.showDraftPosts.events
+    'click .post-theme-btn': ()->
+      $('.post-theme-box').show()
+      $('.post-theme-box-mask').show()
+    'click .post-theme-box-mask': ()->
+      $('.post-theme-box').hide()
+      $('.post-theme-box-mask').hide()
+    'click .post-theme-box li': ()->
+      Posts.update {_id: Session.get('postContent')._id}, {$set: {style: this.style}}, (err, num)->
+        if err or num <= 0
+          return console.log('update post style error:', err)
+        Session.set('postContent', Posts.findOne({_id: Session.get('postContent')._id}))
+        console.log('update post style')
+    'click .post-theme-box .btn-succ': ()->
+      $('.post-theme-box').hide()
+      $('.post-theme-box-mask').hide()
