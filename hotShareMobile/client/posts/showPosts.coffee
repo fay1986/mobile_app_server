@@ -1358,6 +1358,17 @@ if Meteor.isClient
 
             console.log("success");
         )
+        type = 'pcomments'
+        postData = Session.get('postContent')
+        pcommentContent = content
+        to = {
+          id: postData.owner,
+          name: postData.ownerName,
+          icon: postData.ownerIcon,
+          pcommentContent: pcommentContent
+        }
+        if to.id isnt Meteor.userId()
+          sendMqttMessageToUser(type,to,postData)
         $('#pcommitReport').val("")
         $("#pcommitReport").attr("placeholder", "评论")
         #$('body').removeAttr('style')

@@ -7,7 +7,9 @@ if Meteor.isClient
     else if type is 'thumbsDown'
       text = '我踩了你的文章《' + postData.title + '》哦~'
     else
-      text = '我评论了你的文章《' + postData.title + '》哦~'
+      text = '我评论了你的文章《' + postData.title + '》。'
+      if to.pcommentContent
+        text = text + '\n' + '“' + to.pcommentContent + '”'
     msg = {
         _id: new Mongo.ObjectID()._str,
         form:{
@@ -176,15 +178,6 @@ if Meteor.isClient
       $pcommentInput.after('<div id="pcommentInput" class="pcommentInput"><div class="input-group"><form onsubmit="return" class="pcommentInput-form"><input type="text" id="pcommitReport" autofocus="autofocus" class="form-control" maxlength="180" placeholder="' + pcommentPlaceHolderText + '" /></form><div onclick="pcommitReport()" id="pcommitReportBtn">发送</div></div></div><div onclick="hidePcomments()" class="newalertBackground"></div>')
       # $('.showBgColor').css('min-width',$(window).width())
       Session.set "pcommentIndexNum", this.index
-      type = 'pcomments'
-      postData = Session.get('postContent')
-      to = {
-        id: postData.owner,
-        name: postData.ownerName,
-        icon: postData.ownerIcon
-      }
-      if to.id isnt Meteor.userId()
-        sendMqttMessageToUser(type,to,postData)
     'click .bubble':(e)->
       otherElementShowOrHidden(false)
       Session.set "pcommentIndexNum", $(e.currentTarget).parent().parent().parent().index(".element")
