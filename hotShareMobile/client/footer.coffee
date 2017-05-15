@@ -292,25 +292,33 @@ if Meteor.isClient
             else
               PUB.back()
     'click #from-example': (e)->
-      post = Posts.findOne({_id: 'zwmXLe5tuWDKCZQM8'})
-      if !post
-        return PUB.toast('内部错误，请重试~')       
+      example = JSON.parse('{"_id":"zwmXLe5tuWDKCZQM8","pub":[{"_id":"EvGDbdmsv7wASfojn","type":"image","currentCount":1,"totalCount":1,"isImage":true,"owner":"zR2Y5Ar9k9LZQS9vS","imgUrl":"http://data.tiegushi.com/ocmainimages/mainimage10.jpg","filename":"zR2Y5Ar9k9LZQS9vS_1494485644336_cdv_photo_002.jpg","URI":"file:///var/mobile/Containers/Data/Application/532583D2-EAE5-4B78-ACBC-1D0BE4C28E9C/Library/files/drafts/cdv_photo_002.jpg","data_row":1,"data_col":1,"data_sizex":6,"data_sizey":6},{"_id":"2krwF2Gx94Pp53979","type":"text","isImage":false,"owner":"zR2Y5Ar9k9LZQS9vS","text":"点击选择，修改文本","style":"","data_row":7,"data_col":1,"data_sizex":6,"data_sizey":2},{"_id":"ZavyJ5rMQHs6ggh95","type":"image","currentCount":1,"totalCount":1,"isImage":true,"owner":"zR2Y5Ar9k9LZQS9vS","imgUrl":"http://data.tiegushi.com/ocmainimages/mainimage11.jpg","filename":"zR2Y5Ar9k9LZQS9vS_1494485704758_cdv_photo_003.jpg","URI":"file:///var/mobile/Containers/Data/Application/532583D2-EAE5-4B78-ACBC-1D0BE4C28E9C/Library/files/drafts/cdv_photo_003.jpg","data_row":9,"data_col":1,"data_sizex":6,"data_sizey":6},{"_id":"bq9jTr7Y8pXyLRTzz","type":"text","isImage":false,"owner":"zR2Y5Ar9k9LZQS9vS","text":"点击选择，修改文本","style":"","data_row":15,"data_col":1,"data_sizex":6,"data_sizey":2},{"_id":"LwjKtrYJREF4nudAw","type":"image","currentCount":1,"totalCount":1,"isImage":true,"owner":"zR2Y5Ar9k9LZQS9vS","imgUrl":"http://data.tiegushi.com/ocmainimages/mainimage9.jpg","filename":"zR2Y5Ar9k9LZQS9vS_1494485716781_cdv_photo_004.jpg","URI":"file:///var/mobile/Containers/Data/Application/532583D2-EAE5-4B78-ACBC-1D0BE4C28E9C/Library/files/drafts/cdv_photo_004.jpg","data_row":17,"data_col":1,"data_sizex":6,"data_sizey":6},{"_id":"JZxcgQaWki6NukaF3","type":"text","isImage":false,"owner":"zR2Y5Ar9k9LZQS9vS","text":"点击选择，修改文本","style":"","data_row":23,"data_col":1,"data_sizex":6,"data_sizey":2}],"title":"故事样张","browse":0,"heart":[],"retweet":[],"comment":[],"commentsCount":0,"addontitle":"","mainImage":"http://data.tiegushi.com/ocmainimages/mainimage1.jpg","publish":true,"owner":"zR2Y5Ar9k9LZQS9vS","ownerName":"故事贴","ownerIcon":"/userPicture.png","createdAt":"2017-05-12T22:39:11.119Z","isReview":true,"insertHook":true,"import_status":"done","fromUrl":"","style":""}')
+      post = Posts.findOne({_id: 'zwmXLe5tuWDKCZQM8'}) || (if localStorage.getItem('post-example') then JSON.parse(localStorage.getItem('post-example')) else null)
+      post = post || example
 
       Meteor.defer ()->
+        localStorage.setItem('post-example', JSON.stringify(post))
         $('.modal-backdrop.in').remove()
       prepareToEditorMode()
       PUB.page '/add'
-      Meteor.defer ()->
+      Meteor.defer ()->  
         #Clear draft first
         Drafts.remove({})
         #Prepare data from post
         fromUrl = ''
         if post.fromUrl and post.fromUrl isnt ''
           fromUrl = post.fromUrl
-        draft0 = {_id:post._id, type:'image', isImage:true, url: fromUrl, owner: Meteor.userId(), imgUrl:post.mainImage, filename:post.mainImage.replace(/^.*[\\\/]/, ''), URI:"", data_row:0,style:post.mainImageStyle}
+        draft0 = {_id: new Mongo.ObjectID()._str, type:'image', isImage:true, url: fromUrl, owner: Meteor.userId(), imgUrl:post.mainImage, filename:post.mainImage.replace(/^.*[\\\/]/, ''), URI:"", data_row:0,style:post.mainImageStyle}
         Drafts.insert(draft0)
         pub = post.pub;
         if pub.length > 0
+          `
+          for(var i=0;i<pub.length;i++){
+            pub[i]._id = new Mongo.ObjectID()._str;
+            pub[i].owner = Meteor.userId();
+          }
+          `
+            
           ###
           Router.go('/add') will trigger addPost onRendered first, then defer function run.
           The Drafts.insert will trigger addPostItem OnRendered function run, then do the layout thing. The 2nd defer function
