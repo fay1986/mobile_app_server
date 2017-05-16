@@ -4,17 +4,30 @@
     <!--{{/if}}-->
     <div class="post-theme-box-mask"></div>
     <div class="post-theme-box">
-        <div class="btn-succ"><div><i class="fa fa-check"></i>完成</div></div>
-        <ul>
+    <div class="btn-succ"><div><i class="fa fa-check"></i>完成</div></div>
+    <ul>
+      {{#if themeLoaded}}
+        {{#if themeLoadFaild}}
+        <div class="post-theme-loadfial">
+          <h4>加载主题失败 <small>T_T</small></h4>
+          <button class="try-theme-again"><i class="fa fa-refresh" aria-hidden="true"></i>重试</button>
+        </div>
+        {{else}}
         {{#each themes}}
-            {{#if get_hover this}}
-            <li class="hover" data-id="{{_id}}" data-name="{{name}}" data-style="{{style}}" style="background-image: url('{{theme_host}}{{preview}}')"></li>
-            {{else}}
-            <li data-id="{{_id}}" data-name="{{name}}" data-style="{{style}}" style="background-image: url('{{theme_host}}{{preview}}')"></li>
-            {{/if}}
+          {{#if get_hover this}}
+          <li class="hover" data-id="{{_id}}" data-name="{{name}}" data-style="{{style}}" style="background-image: url('{{theme_host}}{{preview}}')"></li>
+          {{else}}
+          <li data-id="{{_id}}" data-name="{{name}}" data-style="{{style}}" style="background-image: url('{{theme_host}}{{preview}}')"></li>
+          {{/if}}
         {{/each}}
-        </ul>
-    </div>
+        {{/if}}
+      {{else}}
+        <div class="post-theme-loadfial">
+          <h4 style="margin-top:50px;">Loading...</h4>
+        </div>
+      {{/if}}
+    </ul>
+  </div>
     <script src="http://qzonestyle.gtimg.cn/qzone/app/qzlike/qzopensl.js#jsdate=20111201" charset="utf-8"></script>
     <div class="showBgColor post-detail-page">
         <div class="showPostsBox">

@@ -6,13 +6,26 @@
   <div class="post-theme-box">
     <div class="btn-succ"><div><i class="fa fa-check"></i>完成</div></div>
     <ul>
-      {{#each themes}}
-        {{#if get_hover this}}
-        <li class="hover" data-id="{{_id}}" data-name="{{name}}" data-style="{{style}}" style="background-image: url('{{theme_host}}{{preview}}')"></li>
+      {{#if themeLoaded}}
+        {{#if themeLoadFaild}}
+        <div class="post-theme-loadfial">
+          <h4>加载主题失败 <small>T_T</small></h4>
+          <button class="try-theme-again"><i class="fa fa-refresh" aria-hidden="true"></i>重试</button>
+        </div>
         {{else}}
-        <li data-id="{{_id}}" data-name="{{name}}" data-style="{{style}}" style="background-image: url('{{theme_host}}{{preview}}')"></li>
+        {{#each themes}}
+          {{#if get_hover this}}
+          <li class="hover" data-id="{{_id}}" data-name="{{name}}" data-style="{{style}}" style="background-image: url('{{theme_host}}{{preview}}')"></li>
+          {{else}}
+          <li data-id="{{_id}}" data-name="{{name}}" data-style="{{style}}" style="background-image: url('{{theme_host}}{{preview}}')"></li>
+          {{/if}}
+        {{/each}}
         {{/if}}
-      {{/each}}
+      {{else}}
+        <div class="post-theme-loadfial">
+          <h4 style="margin-top:50px;">Loading...</h4>
+        </div>
+      {{/if}}
     </ul>
   </div>
   

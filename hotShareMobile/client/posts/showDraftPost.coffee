@@ -588,6 +588,10 @@ if Meteor.isClient
       return theme_host_url
     get_hover: (theme)->
       return theme.style is Session.get('postContent').style or (!Session.get('postContent').style and theme.default is true)
+    themeLoadFaild: ()->
+      return Themes.find({}).count() == 0
+    themeLoaded:()->
+      return Session.get('post_theme_loaded') != 'loading'
   Template.showDraftPosts.events
     'click .post-theme-btn': ()->
       $('.post-theme-box').show()
@@ -601,3 +605,8 @@ if Meteor.isClient
     'click .post-theme-box .btn-succ': ()->
       $('.post-theme-box').hide()
       $('.post-theme-box-mask').hide()
+    'click .try-theme-again':(e)->
+      Session.set('post_theme_loaded','loading');
+      Meteor.subscribe('themes',()->
+        Session.set('post_theme_loaded','loaded');
+      )
