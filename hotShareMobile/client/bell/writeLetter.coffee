@@ -19,6 +19,8 @@ if Meteor.isClient
     else
       Router.go('/simple-chat/to/user?id='+userId)
   Template.writeLetter.rendered=->
+    #true 列出偶像列表，false 列出粉丝列表
+    Session.set 'followers_tag', true
     $('.content').css 'min-height',$(window).height()
     $(window).scroll (event)->
         target = $("#showMoreFollowsResults");
