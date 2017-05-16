@@ -47,6 +47,7 @@ PersonNames = new Meteor.Collection('personNames');
 }*/
 
 Themes = new Meteor.Collection('themes');
+PostExamples = new Meteor.Collection('postExamples');
 
 if(Meteor.isServer){
   Meteor.startup(function(){
@@ -61,6 +62,12 @@ if(Meteor.isServer){
   });
   Meteor.publish('post-example', function(){
     return Posts.find({_id: 'zwmXLe5tuWDKCZQM8'}, {limit: 1});
+  });
+  Meteor.publish('post-examples', function(){
+    return [
+      PostExamples.find({}, {limit: 10}),
+      Posts.find({example: true}, {limit: 10})
+    ]
   });
 
   PeopleHis.allow({
