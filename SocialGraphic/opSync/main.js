@@ -67,7 +67,8 @@ function oplog_connect() {
       })
   }
 
-  oplog_v = MongoOplog(conn.oplog, conn.oplog_opts_v).tail();
+  oplog_v = MongoOplog(conn.oplog, conn.oplog_opts_v);
+  oplog_v.tail();
   oplog_v.on('op', function (data) {
     get_doc(data, function (ns, postDoc, userDoc, viewerDoc) {
       sync_to_neo4j(ns, postDoc, userDoc, viewerDoc);
@@ -83,7 +84,8 @@ function oplog_connect() {
     console.log('>>> stop: server stopped');
   });
 
-  oplog_p = MongoOplog(conn.oplog, conn.oplog_opts_p).tail();
+  oplog_p = MongoOplog(conn.oplog, conn.oplog_opts_p);
+  oplog_p.tail();
   oplog_p.on('op', function (data) {
     get_doc(data, function (ns, postDoc, userDoc, viewerDoc) {
       sync_to_neo4j(ns, postDoc, userDoc, viewerDoc);
@@ -102,7 +104,8 @@ function oplog_connect() {
     console.log('>>> stop: server stopped');
   });
 
-  oplog_u = MongoOplog(conn.oplog, conn.oplog_opts_u).tail();
+  oplog_u = MongoOplog(conn.oplog, conn.oplog_opts_u);
+  oplog_u.tail();
   oplog_u.on('op', function (data) {
     get_doc(data, function (ns, postDoc, userDoc, viewerDoc) {
       sync_to_neo4j(ns, postDoc, userDoc, viewerDoc);
