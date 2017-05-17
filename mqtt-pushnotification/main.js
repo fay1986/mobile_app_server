@@ -177,7 +177,6 @@ function sendNotification(message, toUserId ,type, cb) {
         var dataArray = [];
         dataArray.push(dataObj);
         debug_on && console.log(JSON.stringify(dataArray))
-        return cb && cb(null);
         PushMessages.insert({pushMessage: dataArray, createAt: new Date()},function(err,result){
           if(err){
             console.log('Error:'+err);
