@@ -102,13 +102,15 @@ if Meteor.isClient
     $(node).data('toolbarObj').hide()
     textdiv = $(event.target).children('.textdiv')
     textarea = textdiv.children('textarea')
-    if $(textarea).text().indexOf("点击选择，修改文本")
-          console.log("they are identical")
-          $(textarea).text("")
-          $(textarea).html("")
-          $(textarea).val("")
     doc_id =  $(textarea).attr("text")
     if buttonClicked.id == "modify"
+      console.log('text node:', $(textarea).val())
+      if $(textarea).val() is "点击选择，修改文本"
+        console.log("they are identical")
+        $(textarea).text("")
+        $(textarea).html("")
+        $(textarea).val("")
+
       $(textarea).attr('readOnly',false)
       $(textarea).off('focus')
       $(textarea).off('focusout')
@@ -135,6 +137,11 @@ if Meteor.isClient
       $(textarea).focus()
 
       $(textarea).focusout(()->
+        $textarea = $(this)
+        console.log('textarea value:', $textarea.attr('data-text'), $textarea.val())
+        if $textarea.attr('data-text') is '点击选择，修改文本' and $textarea.val() is ''
+          $textarea.val($textarea.attr('data-text'))
+
         window.unSelectedElem = undefined
         console.log("focusout")
         $(this).attr("readOnly", true)
