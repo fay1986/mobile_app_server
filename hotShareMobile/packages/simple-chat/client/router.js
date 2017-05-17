@@ -926,6 +926,12 @@ Template._simpleChatToChatLayout.events({
 });
 
 Template._simpleChatToChatItem.helpers({
+  isMoreThanHundredChar: function(text){
+    if (text.length > 50)
+      return text.substring(0,50) + "...";
+    else
+      return text;
+  },
   is_error: function(images){
     for(var i=0;i<images.length;i++){
       if (images[i].error)

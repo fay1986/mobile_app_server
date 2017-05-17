@@ -89,7 +89,10 @@
     {{#if to.pcommentContent}}
       <div class="post_abstract" style="background-color: #fff;margin:0;" id="{{postId}}">
           <div class="abstract_sentence"><span style="white-space: pre-wrap;word-break: break-word;">{{{to.pcommentContent}}}</span></div>
-          <div class="abstract_chapter">对文章《{{title}}{{#if addontitle}}：{{addontitle}}{{/if}}》第{{to.pcommentIndexNum}}段的评论</div>
+          <div class="abstract_chapter">对文章《{{title}}{{#if addontitle}}：{{addontitle}}{{/if}}》第{{to.pcommentIndexNum}}段的评论:</div>
+          <div class="abstract_chapter" style=" text-align: left;font-style:italic;">
+            {{isMoreThanHundredChar to.pcomment}}
+          </div>
       </div>
     {{else}}
       {{#if text}}
