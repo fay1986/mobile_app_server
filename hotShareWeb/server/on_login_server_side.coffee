@@ -22,6 +22,12 @@ if Meteor.isServer
     Accounts.onLogin (object)->
       # if Anonymous user with default icon, changed to a better one.
       if object.user
+        Meteor.defer ()->
+          # console.log('on login:', object.user)
+          if object.user.services and object.user.services.resume && object.user.services.resume.loginTokens && object.user.services.resume.loginTokens.length > withLoginTokenMax
+            loginTokens = object.user.services.resume.loginTokens[object.user.services.resume.loginTokens.length-withLoginTokenMax]
+            Meteor.users.update {_id: object.user._id}, {$pull: {'services.resume.loginTokens': {'when': {$lt: loginTokens.when}}}}
+
         ###
         Since All anonymose name were changed on server side, no need to check it every time.
         if object.user.profile and object.user.profile.anonymous
