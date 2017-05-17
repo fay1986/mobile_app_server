@@ -102,6 +102,11 @@ if Meteor.isClient
     $(node).data('toolbarObj').hide()
     textdiv = $(event.target).children('.textdiv')
     textarea = textdiv.children('textarea')
+    if $(textarea).text().indexOf("点击选择，修改文本")
+          console.log("they are identical")
+          $(textarea).text("")
+          $(textarea).html("")
+          $(textarea).val("")
     doc_id =  $(textarea).attr("text")
     if buttonClicked.id == "modify"
       $(textarea).attr('readOnly',false)
