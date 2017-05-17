@@ -2,6 +2,7 @@ var mqtt = require('mqtt')
 var MongoClient = require('mongodb').MongoClient;
 var redisClient = require('./lib/redis.js')
 var f = require('./lib/foreach.js')
+var workQueue = require('./lib/work_queue.js')
 
 var serverUrl = process.env.SERVER_URL || 'http://host1.tiegushi.com/';
 var MQTT_URL = process.env.MQTT_URL;
@@ -10,60 +11,101 @@ var db = null;
 var debug_on = process.env.DEBUG_MESSAGE || false;
 var allowGroupNotification = process.env.ALLOW_GROUP_NOTIFICATION || false;
 var projectName = process.env.PROJECT_NAME || null; // '故事贴：t , 点圈： d'
-var client  = mqtt.connect(MQTT_URL);
 
-if(process.env.REDIS_HOST && process.env.REDIS_PASSWORD) {
-    redisClient.redisClientInit();
+var client;
+
+function mqttPushNotificationInit() {
+    workQueue.workQueueInit(checkTTLAndSendNotification);
+
+    MongoClient.connect(DB_CONN, {poolSize:20 , reconnectTries: Infinity}, function(err, mongodb){
+      if (err) {
+        console.log('Mongo connect Error:' + err);
+      }
+      console.log('Mongo connect');
+      db = mongodb;
+      db.on('timeout',     function(){console.log('MongoClient.connect timeout')});
+      db.on('error',       function(){console.log('MongoClient.connect error')});
+      db.on('close',       function(){console.log('MongoClient.connect close')});
+      db.on('reconnect',   function(){
+          console.log('MongoClient.connect reconnect')
+      });
+    });
+
+    if (workQueue.isMaster()) {
+        client  = mqtt.connect(MQTT_URL);
+        client.on('connect', function () {
+          console.log('mqtt connected')
+          var subscribeTopic = '/msg/#';
+          if(projectName){
+            subscribeTopic = '/'+projectName+'/msg/#';
+          }
+          client.unsubscribe(subscribeTopic);
+          client.subscribe(subscribeTopic,{qos:1},function(err,granted){
+            console.log('Granted is '+JSON.stringify(granted))
+          });
+        });
+
+        client.on('message', function (topic, message) {
+          if(!db)
+              return;
+
+          // message is Buffer
+          debug_on && console.log(topic)
+          var msgObj = JSON.parse(message.toString());
+          if(msgObj && msgObj.to && msgObj.to.id && msgObj.to.id != 'd2bc4601dfc593888618e98f')
+              console.log(msgObj)
+
+          if(allowGroupNotification && topic.match('/msg/g/')){
+              if(msgObj && msgObj.to && msgObj.to.id && msgObj.to.id != 'd2bc4601dfc593888618e98f')
+                  sendGroupNotification(db,msgObj,'groupmessage');
+          }
+          if(topic.match('/msg/u/')){
+              sendNotification(msgObj, msgObj.to.id,'usermessage');
+          }
+        });
+
+        client.on('disconnect', function (topic, message) {
+            console.log('disconnected')
+        });
+    }
+    else {
+        if(process.env.REDIS_HOST && process.env.REDIS_PASSWORD) {
+            redisClient.redisClientInit();
+        }
+    }
 }
 
-MongoClient.connect(DB_CONN, {poolSize:20 , reconnectTries: Infinity}, function(err, mongodb){
-  if (err) {
-    console.log('Mongo connect Error:' + err);
-  }
-  console.log('Mongo connect');
-  db = mongodb;
-  db.on('timeout',     function(){console.log('MongoClient.connect timeout')});
-  db.on('error',       function(){console.log('MongoClient.connect error')});
-  db.on('close',       function(){console.log('MongoClient.connect close')});
-  db.on('reconnect',   function(){
-      console.log('MongoClient.connect reconnect')
-  });
-});
+function checkTTLAndSendNotification(id, item, callback) {
+    if (workQueue.isMaster()) {
+        console.log(">>> master checkTTLAndSendNotification id= " + id + " item=" + JSON.stringify(item))
+        return callback && callback();
+    }
 
-client.on('connect', function () {
-  console.log('mqtt connected')
-  var subscribeTopic = '/msg/#';
-  if(projectName){
-    subscribeTopic = '/'+projectName+'/msg/#';
-  }
-  client.unsubscribe(subscribeTopic);
-  client.subscribe(subscribeTopic,{qos:1},function(err,granted){
-    console.log('Granted is '+JSON.stringify(granted))
-  });
-});
+    if(item && item.key && item.msg && item.userid && item.type) {
+        redisClient.redisUpdateKey(item.key, function(ttl) {
+            if(ttl <= 1) {
+                sendNotification(item.msg, item.userid, item.type, function(err) {
+                    if(err)
+                        debug_on && console.log('sendGroupNotification: err=' + err);
+                    else
+                        console.log('------- sendGroupNotification: send to ' + item.userid);
+                    return callback && callback();
+                })
+                return callback && callback();
+            }
+            else {
+                debug_on && console.log('ingore notification ' + item.key + ' ttl=' + ttl)
+                return callback && callback();
+            }
+        });
+    }
+    else {
+        console.log('invalid data')
+        return callback && callback();
+    }
+}
 
-client.on('message', function (topic, message) {
-  // message is Buffer
-  debug_on && console.log(topic)
-  var msgObj = JSON.parse(message.toString());
-  if(msgObj && msgObj.to && msgObj.to.id)
-      debug_on && console.log(msgObj)
-
-  if(allowGroupNotification && topic.match('/msg/g/')){
-      if(msgObj && msgObj.to && msgObj.to.id)
-          sendGroupNotification(db,msgObj,'groupmessage');
-  }
-  if(topic.match('/msg/u/')){
-      // sendNotification(db,msgObj, msgObj.to.id,'usermessage');
-      sendUserNotification(db, msgObj, 'usermessage');
-  }
-});
-
-client.on('disconnect', function (topic, message) {
-    console.log('disconnected')
-});
-
-function sendNotification(db,message, toUserId ,type, cb) {
+function sendNotification(message, toUserId ,type, cb) {
   var toUserId = toUserId;
   var userId = message.form.id;
 
@@ -135,6 +177,7 @@ function sendNotification(db,message, toUserId ,type, cb) {
         var dataArray = [];
         dataArray.push(dataObj);
         debug_on && console.log(JSON.stringify(dataArray))
+        return cb && cb(null);
         PushMessages.insert({pushMessage: dataArray, createAt: new Date()},function(err,result){
           if(err){
             console.log('Error:'+err);
@@ -166,7 +209,7 @@ function sendUserNotification(db, message, type){
       debug_on && console.log('在对方黑名单中， userId='+ userId +' ,toUserId='+ toUserId);
       return
     }
-    sendNotification(db, message, toUserId, type, function(err) {
+    sendNotification(message, toUserId, type, function(err) {
         if(err)
             console.log('sendUserNotification: err=' + err);
     });
@@ -174,7 +217,6 @@ function sendUserNotification(db, message, type){
 };
 
 function sendGroupNotification(db, message, type){
-
   var groupUsers = db.collection('simple_chat_groups_users');
 
   var groupId = message.to.id;
@@ -183,24 +225,12 @@ function sendGroupNotification(db, message, type){
       return
     }
 
-    forEachAsynSeriesWait(docs, 5, 200, function(doc, index, callback) {
+    forEachAsynSeriesWait(docs, 5, 10, function(doc, index, callback) {
         if(message.form.id != doc.user_id) {
             var keystring = 'Train_' + groupId + '_' + doc.user_id;
-            redisClient.redisUpdateKey(keystring, function(ttl) {
-                if(ttl <= 1) {
-                    sendNotification(db,message,doc.user_id,type, function(err) {
-                        if(err)
-                            console.log('sendGroupNotification: err=' + err);
-                        else
-                            console.log('sendGroupNotification: send to ' + doc.user_id + ' index=' + index);
-                        return callback && callback();
-                    })
-                }
-                else {
-                    console.log('Notification ' + keystring + ' ttl=' + ttl)
-                    return callback && callback();
-                }
-            });
+            debug_on && console.log('>>> add task to queue, user_id=' + keystring);
+            workQueue.createTaskToKueQueue(keystring, {key: keystring, msg: message, userid: doc.user_id, type: type});
+            return callback && callback();
         }
         else
             return callback && callback();
@@ -209,3 +239,5 @@ function sendGroupNotification(db, message, type){
     })
   });
 };
+
+mqttPushNotificationInit();
