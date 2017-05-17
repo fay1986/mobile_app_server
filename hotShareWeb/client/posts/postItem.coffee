@@ -7,9 +7,9 @@ if Meteor.isClient
     else if type is 'thumbsDown'
       text = '我踩了你的文章《' + postData.title + '》哦~'
     else
-      text = '我评论了你的文章《' + postData.title + '》。'
+      text = '我评论了你的文章《' + postData.title + '》中的段落'
       if to.pcommentContent
-        text = text + '\n' + '“' + to.pcommentContent + '”'
+        text = '“' + to.pcommentContent + '”' + '\n' + "---- " + '我评论了你的文章《' + postData.title + '》中的段落'
     msg = {
         _id: new Mongo.ObjectID()._str,
         form:{
@@ -17,6 +17,9 @@ if Meteor.isClient
           name: username,
           icon: Meteor.user().profile.icon || '/userPicture.png'
         },
+        title: postData.title,
+        addontitle: postData.addontitle,
+        postId: postData._id,
         to: to,
         to_type: 'user',
         type: 'text',

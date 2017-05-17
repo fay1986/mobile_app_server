@@ -567,7 +567,6 @@
               return console.log("success");
             }
           });
-          console.log('111111')
           var type = 'pcomments';
           var postData = Session.get('postContent');
           var pcommentContent = content;
@@ -575,7 +574,9 @@
             id: postData.owner,
             name: postData.ownerName,
             icon: postData.ownerIcon,
-            pcommentContent: pcommentContent
+            pcommentContent: pcommentContent,
+            pcommentIndexNum: Session.get("pcommentIndexNum"),
+            pcomment: Session.get("postContent").pub[i].text
           }
           if(to.id != Meteor.userId()){
             sendMqttMessageToUser(type,to,postData);
