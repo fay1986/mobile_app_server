@@ -382,6 +382,11 @@ Template._simpleChatToChatItem.events({
     $('li#' + id + ' div.text .imgs').removeAttr('style');
     $('li#' + id + ' div.text .imgs-1-box').removeAttr('style');
   },
+  'click li div.post_abstract':function(e){
+    console.log(e.currentTarget.id);
+    postId = e.currentTarget.id;
+    Router.go('/posts/'+postId);
+  },
   'click .check': function(){
     Template._simpleChatLabelDevice.open(this);
     // var data = this;

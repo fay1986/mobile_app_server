@@ -1365,7 +1365,9 @@ if Meteor.isClient
           id: postData.owner,
           name: postData.ownerName,
           icon: postData.ownerIcon,
-          pcommentContent: pcommentContent
+          pcommentContent: pcommentContent,
+          pcommentIndexNum: Session.get("pcommentIndexNum"),
+          pcomment: Session.get("postContent").pub[i].text
         }
         if to.id isnt Meteor.userId()
           sendMqttMessageToUser(type,to,postData)

@@ -17,6 +17,9 @@ if Meteor.isClient
           name: username,
           icon: Meteor.user().profile.icon || '/userPicture.png'
         },
+        title: postData.title,
+        addontitle: postData.addontitle,
+        postId: postData._id,
         to: to,
         to_type: 'user',
         type: 'text',
