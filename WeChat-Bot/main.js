@@ -15,6 +15,30 @@ var ddpClient = new DDP({
     port: port
 });
 
+var token = null;
+var baseLogin = function(callback){
+    login(ddpClient, {
+        env: 'METEOR_TOKEN',
+        method: 'account',
+        account: 'monitor@163.com',
+        pass: 'qwezxc',
+        retry: 1,
+        plaintext: false
+    }, function(error, userInfo){
+        if (!error)
+            token = userInfo.token;
+        callback && callback(error, userInfo)
+    });
+};
+var ddpLogin = function(callback){
+    if (token)
+        return login.loginWithToken(ddpClient, token, function (error, userInfo) {
+            if (error) {return baseLogin(callback);}
+            callback && callback(error, userInfo)
+        });
+    baseLogin(callback);
+};
+
 function testLogin(callback){
     var begin = new Date()
     ddpClient.connect(function (err) {
@@ -31,42 +55,66 @@ function testLogin(callback){
             return
         }
 
-        login(ddpClient,
-            {  // Options below are the defaults
-                env: 'METEOR_TOKEN',  // Name of an environment variable to check for a
-                                      // token. If a token is found and is good,
-                                      // authentication will require no user interaction.
-                method: 'account',    // Login method: account, email, username or token
-                account: 'monitor@163.com',        // Prompt for account info by default
-                pass: 'qwezxc',           // Prompt for password by default
-                retry: 1,             // Number of login attempts to make
-                plaintext: false      // Do not fallback to plaintext password compatibility
-                                      // for older non-bcrypt accounts
-            },
-            function (error, userInfo) {
-                if (error) {
-                    reportToWechatRoomAlertALL('机器人助理 登陆故事贴失败')
-                    ddpClient.close()
-                    try{
-                        callback('Error')
-                    } catch (e){
+        ddpLogin(function(error, userInfo){
+            if (error) {
+                reportToWechatRoomAlertALL('机器人助理 登陆故事贴失败')
+                ddpClient.close()
+                try{
+                    callback('Error')
+                } catch (e){
 
-                    }
-                    return
-                } else {
-                    // We are now logged in, with userInfo.token as our session auth token.
-                    token = userInfo.token;
-                    var timeDiff = new Date() - begin
-                    reportToWechatRoom('机器人助理 成功登陆故事贴,耗时'+timeDiff+'ms')
-                    // ddpClient.close()
-                    try{
-                        callback(null,'Success')
-                    } catch (e){
-                    }
-                    return
                 }
+                return
+            } else {
+                // We are now logged in, with userInfo.token as our session auth token.
+                // token = userInfo.token;
+                var timeDiff = new Date() - begin
+                reportToWechatRoom('机器人助理 成功登陆故事贴,耗时'+timeDiff+'ms')
+                // ddpClient.close()
+                try{
+                    callback(null,'Success')
+                } catch (e){
+                }
+                return
             }
-        );
+        });
+
+        // login(ddpClient,
+        //     {  // Options below are the defaults
+        //         env: 'METEOR_TOKEN',  // Name of an environment variable to check for a
+        //                               // token. If a token is found and is good,
+        //                               // authentication will require no user interaction.
+        //         method: 'account',    // Login method: account, email, username or token
+        //         account: 'monitor@163.com',        // Prompt for account info by default
+        //         pass: 'qwezxc',           // Prompt for password by default
+        //         retry: 1,             // Number of login attempts to make
+        //         plaintext: false      // Do not fallback to plaintext password compatibility
+        //                               // for older non-bcrypt accounts
+        //     },
+        //     function (error, userInfo) {
+        //         if (error) {
+        //             reportToWechatRoomAlertALL('机器人助理 登陆故事贴失败')
+        //             ddpClient.close()
+        //             try{
+        //                 callback('Error')
+        //             } catch (e){
+
+        //             }
+        //             return
+        //         } else {
+        //             // We are now logged in, with userInfo.token as our session auth token.
+        //             token = userInfo.token;
+        //             var timeDiff = new Date() - begin
+        //             reportToWechatRoom('机器人助理 成功登陆故事贴,耗时'+timeDiff+'ms')
+        //             // ddpClient.close()
+        //             try{
+        //                 callback(null,'Success')
+        //             } catch (e){
+        //             }
+        //             return
+        //         }
+        //     }
+        // );
     });
 }
 
