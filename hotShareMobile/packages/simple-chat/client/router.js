@@ -385,7 +385,15 @@ Template._simpleChatToChatItem.events({
   'click li div.post_abstract':function(e){
     console.log(e.currentTarget.id);
     postId = e.currentTarget.id;
-    Router.go('/posts/'+postId);
+
+    console.log("e val is: ", JSON.stringify(e.currentTarget.innerText));
+    text = JSON.stringify(e.currentTarget.innerText);
+    firstSubstring = "第";
+    secSubsrting = "段的评论";
+    subtext = text.match(new RegExp(firstSubstring + "(.*)" + secSubsrting));
+    console.log("sub text is: ", subtext[1]);
+    paraIndex = subtext[1];
+    Router.go('/posts/' + postId +'/' + paraIndex);
   },
   'click .check': function(){
     Template._simpleChatLabelDevice.open(this);
