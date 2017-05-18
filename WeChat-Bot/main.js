@@ -138,7 +138,7 @@ wechatInstance.init()
 taskList = [testLogin,testSubscribeShowPost]
 
 var intervalTask = function(){
-    async.series(taskList,testOpenShowPost)
+    async.series(taskList)
 }
 
 
