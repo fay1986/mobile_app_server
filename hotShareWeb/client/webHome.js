@@ -3,6 +3,7 @@ Template.webHome.rendered = function () {
   //    $('.webFooter').css('left', $(window).width()*0.5-105);
   // $('.sendAlert').css('display', "none");
   trackPage('http://www.tiegushi.com/');
+  Meteor.subscribe("versions");
   /*
   Meteor.subscribe("versions");
   Meteor.subscribe("publicPosts","StynhCAjeAdBrZTff")
@@ -113,6 +114,14 @@ Template.webHome.events({
 });
 
 Template.webHome.helpers({
+  androidversion: function () {
+    var version = Versions.findOne();
+    return version.android;
+  },
+  iosversion: function () {
+    var version = Versions.findOne();
+    return version.ios;
+  },
   resetPassword: function () {
     return Session.get('resetPassword');
   },
