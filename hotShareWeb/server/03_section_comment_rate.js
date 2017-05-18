@@ -166,7 +166,7 @@ if (Meteor.isServer){
                         }
                         if (broswerUser === false) {
                             Meteor.users.update({ _id: data.commentUserId }, { $set: { 'profile.waitReadCount': waitReadCount + 1 } });
-                            pushnotification("palsocommentReply", doc, data.commentUserId);
+                            // pushnotification("palsocommentReply", doc, data.commentUserId);
                         }
                     }
                     return  
@@ -305,8 +305,7 @@ if (Meteor.isServer){
                                             {
                                                 //Meteor.users.update({_id: doc.pub[pindex].likeUserId}, {$set: {'profile.waitReadCount': waitReadCount + 1}});
                                                 Meteor.users.update({_id: likeUserId}, {$set: {'profile.waitReadCount': waitReadCount + 1}});
-                                                //pushnotification("palsofavourite", doc, doc.pub[pindex].likeUserId);
-                                                pushnotification("palsofavourite", doc, likeUserId);
+                                                // pushnotification("palsofavourite", doc, likeUserId);
                                             }
                                         }
                                     }
@@ -436,7 +435,7 @@ if (Meteor.isServer){
                                 waitReadCount = 0;
                             }
                             Meteor.users.update({_id: doc.owner}, {$set: {'profile.waitReadCount': waitReadCount + 1}});
-                            pushnotification("pcommentowner", doc, userId);
+                            // pushnotification("pcommentowner", doc, userId);
                         }
                     }
                 }
