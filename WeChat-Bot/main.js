@@ -6,6 +6,7 @@ const { Wechaty } = require('wechaty')
 var DDP = require('ddp');
 var login = require('ddp-login');
 var async = require('async');
+var switchAccount = require('./switch-account');
 
 var host = "host1.tiegushi.com";
 var port = 80;
@@ -16,6 +17,7 @@ var ddpClient = new DDP({
 });
 
 var token = null;
+var loginUser = null;
 var baseLogin = function(callback){
     login(ddpClient, {
         env: 'METEOR_TOKEN',
@@ -25,8 +27,14 @@ var baseLogin = function(callback){
         retry: 1,
         plaintext: false
     }, function(error, userInfo){
-        if (!error)
+        if (!error){
             token = userInfo.token;
+            loginUser = userInfo;
+        } else {
+            token = null;
+            loginUser = null;
+        }
+        console.log('login user:', userInfo);
         callback && callback(error, userInfo)
     });
 };
@@ -152,6 +160,26 @@ function testSubscribeShowPost(callback){
     );
 }
 
+function testSwitchAccount(callback){
+    var begin = new Date();
+
+    if (!loginUser.id)
+        return;
+        
+    switchAccount(ddpClient, loginUser.id, 'mdaRAZBL73d8KsQP7', function(err){
+        if (err){
+            ddpClient.close();
+            reportToWechatRoomAlertALL('切换帐号  失败！');
+            reportToWechatRoomAlertALL(error);
+            try{callback && callback('Error');}catch(e){}
+        } else {
+            var timeDiff = new Date() - begin;
+            reportToWechatRoom('切换帐号,  耗时'+timeDiff+'ms');
+            try{callback && callback(null,'Success');}catch(e){}
+        }
+    });
+}
+
 var globalRoom = null
 var reportToWechatRoom = function(string){
     if(string && globalRoom){
@@ -183,7 +211,7 @@ wechatInstance.on('message', function(message){
 wechatInstance.init()
 
 
-taskList = [testLogin,testSubscribeShowPost]
+taskList = [testLogin, testSwitchAccount, testSubscribeShowPost]
 
 var intervalTask = function(){
     async.series(taskList)
