@@ -42,6 +42,7 @@ mqttClient.on('message' ,function (topic,message) {
     }
 })
 var switchAccount = require('./switch-account');
+var example = require('./post-example');
 
 var host = "host1.tiegushi.com";
 var port = 80;
@@ -121,43 +122,6 @@ function testLogin(callback){
                 return
             }
         });
-
-        // login(ddpClient,
-        //     {  // Options below are the defaults
-        //         env: 'METEOR_TOKEN',  // Name of an environment variable to check for a
-        //                               // token. If a token is found and is good,
-        //                               // authentication will require no user interaction.
-        //         method: 'account',    // Login method: account, email, username or token
-        //         account: 'monitor@163.com',        // Prompt for account info by default
-        //         pass: 'qwezxc',           // Prompt for password by default
-        //         retry: 1,             // Number of login attempts to make
-        //         plaintext: false      // Do not fallback to plaintext password compatibility
-        //                               // for older non-bcrypt accounts
-        //     },
-        //     function (error, userInfo) {
-        //         if (error) {
-        //             reportToWechatRoomAlertALL('机器人助理 登陆故事贴失败')
-        //             ddpClient.close()
-        //             try{
-        //                 callback('Error')
-        //             } catch (e){
-
-        //             }
-        //             return
-        //         } else {
-        //             // We are now logged in, with userInfo.token as our session auth token.
-        //             token = userInfo.token;
-        //             var timeDiff = new Date() - begin
-        //             reportToWechatRoom('机器人助理 成功登陆故事贴,耗时'+timeDiff+'ms')
-        //             // ddpClient.close()
-        //             try{
-        //                 callback(null,'Success')
-        //             } catch (e){
-        //             }
-        //             return
-        //         }
-        //     }
-        // );
     });
 }
 
@@ -267,6 +231,27 @@ function testSwitchAccount(callback){
     });
 }
 
+function testPostNew(callback){
+    var begin = new Date();
+    var post = example();
+    post._id = mongoid();
+    ddpClient.call('/posts/insert', post, function(error, res){
+        if (error){
+            try{ddpClient.close()}catch(e){}
+            return callback('发贴失败');
+        }
+
+        ddpClient.call('/posts/remove', {_id: post._id}, function(){
+            var timeDiff = new Date() - begin;
+            try{callback && callback(null,'发贴('+timeDiff+'ms)');}catch(e){}
+        });
+    });
+}
+
+function testImportPost(callback){
+    
+}
+
 var globalRoom = null
 var reportToWechatRoom = function(string){
     if(string && globalRoom){
@@ -298,7 +283,7 @@ wechatInstance.on('message', function(message){
 })
 wechatInstance.init()
 
-taskList = [testLogin,testSubscribeShowPost,/*testSwitchAccount,*/testNeo4J,getProductionServerOnlineStatus]
+taskList = [testLogin,testSwitchAccount,testSubscribeShowPost,testNeo4J,getProductionServerOnlineStatus]
 
 var intervalTask = function(){
     async.series(taskList,function(err,results){
