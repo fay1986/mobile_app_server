@@ -73,10 +73,11 @@ if Meteor.isClient
     # )        
   Template.socialContent.helpers
     newcount:()->
-      postFriendsCount = PostFriends.find({meetOnPostId:Session.get("postContent")._id,count:1,ta:{$ne:null}},{sort:{createdAt:-1}}).count()
-      clientPostFriendsCount = ClientPostFriends.find({meetOnPostId: Session.get("postContent")._id}).count()
-      return postFriendsCount - clientPostFriendsCount
       # PostFriends.find({meetOnPostId:Session.get("postContent")._id,count:1,ta:{$ne:null}},{sort: {createdAt: -1}}).count()
+      ids = []
+      ClientPostFriends.find({meetOnPostId: Session.get("postContent")._id},{fields:{_id:1}}).forEach (item)->
+        ids.push(item._id)
+      PostFriends.find({meetOnPostId:Session.get("postContent")._id,count:1,_id:{$nin:ids}},{sort:{createdAt:-1}}).count()
     feedscount:()->
       Feeds.find({followby:Meteor.userId(),checked:false,eventType: {$nin: ['share','personalletter']}, createdAt:{$gt:new Date((new Date()).getTime() - 7 * 24 * 3600 * 1000)}},{sort: {createdAt: -1}, limit:20}).count()
     haveFeeds:->
@@ -86,9 +87,10 @@ if Meteor.isClient
         false
     haveNewFriends: ->
       # if PostFriends.find({meetOnPostId:Session.get("postContent")._id,count:1,ta:{$ne:null}},{sort:{createdAt:-1}}).count()>0
-      postFriendsCount = PostFriends.find({meetOnPostId:Session.get("postContent")._id,count:1,ta:{$ne:null}},{sort:{createdAt:-1}}).count()
-      clientPostFriendsCount = ClientPostFriends.find({meetOnPostId: Session.get("postContent")._id}).count()
-      if (postFriendsCount - clientPostFriendsCount) > 0
+      ids = []
+      ClientPostFriends.find({meetOnPostId: Session.get("postContent")._id},{fields:{_id:1}}).forEach (item)->
+        ids.push(item._id)
+      if PostFriends.find({meetOnPostId:Session.get("postContent")._id,count:1,_id:{$nin:ids}},{sort:{createdAt:-1}}).count() > 0
         true
       else
         false

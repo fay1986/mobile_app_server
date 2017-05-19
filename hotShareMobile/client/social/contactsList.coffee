@@ -108,7 +108,7 @@ if Meteor.isClient
       else
         false
     showRedSpot:()->
-      if this.count>1
+      if this.count>1 or ClientPostFriends.findOne({_id:this._id})
         false
       else
         true
@@ -132,7 +132,8 @@ if Meteor.isClient
         else
           $('#newFriendRedSpot').hide()
           $('#newFriendRedSpotReal').hide()
-      if this.count is 1
+      clientMeetCount = ClientPostFriends.find({_id: this._id}).count()
+      if (this.count is 1 and clientMeetCount is 0)
         # Meets.update({_id: this._id}, {$set: {count: 2}})
         ClientPostFriends.insert(this)
       userProfileList = PostFriends.find({meetOnPostId:Session.get("postContent")._id,ta:{$ne:null}},{sort:{createdAt:-1}}).fetch()

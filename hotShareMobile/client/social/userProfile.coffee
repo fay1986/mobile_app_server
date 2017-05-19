@@ -14,7 +14,9 @@ if Meteor.isClient
     meetInfo = PostFriends.findOne({me:Meteor.userId(),ta:userId})
     if(meetInfo)
       meetCount=meetInfo.count
-      if(meetCount and meetCount is 1)
+      clientMeetCount = ClientPostFriends.find({_id: meetInfo._id}).count()
+      console.log('clientMeetCount=='+JSON.stringify(meetInfo)+',count=='+clientMeetCount)
+      if(meetCount and meetCount is 1 and clientMeetCount is 0)
         # Meets.update({_id: meetInfo._id}, {$set: {count: 2}})
         ClientPostFriends.insert(meetInfo)
   getLocation = (userId)->
