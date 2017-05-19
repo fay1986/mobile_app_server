@@ -138,6 +138,40 @@ var updatePosts = function(postId, post, callback){
     callback && callback(err, number);
   });
 };
+function initMqttReporter(){
+    var mqtt    = require('mqtt');
+    var mqttOptions = {
+        keepalive:30,
+        reconnectPeriod:20*1000
+    }
+
+    var client  = mqtt.connect('ws://tmq.tiegushi.com:80',mqttOptions);
+    client.on('connect' ,function () {
+        console.log('Connected to mqtt server')
+    })
+
+    var statusRecordInfo = null;
+    updateSucc = function(){
+        statusRecordInfo.succ++;
+    }
+    function initStatusRecord(){
+        statusRecordInfo = {
+            service: process.env.SERVICE_NAME ? process.env.SERVICE_NAME:'importServer',
+            production: process.env.PRODUCTION ? true:false,
+            serviceIndex: process.env.SERVICE_INDEX ? process.env.SERVICE_INDEX:0,
+            succ: 0,
+            detail:{}
+        }
+    }
+    function reportStatusToMQTTBroker(){
+        client.publish('status/service',statusRecordInfo,{qos:1});
+        initStatusRecord();
+    }
+    initStatusRecord();
+    setInterval(reportStatusToMQTTBroker,30*1000);
+}
+
+initMqttReporter();
 
 // ROUTES FOR OUR API
 // =============================================================================

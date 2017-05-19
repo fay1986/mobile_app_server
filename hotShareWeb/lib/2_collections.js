@@ -173,6 +173,9 @@ if(Meteor.isClient){
   DynamicMoments = new Meteor.Collection('dynamicmoments');
   NewDynamicMoments = new Meteor.Collection('newdynamicmoments');
   SuggestPosts = new Meteor.Collection('suggestposts');
+
+  // ClientPostFriends（groundDB）记录： 新朋友点过的，且count=1的数据
+  ClientPostFriends = new Ground.Collection('ClientPostFriends', { connection: null });
 }
 if(Meteor.isServer){
   RefNames = new Meteor.Collection("refnames");
@@ -2041,29 +2044,93 @@ if(Meteor.isServer){
                 }
         });
     };
-    Meteor.publish("newDynamicMoments", function (postId,limit) {
-        if(this.userId === null || !Match.test(postId, String) ){
-            return this.ready();
-        }
-        else{
-            var self = this;
-            self.count = 0;
-            var handle = Moments.find({currentPostId: postId},{sort: {createdAt: -1},limit:limit}).observeChanges({
-                added: function (id,fields) {
-                    if(fields && fields.readPostId){
-                        momentsAddForNewDynamicMomentsDeferHandle(self,fields.readPostId,fields);
-                    }
-                },
-                changed:function (id,fields){
-                    momentsChangeForNewDynamicMomentsDeferHandle(self,id,fields);
+    if(withNeo4JInMoment){
+        // a["{\"msg\":\"added\",\"collection\":\"newdynamicmoments\",\"id\":\"qeXBBL5sncqRPfLQe\",\"fields\":
+        // {\"currentPostId\":\"s8EuWYvLCfbaJwxod\",
+        // \"userId\":\"bEPMSF8FMQjBS4SFj\",
+        // \"userIcon\":\"http://data.tiegushi.com/anonymousIcon/anonymous_32.png\",
+        // \"username\":\"乾隆\",
+        // \"readPostId\":\"qeXBBL5sncqRPfLQe\",
+        // \"mainImage\":\"http://data.tiegushi.com/ocmainimages/mainimage7.jpg\",
+        // \"title\":\"✅三星不哭! 苹果iPhone 7也炸了! 真正的果粉坐等明年iPhone 8\",
+        // \"addontitle\":\"\",
+        // \"createdAt\":{\"$date\":1479716971850}}}"]
+        Meteor.publish("newDynamicMoments", function (postId,limit) {
+            if(!Match.test(this.userId, String) || !Match.test(postId, String) ){
+                return this.ready();
+            }
+            else{
+                var self = this;
+                var userId = this.userId;
+                self.count = 0;
+                var ts1 = Date.now()
+                if(!self._session.momentSkip){
+                    self._session.momentSkip = {};
                 }
-            });
-            self.ready();
-            self.onStop(function () {
-                handle.stop();
-            });
-        }
-    });
+                if(!self._session.momentSkip[postId]){
+                    self._session.momentSkip[postId] = 0;
+                }
+                if(self._session.momentSkip[postId] > limit){
+                    self._session.momentSkip[postId] = 0;
+                }
+                var queryLimit = limit - self._session.momentSkip[postId];
+                //console.log(self._session._namedSubs[self._subscriptionId])
+                deferSetImmediate(function() {
+                    ensureUserViewPostInNeo4j(userId,postId)
+                    var queryResult = getSuggestPostsFromNeo4J(userId,postId,self._session.momentSkip[postId],queryLimit)
+                    self._session.momentSkip[postId] += queryLimit;
+                    queryResult.forEach(function(item){
+                        var viewer = item[0]
+                        var post = item[1]
+                        var fields = {
+                            currentPostId: postId,
+                            userId: viewer.userId,
+                            userIcon: '',
+                            username:viewer.fullname,
+                            readPostId:post.postId,
+                            mainImage:post.mainImage,
+                            title:post.name,
+                            addontitle: post.addonTitle,
+                            createdAt: post.createdAt
+                        }
+                        self.added("newdynamicmoments",postId+'_'+post.postId, fields);
+                    })
+                })
+                self.onStop(function(){
+                    //console.log('onStop')
+                })
+                self.removed = function(collection, id){
+                    //console.log('removing '+id+' in '+collection +' but no, we dont want to resend data to client')
+                }
+                return this.ready();
+            }
+        });
+    } else {
+        Meteor.publish("newDynamicMoments", function (postId,limit) {
+            if(this.userId === null || !Match.test(postId, String) ){
+                return this.ready();
+            }
+            else{
+                var self = this;
+                self.count = 0;
+                var handle = Moments.find({currentPostId: postId},{sort: {createdAt: -1},limit:limit}).observeChanges({
+                    added: function (id,fields) {
+                        if(fields && fields.readPostId){
+                            momentsAddForNewDynamicMomentsDeferHandle(self,fields.readPostId,fields);
+                        }
+                    },
+                    changed:function (id,fields){
+                        momentsChangeForNewDynamicMomentsDeferHandle(self,id,fields);
+                    }
+                });
+                //console.log(self._session._namedSubs[self._subscriptionId])
+                self.ready();
+                self.onStop(function () {
+                    handle.stop();
+                });
+            }
+        });
+    }
   Meteor.publish("dynamicMoments", function (postId,limit) {
       if(this.userId === null || !Match.test(postId, String) ){
           return this.ready();
@@ -2174,57 +2241,130 @@ if(Meteor.isServer){
             });
         }
   });
-    Meteor.publish("postFriendsV2", function (userId,postId,limit) {
-        if(this.userId === null || !Match.test(postId, String) ){
-            return this.ready();
-        }
-        else{
-            var self = this;
-            self.count = 0;
-            self.meeterIds=[];
-            self.docIds=[];
-            try{self.added("postfriendsCount", userId+'_'+postId, {count: 0});}catch(e){}
-            //此处为了修复再次打开帖子时新朋友消失的问题，需要publicPostsPublisherDeferHandle重新计算相遇次数
-            if(limit <= 10){
-                publicPostsPublisherDeferHandle(userId,postId,self);
+    if(withNeo4JInDynamicPostFriend){
+        Meteor.publish("postFriendsV2", function (userId,postId,limit) {
+            if(this.userId === null || !Match.test(postId, String) ){
+                return this.ready();
             }
-            var handle = Meets.find({me: userId,meetOnPostId:postId},{sort: {createdAt: -1},limit:limit}).observeChanges({
-                added: function (id,fields) {
-                    var taId = fields.ta;
-                    //Call defered function here:
-                    if (taId !== userId){
-                        if(!~self.meeterIds.indexOf(taId)){
-                            self.meeterIds.push(taId);
-                            self.docIds.push(id);
-                            newMeetsAddedForPostFriendsDeferHandleV2(self,taId,userId,id,fields);
-                        }
+            else{
+                var self = this;
+                self.count = 0;
+                self.meeterIds=[];
+                self.docIds=[];
+                if(!self._session.skipPostFriend){
+                    self._session.skipPostFriend = {}
+                }
+                if(!self._session.skipPostFriend[postId]){
+                    self._session.skipPostFriend[postId] = 0;
+                }
+                if(!self._session.skipPostFriend[postId+'_newfriends']){
+                    self._session.skipPostFriend[postId+'_newfriends'] = 0;
+                }
+                if(self._session.skipPostFriend[postId] > limit){
+                    self._session.skipPostFriend[postId] = 0;
+                }
+                if(self._session.skipPostFriend[postId+'_newfriends'] > self._session.skipPostFriend[postId] + limit){
+                    self._session.skipPostFriend[postId+'_newfriends'] = 0;
+                }
+                var queryLimit = limit - self._session.skipPostFriend[postId];
+                // Test code
+                // if your neo4j is not sync to ready, hard code this one for testing.
+                // Test_userId = "myZDgPM7YG2PE7ffh";
+
+                deferSetImmediate(function(){
+                    if(self._session.skipPostFriend[postId+'_newfriends'] === 0){
+                        try{self.added("postfriendsCount", userId+'_'+postId, {count: self._session.skipPostFriend[postId+'_newfriends']});}catch(e){}
                     }
-                    try{self.changed("postfriendsCount", userId+'_'+postId, {count: Meets.find({me: userId,meetOnPostId:postId}).count()});}catch(e){}
-                    self.count++;
-                },
-                changed: function (id,fields) {
-                    // self.changed("postfriends", id, fields);
-                    if(~self.docIds.indexOf(id)){
-                        try{
-                            self.changed("postfriends", id, fields);
-                        }
-                        catch(error){
-                        }
+                    // Since this was called in memont fetching, no need to check again.
+                    // Momont subscriber is called before this one on client side if behavior changed, check here.
+                    //ensureUserViewPostInNeo4j(userId,postId)
+                    var queryResult = getPostNewFriends( userId /*Test_userId*/,postId,self._session.skipPostFriend[postId],queryLimit);
+                    self._session.skipPostFriend[postId] += queryLimit;
+
+                    if(queryResult && queryResult.length > 0){
+                        self._session.skipPostFriend[postId+'_newfriends'] += queryResult.length;
+                        try{self.changed("postfriendsCount", userId+'_'+postId, {count: self._session.skipPostFriend[postId+'_newfriends'] });}catch(e){}
+
+                        queryResult.forEach(function (item) {
+                            if(item && item[0] && item[1] && Match.test(item[0], String) && Match.test(item[1], Number)){
+                                var taId = item[0];
+                                var meetTimes = item[1];
+                                var fields = {
+                                    me:userId,
+                                    ta:taId,
+                                    count: meetTimes,
+                                    meetOnPostId:postId,
+                                    createdAt: new Date()
+                                };
+                                newMeetsAddedForPostFriendsDeferHandleV2(self,taId,userId,taId,fields);
+                            }
+                        });
                     }
-                    try{self.changed("postfriendsCount", userId+'_'+postId, {count: Meets.find({me: userId,meetOnPostId:postId}).count()});}catch(e){}
-                }/*,
-                 removed:function (id,fields) {
-                 self.removed("postfriends", id, fields);
-                 }*/
-            });
-            self.ready();
-            self.onStop(function () {
-                handle.stop();
-                delete self.meeterIds
-                delete self.docIds
-            });
-        }
-    });
+                })
+
+                self.onStop(function(){
+                    //console.log('onStop New Friend')
+                })
+                self.removed = function(collection, id){
+                    //console.log('removing '+id+' in '+collection +' but no, we dont want to resend data to client')
+                }
+                return this.ready();
+            }
+        });
+    } else {
+        Meteor.publish("postFriendsV2", function (userId,postId,limit) {
+            if(this.userId === null || !Match.test(postId, String) ){
+                return this.ready();
+            }
+            else{
+                var self = this;
+                self.count = 0;
+                self.meeterIds=[];
+                self.docIds=[];
+                try{self.added("postfriendsCount", userId+'_'+postId, {count: 0});}catch(e){}
+                //此处为了修复再次打开帖子时新朋友消失的问题，需要publicPostsPublisherDeferHandle重新计算相遇次数
+                if(limit <= 10){
+                    publicPostsPublisherDeferHandle(userId,postId,self);
+                }
+                var handle = Meets.find({me: userId,meetOnPostId:postId},{sort: {createdAt: -1},limit:limit}).observeChanges({
+                    added: function (id,fields) {
+                        var taId = fields.ta;
+                        //Call defered function here:
+                        if (taId !== userId){
+                            if(!~self.meeterIds.indexOf(taId)){
+                                self.meeterIds.push(taId);
+                                self.docIds.push(id);
+                                newMeetsAddedForPostFriendsDeferHandleV2(self,taId,userId,id,fields);
+                            }
+                        }
+                        try{self.changed("postfriendsCount", userId+'_'+postId, {count: Meets.find({me: userId,meetOnPostId:postId}).count()});}catch(e){}
+                        self.count++;
+                    },
+                    changed: function (id,fields) {
+                        // self.changed("postfriends", id, fields);
+                        if(~self.docIds.indexOf(id)){
+                            try{
+                                self.changed("postfriends", id, fields);
+                            }
+                            catch(error){
+                            }
+                        }
+                        try{self.changed("postfriendsCount", userId+'_'+postId, {count: Meets.find({me: userId,meetOnPostId:postId}).count()});}catch(e){}
+                    }/*,
+                     removed:function (id,fields) {
+                     self.removed("postfriends", id, fields);
+                     }*/
+                });
+                self.ready();
+                self.onStop(function () {
+                    handle.stop();
+                    delete self.meeterIds
+                    delete self.docIds
+                });
+            }
+        });
+    }
+
   Meteor.publish("newfriends", function (userId,postId) {
     if(this.userId === null || !Match.test(postId, String)){
         return this.ready();
@@ -2449,12 +2589,91 @@ if(Meteor.isServer){
           return Moments.find({currentPostId: postId},{sort: {createdAt: -1},limit:limit});
       }
   });
-  Meteor.publish("followposts", function(limit) {
-    if(this.userId === null || !Match.test(limit, Number))
-      return this.ready();
-    else
-      return FollowPosts.find({followby: this.userId}, {sort: {createdAt: -1}, limit:limit});
-  });
+  if(withNeo4JInFollowPosts){
+      Meteor.publish("followposts", function(limit) {
+          if(this.userId === null || !Match.test(limit, Number))
+              return this.ready();
+          else{
+              var self = this;
+              var userId = this.userId;
+              if(!self._session.skipFollowPost){
+                  self._session.skipFollowPost = {}
+              }
+              if(!self._session.skipFollowPost[userId]){
+                  self._session.skipFollowPost[userId] = 0;
+              }
+              if(self._session.skipFollowPost[userId] > limit){
+                  self._session.skipFollowPost[userId] = 0;
+              }
+              var queryLimit = limit - self._session.skipFollowPost[userId];
+
+              deferSetImmediate(function(){
+                  //ensureFollowInNeo4j(userId,postId)
+                  var queryResult = getFollowPostFromNeo4J( userId, self._session.skipFollowPost[userId],queryLimit);
+                  self._session.skipFollowPost[userId] += queryLimit;
+
+                  if(queryResult && queryResult.length > 0){
+                      queryResult.forEach(function (item) {
+                        //   if(item && item[0]){
+                            //   var postInfo = item[0];
+                            //   var meetTimes = item[1];
+                          if(item){
+                              var postInfo = item;
+                              var ownerIcon = '';
+                              var publish = false;
+                              if(postInfo.ownerIcon){
+                                ownerIcon = postInfo.ownerIcon;
+                              } else {
+                                var ownerInfo = Meteor.users.findOne({_id: postInfo.ownerId},{fields:{'profile.icon':true}});
+                                ownerIcon =  ownerInfo?ownerInfo.profile.icon:'';
+                              }
+                              if(postInfo.publish){
+                                publish = postInfo.publish
+                              } else {
+                                var post = Posts.findOne({_id:postInfo.postId},{fields:{'publish':true}});
+                                publish = post.publish;
+                              }
+                              var fields = {
+                                  postId:postInfo.postId,
+                                  title: postInfo.name,
+                                  addontitle: postInfo.addonTitle,
+                                  mainImage:postInfo.mainImage,
+                                  mainImageStyle: null,
+                                  heart: 0,
+                                  retweet: 0,
+                                  comment: 0,
+                                  browse:  0,
+                                  publish: publish,
+                                  owner: postInfo.ownerId,
+                                  ownerName: postInfo.ownerName,
+                                  ownerIcon: ownerIcon,
+                                  createdAt: postInfo.createdAt,
+                                  followby:userId
+                              };
+                              self.added('followposts',postInfo.postId,fields)
+                          }
+                      });
+                  }
+              })
+
+              self.onStop(function(){
+                  //console.log('onStop New Friend')
+              })
+              self.removed = function(collection, id){
+                  //console.log('removing '+id+' in '+collection +' but no, we dont want to resend data to client')
+              }
+              return this.ready();
+          }
+          //return FollowPosts.find({followby: this.userId}, {sort: {createdAt: -1}, limit:limit});
+      });
+  } else {
+      Meteor.publish("followposts", function(limit) {
+          if(this.userId === null || !Match.test(limit, Number))
+              return this.ready();
+          else
+              return FollowPosts.find({followby: this.userId}, {sort: {createdAt: -1}, limit:limit});
+      });
+  }
   Meteor.publish("ViewPostsList", function(postId) {
       if(this.userId === null || !Match.test(postId, String))
         return this.ready();

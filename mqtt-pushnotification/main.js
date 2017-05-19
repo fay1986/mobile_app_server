@@ -13,6 +13,7 @@ var allowGroupNotification = process.env.ALLOW_GROUP_NOTIFICATION || false;
 var projectName = process.env.PROJECT_NAME || null; // '故事贴：t , 点圈： d'
 
 var client;
+var statusRecordInfo = null;
 
 function mqttPushNotificationInit() {
     workQueue.workQueueInit(checkTTLAndSendNotification);
@@ -35,6 +36,7 @@ function mqttPushNotificationInit() {
         client  = mqtt.connect(MQTT_URL);
         client.on('connect', function () {
           console.log('mqtt connected')
+          mqttReporterInit();
           var subscribeTopic = '/msg/#';
           if(projectName){
             subscribeTopic = '/'+projectName+'/msg/#';
@@ -63,9 +65,25 @@ function mqttPushNotificationInit() {
               sendNotification(msgObj, msgObj.to.id,'usermessage');
           }
         });
-
+        client.on('reconnect', function () {
+            //TODO
+            console.log('reconnect to mqtt server');
+        });
+        client.on('close', function () {
+            //TODO
+            console.log('close to mqtt server');
+        });
         client.on('disconnect', function (topic, message) {
+            //TODO
             console.log('disconnected')
+        });
+        client.on('offline', function () {
+            //TODO
+            console.log('offline to mqtt server');
+        });
+        client.on('error', function () {
+            //TODO
+            console.log('error to mqtt server');
         });
     }
     else {
@@ -94,7 +112,7 @@ function checkTTLAndSendNotification(id, item, callback) {
                 return callback && callback();
             }
             else {
-                debug_on && console.log('ingore notification ' + item.key + ' ttl=' + ttl)
+                console.log('ingore notification ' + item.key + ' ttl=' + ttl)
                 return callback && callback();
             }
         });
@@ -209,8 +227,11 @@ function sendUserNotification(db, message, type){
       return
     }
     sendNotification(message, toUserId, type, function(err) {
-        if(err)
+        if(err){
             console.log('sendUserNotification: err=' + err);
+        } else {
+          updateSucc()
+        }
     });
   });
 };
@@ -238,5 +259,25 @@ function sendGroupNotification(db, message, type){
     })
   });
 };
-
+function mqttReporterInit(){
+  updateSucc = function(){
+    statusRecordInfo.succ++;
+  }
+  function initStatusRecord(){
+    statusRecordInfo = {
+      service: process.env.SERVICE_NAME ? process.env.SERVICE_NAME:'MQTT_IOS_Notification',
+      production: process.env.PRODUCTION ? true:false,
+      serviceIndex: process.env.SERVICE_INDEX ? process.env.SERVICE_INDEX:0,
+      succ: 0,
+      detail:{}
+    }
+  }
+  function reportStatusToMQTTBroker(){
+    if(client)
+        client.publish('status/service', JSON.stringify(statusRecordInfo), {qos:1});
+    initStatusRecord();
+  }
+  initStatusRecord();
+  setInterval(reportStatusToMQTTBroker,30*1000);
+}
 mqttPushNotificationInit();

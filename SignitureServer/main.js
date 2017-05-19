@@ -4,6 +4,7 @@
 require('newrelic');
 var restify = require('restify');
 var request = require('request');
+var mqtt    = require('mqtt');
 var jsSHA = require('jssha')
 
 /*request('http://www.google.com', function (error, response, body) {
@@ -14,7 +15,7 @@ var jsSHA = require('jssha')
 
 var server = restify.createServer({
     name: 'Signiture Server',
-    version: '1.0.0'
+    version: '1.1.0'
 });
 server.use(restify.acceptParser(server.acceptable));
 server.use(restify.queryParser());
@@ -75,6 +76,7 @@ var updateTicket = function (access_token) {
                 ticket = resp.ticket;
             }
             console.log('Ticket is: ' + ticket);
+            updateSucc();
         }
     });
 }
@@ -94,6 +96,37 @@ setInterval(updateTokenAndTicket,60*60*1000);
 
 updateTokenAndTicket();
 
+var mqttOptions = {
+    keepalive:30,
+    reconnectPeriod:20*1000
+}
+
+var client  = mqtt.connect('ws://tmq.tiegushi.com:80',mqttOptions);
+client.on('connect' ,function () {
+    console.log('Connected to server')
+})
+
+var statusRecordInfo = null;
+updateSucc = function(){
+    statusRecordInfo.succ++;
+}
+function initStatusRecord(){
+    statusRecordInfo = {
+        service: process.env.SERVICE_NAME ? process.env.SERVICE_NAME:'WeChatSign',
+        production: process.env.PRODUCTION ? true:false,
+        serviceIndex: process.env.SERVICE_INDEX ? process.env.SERVICE_INDEX:0,
+        succ: 0,
+        detail:{}
+    }
+}
+function reportStatusToMQTTBroker(){
+    sendMqttMessage('status/service',statusRecordInfo);
+    initStatusRecord();
+}
+initStatusRecord();
+setInterval(reportStatusToMQTTBroker,30*1000);
+
+
 server.get('/echo/:name', function (req, res, next) {
     res.send({test:req.params.name});
     return next();
@@ -105,6 +138,7 @@ server.get('/verify', function (req, res, next) {
 server.get('/update', function (req, res, next) {
     updateTokenAndTicket();
     res.send('ok');
+    updateSucc();
     return next();
 });
 server.get('/sign/:url', function (req, res, next) {
@@ -112,6 +146,7 @@ server.get('/sign/:url', function (req, res, next) {
     console.log('To sign this url: '+url);
     var result=generateSignature(url);
     res.send(result);
+    updateSucc();
     return next();
 });
 

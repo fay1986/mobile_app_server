@@ -34,8 +34,8 @@ function save_viewer_node(doc,cb){
         })
     }
 }
-function grab_viewerInfo_in_hotshare(db){
-    var cursor =db.collection('viewers').find({});//.limit(3000).sort({createdAt:-1});
+function grab_viewerInfo_in_hotshare(db,query){
+    var cursor =db.collection('viewers').find(query);//.limit(3000).sort({createdAt:-1});
 
     function eachViewersInfo(err,doc){
         if(doc ===null){
@@ -58,11 +58,17 @@ function grab_viewerInfo_in_hotshare(db){
     cursor.next(eachViewersInfo)
 }
 
-
 if(process.env.RUN_IMPORT_VIEWER) {
     MongoClient.connect(url, function (err, db) {
         assert.equal(null, err);
-        grab_viewerInfo_in_hotshare(db)
+        var query = {};
+        if(process.env.DAY_SINCE_DAY_BEFORE){
+            var day = parseInt(process.env.DAY_SINCE_DAY_BEFORE);
+            var d = new Date();
+            d.setDate(d.getDate()-day);
+            query = {createdAt:{$gt:d}}
+        }
+        grab_viewerInfo_in_hotshare(db,query)
     });
 }
 

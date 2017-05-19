@@ -16,6 +16,7 @@
     "restify":"^4.0.3",
     "request":"^2.72.0",
     "jssha":"^2.1.0",
+    "mqtt":"^2.7.2",
     "newrelic":"^1.27.2"
   },
   "devDependencies": {

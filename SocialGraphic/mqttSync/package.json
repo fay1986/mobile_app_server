@@ -12,6 +12,7 @@
     "mongo-oplog":"^2.0.2",
     "seraph":"^0.14.4",
     "async": "^2.1.2",
+    "mqtt":"^2.7.2",
     "mongodb":"^2.2.19"
   },
   "devDependencies": {

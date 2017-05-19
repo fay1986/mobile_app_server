@@ -171,8 +171,8 @@ function save_post_node(doc,cb){
         });
     }
 }
-function grab_userInfo_in_hotshare(db){
-    var cursor =db.collection('users').find({});//.limit(3000);
+function grab_userInfo_in_hotshare(db,query){
+    var cursor =db.collection('users').find(query);//.limit(3000);
     function eachUserInfo(err,doc){
         if(doc ===null){
             return
@@ -193,8 +193,8 @@ function grab_userInfo_in_hotshare(db){
     }
     cursor.next(eachUserInfo)
 }
-function grab_postsInfo_in_hotshare(db){
-    var cursor =db.collection('posts').find({},{fields:{
+function grab_postsInfo_in_hotshare(db,query){
+    var cursor =db.collection('posts').find(query,{fields:{
         title:true,
         addontitle:true,
         owner:true,
@@ -227,7 +227,16 @@ function grab_postsInfo_in_hotshare(db){
 if(process.env.RUN_IMPORT_USER_POST){
     MongoClient.connect(url, function(err, db) {
         assert.equal(null, err);
-        grab_userInfo_in_hotshare(db);
-        grab_postsInfo_in_hotshare(db);
+        var queryUser = {};
+        var queryPost = {};
+        if(process.env.DAY_SINCE_DAY_BEFORE){
+            var day = parseInt(process.env.DAY_SINCE_DAY_BEFORE);
+            var d = new Date();
+            d.setDate(d.getDate()-day);
+            queryUser = {createdAt:{$gt:d}}
+            queryPost = {createdAt:{$gt:d}}
+        }
+        grab_userInfo_in_hotshare(db,queryUser);
+        grab_postsInfo_in_hotshare(db,queryPost);
     });
 }

@@ -133,7 +133,8 @@ if Meteor.isClient
           $('#newFriendRedSpot').hide()
           $('#newFriendRedSpotReal').hide()
       if this.count is 1
-        Meets.update({_id: this._id}, {$set: {count: 2}})
+        # Meets.update({_id: this._id}, {$set: {count: 2}})
+        ClientPostFriends.insert(this)
       userProfileList = PostFriends.find({meetOnPostId:Session.get("postContent")._id,ta:{$ne:null}},{sort:{createdAt:-1}}).fetch()
       Session.set("userProfileList", userProfileList)
       Session.set("userProfileType", "newfriends")

@@ -19,5 +19,8 @@
 @withSkypeWebReporter = true
 @withPostTitleMaxLength = 90      #byte
 @withPostSubTitleMaxLength = 60   #byte
+@withNeo4JInDynamicPostFriend = true
+@withNeo4JInMoment = true
+@withNeo4JInFollowPosts = true
 @MQTT_TIME_DIFF = 0
 @withLoginTokenMax = 10

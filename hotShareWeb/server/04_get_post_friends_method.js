@@ -1,5 +1,41 @@
 
 if(Meteor.isServer){
+    getPostNewFriends = function(userId,postId,skip,limit){
+        if (!Match.test(userId, String) || !Match.test(postId, String) || !Match.test(skip, Number) || !Match.test(limit, Number)) {
+            return [];
+        }
+        var queryString = 'MATCH (u:User) WHERE u.userId="'+userId+'" WITH u ' +
+            'MATCH (p:Post) WHERE p.postId="'+postId+'" WITH u,p ' +
+            'MATCH (u1:User)-[v1:VIEWER]->(p:Post) WHERE u1.userId <>"'+userId+'" WITH distinct u1 as meeter,u,p ' +
+            'MATCH (meeter)-[v2:VIEWER]->(p1:Post)<-[v3:VIEWER]-(u) WITH distinct meeter as meeter1,size(collect(distinct p1)) as meetsCount ' +
+            'RETURN distinct meeter1.userId,meetsCount ORDER BY meetsCount DESC SKIP '+skip+' LIMIT '+limit;
+
+        /*
+         var queryString = 'MATCH (u:User)-[v:VIEWER]->(p:Post)<-[v1:VIEWER]-(u1:User) ' +
+         'WHERE p.postId="'+postId+'" and u.userId="'+this.userId+'" ' +
+         'and u1.userId <>"'+this.userId+'" ' +
+         'WITH distinct u1 as meeter,u ' +
+         'MATCH meeter-[v2:VIEWER]->(p1:Post)<-[v3:VIEWER]-u ' +
+         'WITH distinct meeter as meeter1,size(collect(distinct p1)) as meetsCount ' +
+         'RETURN distinct meeter1.userId,meetsCount ORDER BY meetsCount DESC SKIP '+skip+' LIMIT '+limit;
+         */
+        try {
+            var queryResult = Neo4j.query(queryString);
+        } catch (_error) {
+            console.log("Can't query hot post from neo4j server");
+            if (postMessageToGeneralChannel) {
+                if (process.env.PRODUCTION) {
+                    postMessageToGeneralChannel("@everyone Can't query hot post from neo4j server, this is reporting from Production server.");
+                } else {
+                    postMessageToGeneralChannel("@everyone Can't query hot post from neo4j server, this is reporting from Test/Local  server.");
+                }
+            }
+            return [];
+        }
+        console.log('Query String for getPostFriends is: '+queryString);
+        updateSucc();
+        return queryResult;
+    }
     Meteor.startup(function(){
         Meteor.methods({
             "getPostFriends":function (postId,skip,limit){
@@ -7,35 +43,7 @@ if(Meteor.isServer){
                     return [];
                 }
                 this.unblock();
-                var queryString = 'MATCH (u:User) WHERE u.userId="'+this.userId+'" WITH u ' +
-                'MATCH (p:Post) WHERE p.postId="'+postId+'" WITH u,p ' +
-                'MATCH (u1:User)-[v1:VIEWER]->(p:Post) WHERE u1.userId <>"'+this.userId+'" WITH distinct u1 as meeter,u,p ' +
-                'MATCH meeter-[v2:VIEWER]->(p1:Post)<-[v3:VIEWER]-u WITH distinct meeter as meeter1,size(collect(distinct p1)) as meetsCount ' +
-                'RETURN distinct meeter1.userId,meetsCount ORDER BY meetsCount DESC SKIP '+skip+' LIMIT '+limit;
-
-                /*
-                var queryString = 'MATCH (u:User)-[v:VIEWER]->(p:Post)<-[v1:VIEWER]-(u1:User) ' +
-                    'WHERE p.postId="'+postId+'" and u.userId="'+this.userId+'" ' +
-                        'and u1.userId <>"'+this.userId+'" ' +
-                    'WITH distinct u1 as meeter,u ' +
-                    'MATCH meeter-[v2:VIEWER]->(p1:Post)<-[v3:VIEWER]-u ' +
-                    'WITH distinct meeter as meeter1,size(collect(distinct p1)) as meetsCount ' +
-                    'RETURN distinct meeter1.userId,meetsCount ORDER BY meetsCount DESC SKIP '+skip+' LIMIT '+limit;
-                */
-                try {
-                    var queryResult = Neo4j.query(queryString);
-                } catch (_error) {
-                    console.log("Can't query hot post from neo4j server");
-                    if (postMessageToGeneralChannel) {
-                        if (process.env.PRODUCTION) {
-                            postMessageToGeneralChannel("@everyone Can't query hot post from neo4j server, this is reporting from Production server.");
-                        } else {
-                            postMessageToGeneralChannel("@everyone Can't query hot post from neo4j server, this is reporting from Test/Local  server.");
-                        }
-                    }
-                    return [];
-                }
-                console.log('Query String for getPostFriends is: '+queryString);
+                var queryResult = getPostNewFriends(this.userId,postId,skip,limit)
                 var postFriendsList=[];
                 queryResult.forEach(function (item) {
                     if(item && item[0] && item[1] && Match.test(item[0], String) && Match.test(item[1], Number)){

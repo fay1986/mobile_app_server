@@ -1,9 +1,11 @@
 var async = require('async');
 var assert = require('assert');
 var savePostUser = require('./import-user-post-info');
+var saveFollow = require('./import-follow');
 var save_viewer_node = require('./import-viewer-info').save_viewer_node;
 var MongoOplog = require('mongo-oplog');
 var mongodb = require('mongodb');
+var mqtt    = require('mqtt');
 //var restify = require('restify');
 
 var conn = {
@@ -26,13 +28,15 @@ var conn = {
   },
   oplog_opts_v: { ns: 'hotShare.viewers' , server : { reconnectTries : 3000, reconnectInterval: 5000, autoReconnect : true }},
   oplog_opts_p: { ns: 'hotShare.posts'   , server : { reconnectTries : 3000, reconnectInterval: 5000, autoReconnect : true }},
-  oplog_opts_u: { ns: 'hotShare.users'   , server : { reconnectTries : 3000, reconnectInterval: 5000, autoReconnect : true }}
+  oplog_opts_u: { ns: 'hotShare.users'   , server : { reconnectTries : 3000, reconnectInterval: 5000, autoReconnect : true }},
+  oplog_opts_f: { ns: 'hotShare.follower', server : { reconnectTries : 3000, reconnectInterval: 5000, autoReconnect : true }}
 };
 var MongoClient = mongodb.MongoClient;
 var db = null;
 var oplog_v = null;
 var oplog_p = null;
 var oplog_u = null;
+var oplog_f = null;
 
 process.addListener('uncaughtException', function (err) {
     var msg = err.message;
@@ -56,10 +60,10 @@ MongoClient.connect(conn.mongo, conn.mongo_opts, function(err, tdb) {
     db.on('close',       function(){console.log('MongoClient.connect close')});
     db.on('reconnect',   function(){
         console.log('MongoClient.connect reconnect')
-        oplog_connect();
+        //oplog_connect();
     });
 
-    oplog_connect();
+    //oplog_connect();
 });
 
 function oplog_connect() {
@@ -81,12 +85,18 @@ function oplog_connect() {
           oplog_u = null;
       })
   }
+  if(oplog_f) {
+    oplog_f.destroy(function(){
+      console.log('oplog_f destroyed');
+      oplog_f = null;
+    })
+  }
 
   oplog_v = MongoOplog(conn.oplog, conn.oplog_opts_v);
   oplog_v.tail();
   oplog_v.on('op', function (data) {
-    get_doc(data, function (ns, postDoc, userDoc, viewerDoc) {
-      sync_to_neo4j(ns, postDoc, userDoc, viewerDoc);
+    get_doc(data, function (ns, postDoc, userDoc, viewerDoc, followDoc) {
+      sync_to_neo4j(ns, postDoc, userDoc, viewerDoc, followDoc);
     })
   });
   oplog_v.on('error', function (error) {
@@ -102,8 +112,8 @@ function oplog_connect() {
   oplog_p = MongoOplog(conn.oplog, conn.oplog_opts_p);
   oplog_p.tail();
   oplog_p.on('op', function (data) {
-    get_doc(data, function (ns, postDoc, userDoc, viewerDoc) {
-      sync_to_neo4j(ns, postDoc, userDoc, viewerDoc);
+    get_doc(data, function (ns, postDoc, userDoc, viewerDoc, followDoc) {
+      sync_to_neo4j(ns, postDoc, userDoc, viewerDoc, followDoc);
     })
   });
   oplog_p.on('delete', function (doc) {
@@ -122,8 +132,8 @@ function oplog_connect() {
   oplog_u = MongoOplog(conn.oplog, conn.oplog_opts_u);
   oplog_u.tail();
   oplog_u.on('op', function (data) {
-    get_doc(data, function (ns, postDoc, userDoc, viewerDoc) {
-      sync_to_neo4j(ns, postDoc, userDoc, viewerDoc);
+    get_doc(data, function (ns, postDoc, userDoc, viewerDoc, followDoc) {
+      sync_to_neo4j(ns, postDoc, userDoc, viewerDoc, followDoc);
     })
   });
   oplog_u.on('error', function (error) {
@@ -133,6 +143,23 @@ function oplog_connect() {
     console.log('>>> end: Stream ended');
   });
   oplog_u.on('stop', function () {
+    console.log('>>> stop: server stopped');
+  });
+
+  oplog_f = MongoOplog(conn.oplog, conn.oplog_opts_f);
+  oplog_f.tail();
+  oplog_f.on('op', function (data) {
+    get_doc(data, function (ns, postDoc, userDoc, viewerDoc, followDoc) {
+      sync_to_neo4j(ns, postDoc, userDoc, viewerDoc, followDoc);
+    })
+  });
+  oplog_f.on('error', function (error) {
+    console.log('>>> error: ' + error);
+  });
+  oplog_f.on('end', function () {
+    console.log('>>> end: Stream ended');
+  });
+  oplog_f.on('stop', function () {
     console.log('>>> stop: server stopped');
   });
 }
@@ -148,6 +175,7 @@ function get_doc(doc, cb) {
   var postDoc = null;
   var userDoc = null;
   var viewerDoc = null;
+  var followDoc = null;
 
   if(doc.op === 'i') {
     if(doc.ns === conn.oplog_opts_v.ns && (!!doc.o))
@@ -156,24 +184,34 @@ function get_doc(doc, cb) {
       userDoc = doc.o
     else if(doc.ns === conn.oplog_opts_p.ns && (!!doc.o))
       postDoc = doc.o
+    else if(doc.ns === conn.oplog_opts_f.ns && (!!doc.o))
+      followDoc = doc.o
     else
       console.log('!!! unknow insert op: ' + JSON.stringify(doc))
 
-    return cb && cb(doc.ns, postDoc, userDoc, viewerDoc);
+    return cb && cb(doc.ns, postDoc, userDoc, viewerDoc, followDoc);
   }
   else if(doc.op === 'u') {
     if(doc.ns === conn.oplog_opts_v.ns && (!!doc.o2) && doc.o2._id) {
       get_doc_byId(doc.ns, doc.o2._id, function(ns, result) {
         if(result)
           viewerDoc = result
-        return cb && cb(doc.ns, postDoc, userDoc, viewerDoc);
+        return cb && cb(doc.ns, postDoc, userDoc, viewerDoc, followDoc);
       })
     }
     else
-      return cb && cb(doc.ns, postDoc, userDoc, viewerDoc);
+      return cb && cb(doc.ns, postDoc, userDoc, viewerDoc, followDoc);
+  }
+  else if(doc.op === 'd') {
+    if(doc.ns === conn.oplog_opts_f.ns && (!!doc.o) && doc.o._id) {
+        followDoc = {drop: true, _id: doc.o._id}
+        return cb && cb(doc.ns, postDoc, userDoc, viewerDoc, followDoc);
+    }
+    else
+      return cb && cb(doc.ns, postDoc, userDoc, viewerDoc, followDoc);
   }
   else
-    return cb && cb(doc.ns, postDoc, userDoc, viewerDoc);
+    return cb && cb(doc.ns, postDoc, userDoc, viewerDoc, followDoc);
 }
 
 function get_doc_byId(ns, id, cb) {
@@ -231,7 +269,7 @@ function get_doc_byId(ns, id, cb) {
     return cb(null, null);
 }
 
-function sync_to_neo4j(ns, postDoc, userDoc, viewerDoc) {
+function sync_to_neo4j(ns, postDoc, userDoc, viewerDoc, followDoc) {
   if(ns === conn.oplog_opts_v.ns && (!!viewerDoc)) {
     if (!viewerDoc.createdAt)
       viewerDoc.createdAt = new Date();
@@ -258,6 +296,25 @@ function sync_to_neo4j(ns, postDoc, userDoc, viewerDoc) {
       else
         console.log('Post Info saved: error:' + err)
     })
+  }
+  else if(ns === conn.oplog_opts_f.ns && (!!followDoc)) {
+    if(!followDoc.drop) {
+      saveFollow.save_follow_relationship(followDoc,function(err){
+        if(err === null)
+          console.log('Follow saved: fid=' + followDoc._id)
+        else
+          console.log('Follow Info saved: error:' + err)
+      })
+    }
+    else {
+      saveFollow.remove_follow_relationship(followDoc, function(err){
+        if(err === null)
+          console.log('Follow removed fid=' + followDoc._id)
+        else
+          console.log('Follow Info removed: error:' + err)
+      });
+    }
+
   }
 }
 
@@ -292,17 +349,153 @@ function resave_viewer_node(viewerDoc) {
     })
   }
 }
-/*
-var server = restify.createServer({
-  name: 'opSync Server',
-  version: '0.3.0'
-});
-server.get('/', function (req, res, next) {
-  res.send({status:'ok'});
-  return next();
-});
+var mqttOptions = {
+  keepalive:30,
+  reconnectPeriod:20*1000
+}
 
-server.listen(process.env.LIVING_PORT, function () {
-  console.log('%s listening at %s', server.name, server.url);
+var client  = mqtt.connect('ws://tmq.tiegushi.com:80',mqttOptions);
+
+function new_usernode(doc, cb){
+  db.collection('users').findOne({_id:doc.userId},{fields:{
+    username: true,
+    createdAt:true,
+    'profile.fullname': true,
+    type: true,
+    'profile.sex':true,
+    'profile.lastLogonIP':true,
+    'profile.anonymous':true,
+    'profile.browser':true,
+    'profile.location':true
+  }},function(err, user) {
+    if(err || (!user)) {
+      return cb(err)
+    }
+    else {
+      savePostUser.save_user_node(user,function(){
+        console.log('User Info saved')
+        return cb(null);
+      })
+    }
+  });
+}
+
+function new_postnode(doc, cb){
+  db.collection('posts').findOne({_id:doc.postId},{fields:{
+    browse:true,
+    title:true,
+    addontitle:true,
+    owner:true,
+    _id:true,
+    ownerName:true,
+    createdAt:true,
+    mainImage:true
+  }},function(err, post) {
+    if(err || (!post)) {
+      return cb(err)
+    }
+    else {
+      savePostUser.save_post_node(post,function(){
+        console.log('Post Info saved')
+        return cb(null);
+      })
+    }
+  });
+}
+var reportSyncInfo;
+initReportSyncInfo();
+function initReportSyncInfo(){
+  reportSyncInfo = {
+    succ : 0,
+    postView : 0,
+    newUser : 0,
+    publishPost : 0,
+    unpublishPost : 0,
+    follow : 0,
+    unfollow : 0
+  }
+}
+
+function reportStatusInterval(){
+  var report = {
+    service: process.env.SERVICE_NAME ? process.env.SERVICE_NAME:'mqttSyncToNeo4j',
+    production: process.env.PRODUCTION ? true:false,
+    serviceIndex: process.env.SERVICE_INDEX ? process.env.SERVICE_INDEX:0, //index 0 for production
+    succ: reportSyncInfo.succ,
+    detail:reportSyncInfo
+  }
+  client.publish('status/service',JSON.stringify(report))
+  initReportSyncInfo();
+}
+
+setInterval(reportStatusInterval,30*1000)
+
+client.on('connect' ,function () {
+  console.log('Connected to server')
+  client.subscribe('postView',{qos:1});
+  client.subscribe('publishPost',{qos:1});
+  client.subscribe('newUser',{qos:1});
+
+  client.on('message', function (topic, message) {
+    // message is Buffer
+    console.log(topic+': '+message.toString());
+    var json = JSON.parse(message)
+    if(topic === 'postView'){
+      if (!json.userId || !json.postId){
+        return
+      }
+      if (json.postId.indexOf('?')>0){
+        json.postId = json.postId.split('?')[0];
+      }
+      if (!json.createdAt){
+        json.createdAt = new Date();
+      }
+      console.log('To save postview: '+JSON.stringify(json));
+      save_viewer_node(json,function(error){
+        if(!error){
+          reportSyncInfo.succ++;
+          reportSyncInfo.postView++;
+        }
+      })
+    } else if(topic === 'newUser'){
+      db.collection('users').findOne({_id:json.userId},{fields:{
+        username: true,
+        createdAt:true,
+        'profile.fullname': true,
+        type: true,
+        'profile.sex':true,
+        'profile.lastLogonIP':true,
+        'profile.anonymous':true,
+        'profile.browser':true,
+        'profile.location':true
+      }},function(err, user) {
+        savePostUser.save_user_node(user,function(error){
+          if(!error){
+            console.log('User Info saved')
+            reportSyncInfo.succ++;
+            reportSyncInfo.newUser++;
+          }
+        })
+      });
+    } else if(topic === 'publishPost'){
+      db.collection('posts').findOne({_id:json.postId},{fields:{
+        browse:true,
+        title:true,
+        addontitle:true,
+        owner:true,
+        _id:true,
+        ownerName:true,
+        createdAt:true,
+        mainImage:true
+      }},function(err, post) {
+        savePostUser.save_post_node(post,function(error){
+          if(!error){
+            console.log('publishPost Info saved')
+            reportSyncInfo.succ++;
+            reportSyncInfo.publishPost++;
+          }
+        })
+      });
+    }
+  });
 });
-*/

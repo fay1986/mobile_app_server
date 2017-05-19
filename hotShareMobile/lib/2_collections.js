@@ -122,6 +122,8 @@ if(Meteor.isClient){
   DynamicMoments = new Meteor.Collection('dynamicmoments');
   NewDynamicMoments = new Meteor.Collection('newdynamicmoments');
   SuggestPosts = new Meteor.Collection('suggestposts');
+  // ClientPostFriends（groundDB）记录： 新朋友点过的，且count=1的数据
+  ClientPostFriends = new Ground.Collection('ClientPostFriends', { connection: null });
 }
 if(Meteor.isServer){
   RefNames = new Meteor.Collection("refnames");
