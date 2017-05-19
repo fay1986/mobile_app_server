@@ -362,7 +362,7 @@ function initMqttReporter(){
         }
     }
     function reportStatusToMQTTBroker(){
-        client.publish('status/service',statusRecordInfo,{qos:1});
+        client.publish('status/service', JSON.stringify(statusRecordInfo),{qos:1});
         initStatusRecord();
     }
     initStatusRecord();
