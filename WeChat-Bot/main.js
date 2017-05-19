@@ -26,7 +26,7 @@ mqttClient.on('message' ,function (topic,message) {
     if(topic === 'status/service' ){
         var json = JSON.parse(message);
         if(json.service && typeof json.serviceIndex !== 'undefined') {
-            var isProd = !!topic.production;
+            var isProd = !!json.production;
             db.update({
                 service: json.service,
                 serviceIndex: json.serviceIndex,
