@@ -17,6 +17,7 @@ var THREAD_NUMBER = {
 }; // 同时下载/上传/pub分析的任务数
 
 var showDebug = true;
+var statusRecordInfo = null;
 
 var port = process.env.PORT || 8080;        // set our port
 //var hotshare_web = process.env.HOTSHARE_WEB_HOST || 'http://host1test.tiegushi.com:8083';
@@ -1493,6 +1494,38 @@ function startKueService() {
     }
 }
 
+function initMqttReporter(){
+    var mqtt    = require('mqtt');
+    var mqttOptions = {
+        keepalive:30,
+        reconnectPeriod:20*1000
+    }
+
+    var client  = mqtt.connect('ws://tmq.tiegushi.com:80',mqttOptions);
+    client.on('connect' ,function () {
+        console.log('Connected to mqtt server')
+    })
+
+    updateSucc = function(){
+        statusRecordInfo.succ++;
+    }
+    function initStatusRecord(){
+        statusRecordInfo = {
+            service: process.env.SERVICE_NAME ? process.env.SERVICE_NAME:'importServer',
+            production: process.env.PRODUCTION ? true:false,
+            serviceIndex: process.env.SERVICE_INDEX ? process.env.SERVICE_INDEX:0,
+            succ: 0,
+            detail:{}
+        }
+    }
+    function reportStatusToMQTTBroker(){
+        client.publish('status/service', JSON.stringify(statusRecordInfo),{qos:1});
+        initStatusRecord();
+    }
+    initStatusRecord();
+    setInterval(reportStatusToMQTTBroker,30*1000);
+}
+
 if (cluster.isMaster) {
   console.log("clusterWorkerSize="+clusterWorkerSize);
   for (var i = 0; i < clusterWorkerSize; i++) {
@@ -1517,6 +1550,8 @@ if (cluster.isMaster) {
   } else {
     console.log("cluster work both for Master and slaver mode.");
   }
+
+  initMqttReporter();
 
   var router = express.Router();
   router.get('/', function(req, res) {

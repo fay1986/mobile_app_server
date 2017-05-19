@@ -8,6 +8,7 @@ var filedownup = require('./file_downupload.js');
 var drafts = require('./post_drafts.js');
 
 var showDebug = false;
+var statusRecordInfo = null;
 
 process.addListener('uncaughtException', function (err) {
   var msg = err.message;
@@ -150,7 +151,6 @@ function initMqttReporter(){
         console.log('Connected to mqtt server')
     })
 
-    var statusRecordInfo = null;
     updateSucc = function(){
         statusRecordInfo.succ++;
     }
@@ -164,7 +164,7 @@ function initMqttReporter(){
         }
     }
     function reportStatusToMQTTBroker(){
-        client.publish('status/service',statusRecordInfo,{qos:1});
+        client.publish('status/service', JSON.stringify(statusRecordInfo),{qos:1});
         initStatusRecord();
     }
     initStatusRecord();
