@@ -14,6 +14,10 @@ var projectName = process.env.PROJECT_NAME || null; // '故事贴：t , 点圈�
 
 var client;
 var statusRecordInfo = null;
+var subscribeTopic = '/msg/#';
+if(projectName){
+  subscribeTopic = '/'+projectName+'/msg/#';
+}
 
 function mqttPushNotificationInit() {
     workQueue.workQueueInit(checkTTLAndSendNotification);
@@ -37,11 +41,6 @@ function mqttPushNotificationInit() {
         client.on('connect', function () {
           console.log('mqtt connected')
           mqttReporterInit();
-          var subscribeTopic = '/msg/#';
-          if(projectName){
-            subscribeTopic = '/'+projectName+'/msg/#';
-          }
-          client.unsubscribe(subscribeTopic);
           client.subscribe(subscribeTopic,{qos:1},function(err,granted){
             console.log('Granted is '+JSON.stringify(granted))
           });
@@ -66,23 +65,23 @@ function mqttPushNotificationInit() {
           }
         });
         client.on('reconnect', function () {
-            //TODO
+            client.unsubscribe(subscribeTopic);
             console.log('reconnect to mqtt server');
         });
         client.on('close', function () {
-            //TODO
+            client.unsubscribe(subscribeTopic);
             console.log('close to mqtt server');
         });
         client.on('disconnect', function (topic, message) {
-            //TODO
+            client.unsubscribe(subscribeTopic);
             console.log('disconnected')
         });
         client.on('offline', function () {
-            //TODO
-            console.log('offline to mqtt server');
+            client.unsubscribe(subscribeTopic);
+            console.log('disconnected')
         });
         client.on('error', function () {
-            //TODO
+            client.unsubscribe(subscribeTopic);
             console.log('error to mqtt server');
         });
     }

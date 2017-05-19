@@ -3,10 +3,10 @@ var cluster    = require('cluster');
 var clusterWorkerSize = 1; //only one slave needed !!
 
 var debug = false
-var prefix = '';
-var redis_prefix = prefix+'workai_mqtt_pushnotification_task';
-var redis_prefix_us = prefix+'workai_mqtt_pushnotification_task_us';
-var QUEUE_SIZE = 1024;
+var prefix = process.env.PREFIX || '';
+var redis_prefix = prefix+'_mqtt_pushnotification_task';
+var redis_prefix_us = prefix+'_mqtt_pushnotification_task_us';
+var QUEUE_SIZE = 1;
 var kuequeue;
 
 module.exports = workQueue
@@ -38,42 +38,70 @@ function startKueService(handler) {
     }
 }
 
+/*Kue relative process*/
+function restartKueService() {
+    if (restartKueServiceTimeout) {
+        clearTimeout(restartKueServiceTimeout);
+        restartKueServiceTimeout = null;
+    }
+
+    console.log("restartKueService in");
+    restartKueServiceTimeout = setTimeout(function(){
+        if (cluster.isMaster) {
+            for (var id in cluster.workers) {
+                var msg = {type:'restartKueService'}
+                console.log("Sending message restartKueService to work id: "+id);
+                cluster.workers[id].send(JSON.parse(msg));
+            }
+        }
+        if (kuequeue) {
+            var timeout = 30000;
+            kuequeue.shutdown(Number(timeout), function () {
+                if (cluster.isMaster) {
+                    console.log("!!!!!!!!!! restartKueService: Master, shutdown kue queue service! Start again...");
+                    kuequeue = null;
+                    startKueService();
+                } else {
+                    console.log("!!!!!!!!!! restartKueService: Slaver, shutdown kue queue service! Start again...");
+                    process.exit(0);
+                }
+            });
+        }
+    }, 5000);
+}
+
 function _isObject(obj){
     return (typeof obj=='object')&&obj.constructor==Object;
 }
 
 function setKueProcessCallback(handler) {
     function _process_callback(job, ctx, done){
-        ctx.pause( 5000, function(err){
-            var data = job.data;
-            var _id = data.id;
-            var itemObj = data.itemObj;
-            debug && console.log('worker', cluster.worker.id, 'queue.process', job.data);
-            debug && console.log('------- Start --------');
+        var data = job.data;
+        var _id = data.id;
+        var itemObj = data.itemObj;
+        debug && console.log('worker', cluster.worker.id, 'queue.process', job.data);
+        debug && console.log('------- Start --------');
 
-            if (!_isObject(itemObj)) {
-                console.log("itemObj is invalid, itemObj="+itemObj);
-                done();
-                ctx.resume();
-                return;
+        if (!_isObject(itemObj)) {
+            console.log("itemObj is invalid, itemObj="+itemObj);
+            job.progress(100, 100, JSON.stringify({'result': 'success'}));
+            done();
+            return;
+        }
+        setTimeout(function() {
+            try {
+                handler(_id, itemObj, function() {
+                    job.progress(100, 100, JSON.stringify({'result': 'success'}));
+                    debug && console.log('-------  End  --------');
+                    done();
+                });
+            } catch (error) {
+                console.log("Exception: in setKueProcessCallback, error="+error);
+                console.log("Exception: in setKueProcessCallback, job.data="+JSON.stringify(job.data));
+                job.progress(100, 100, JSON.stringify({'result': 'success'}));
+                done(new Error('failed'));
             }
-            setTimeout(function() {
-                try {
-                    debug && console.log("Worker is paused... ");
-                    handler(_id, itemObj, function() {
-                        job.progress(100, 100, JSON.stringify({'result': 'success'}));
-                        debug && console.log('-------  End  --------');
-                        done();
-                        ctx.resume();
-                    });
-                } catch (error) {
-                    console.log("Exception: in setKueProcessCallback, error="+error);
-                    console.log("Exception: in setKueProcessCallback, job.data="+JSON.stringify(job.data));
-                    done(new Error('failed'));
-                    ctx.resume();
-                }
-            }, 0);
-        });
+        }, 0);
     }
     if (!process.env.SERVER_IN_US) {
         console.log("cluster Slaver: CN");
@@ -116,7 +144,7 @@ function _createTaskToKueQueue(prefix, _id, itemObj) {
     var job = kuequeue.create(prefix, {
       id: _id,
       itemObj:itemObj
-    }).priority('critical').removeOnComplete(true).save(function(err){
+    }).priority('critical').removeOnComplete(true).ttl(600*1000).save(function(err){
       if (!err) {
         debug && console.log("   job.id = "+job.id+", _id="+_id);
       }
@@ -141,6 +169,30 @@ function checkIsMaster() {
 }
 
 function workQueue_init(handler) {
+    process.addListener('uncaughtException', function (err) {
+      if (!err) {
+        err = {};
+      }
+      var msg = err.message;
+      if (err.stack) {
+        msg += '\n' + err.stack;
+      }
+      if (!msg) {
+        msg = JSON.stringify(err);
+      }
+      if (cluster.isMaster) {
+        console.log("uncaughtException on Master");
+      } else {
+        console.log("uncaughtException on Slaver");
+      }
+      console.log("uncaughtException: err="+JSON.stringify(err));
+      console.log(msg);
+      console.trace();
+      if (err.message && err.message.toLowerCase().startsWith("redis")) {
+        restartKueService();
+      }
+    });
+
     if (cluster.isMaster) {
         console.log("clusterWorkerSize="+clusterWorkerSize);
         for (var i = 0; i < clusterWorkerSize; i++) {
@@ -156,6 +208,16 @@ function workQueue_init(handler) {
         });
         cluster.on('message', function(message) {
             console.log('master message form worker:', message);
+        });
+    }
+    else {
+        process.on('message', function(obj) {
+            var msg = JSON.parse(obj);
+            console.log("msg = "+JSON.stringify(msg));
+            if (msg.type === 'restartKueService') {
+              console.log("Received restartKueService message from Master.");
+              process.exit(0);
+            }
         });
     }
 
