@@ -25,8 +25,8 @@ mqttClient.on('message' ,function (topic,message) {
     console.log(topic+': '+message);
     if(topic === 'status/service' ){
         var json = JSON.parse(message);
-        if(json.service && typeof json.serviceIndex !== 'undefined') {
-            var isProd = !!json.production;
+        if(json.service && (typeof json.serviceIndex) !== 'undefined') {
+            var isProd = json.production;
             db.update({
                 service: json.service,
                 serviceIndex: json.serviceIndex,
@@ -231,14 +231,14 @@ function getProductionServerOnlineStatus(callback){
         });
     });
 }
-function reportHowManyProductionServerIsBeingMonitored(){
-    db.find({isProd: true}, function (err,docs) {
+function reportHowManyProductionServerIsBeingMonitored() {
+    db.find({isProd: true}, function (err, docs) {
         var serverLists = []
-        if(docs.length>0){
-            for(var i=0;i<docs.length;i++){
-                serverLists.push(docs[i].service+'['+docs[i].serviceIndex+']')
+        if (docs.length > 0) {
+            for (var i = 0; i < docs.length; i++) {
+                serverLists.push(docs[i].service + '[' + docs[i].serviceIndex + ']')
             }
-            var msg = '正在监控'+serverLists.length+'台产品服务器('+serverLists.toString()+')'
+            var msg = '正在监控' + serverLists.length + '台产品服务器(' + serverLists.toString() + ')'
             console.log(msg)
             reportToWechatRoom(msg)
         } else {
@@ -246,12 +246,13 @@ function reportHowManyProductionServerIsBeingMonitored(){
             reportToWechatRoom('未能成功监测产品服务器')
         }
     })
+}
 function testSwitchAccount(callback){
     var begin = new Date();
 
     if (!loginUser.id)
         return;
-        
+
     switchAccount(ddpClient, loginUser.id, 'mdaRAZBL73d8KsQP7', function(err){
         if (err){
             ddpClient.close();
@@ -297,7 +298,7 @@ wechatInstance.on('message', function(message){
 })
 wechatInstance.init()
 
-taskList = [testLogin,testSubscribeShowPost,testSwitchAccount,testNeo4J,getProductionServerOnlineStatus]
+taskList = [testLogin,testSubscribeShowPost,/*testSwitchAccount,*/testNeo4J,getProductionServerOnlineStatus]
 
 var intervalTask = function(){
     async.series(taskList,function(err,results){
