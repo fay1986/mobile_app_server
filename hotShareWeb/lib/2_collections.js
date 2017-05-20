@@ -2603,70 +2603,82 @@ if(Meteor.isServer){
       }
   });
   if(withNeo4JInFollowPosts){
-      Meteor.publish("followposts", function(limit) {
+      Meteor.publish("followposts", function(limit,skip) {
           if(this.userId === null || !Match.test(limit, Number))
               return this.ready();
           else{
               var self = this;
               var userId = this.userId;
-              if(!self._session.skipFollowPost){
-                  self._session.skipFollowPost = {}
+              var toSkip = 0;
+              var queryLimit = limit;
+              if(typeof skip !== 'undefined'){
+                  if(skip >= 0){
+                      console.log('Skip '+skip+' limit '+limit);
+                      toSkip = skip;
+                  }
+              } else {
+                  if(!self._session.skipFollowPost){
+                      self._session.skipFollowPost = {}
+                  }
+                  if(!self._session.skipFollowPost[userId]){
+                      self._session.skipFollowPost[userId] = 0;
+                  }
+                  if(self._session.skipFollowPost[userId] >= limit){
+                      self._session.skipFollowPost[userId] = 0;
+                  }
+                  toSkip = self._session.skipFollowPost[userId];
+                  queryLimit = limit - self._session.skipFollowPost[userId];
+                  self._session.skipFollowPost[userId] += queryLimit;
               }
-              if(!self._session.skipFollowPost[userId]){
-                  self._session.skipFollowPost[userId] = 0;
-              }
-              if(self._session.skipFollowPost[userId] >= limit){
-                  self._session.skipFollowPost[userId] = 0;
-              }
-              var queryLimit = limit - self._session.skipFollowPost[userId];
-
               deferSetImmediate(function(){
                   //ensureFollowInNeo4j(userId,postId)
-                  var queryResult = getFollowPostFromNeo4J( userId, self._session.skipFollowPost[userId],queryLimit);
-                  self._session.skipFollowPost[userId] += queryLimit;
+                  try{
+                      var queryResult = getFollowPostFromNeo4J( userId, toSkip,queryLimit);
 
-                  if(queryResult && queryResult.length > 0){
-                      queryResult.forEach(function (item) {
-                        //   if(item && item[0]){
-                            //   var postInfo = item[0];
-                            //   var meetTimes = item[1];
-                          if(item){
-                              var postInfo = item;
-                              var ownerIcon = '';
-                              var publish = false;
-                              if(postInfo.ownerIcon){
-                                ownerIcon = postInfo.ownerIcon;
-                              } else {
-                                var ownerInfo = Meteor.users.findOne({_id: postInfo.ownerId},{fields:{'profile.icon':true}});
-                                ownerIcon =  ownerInfo?ownerInfo.profile.icon:'';
+                      if(queryResult && queryResult.length > 0){
+                          queryResult.forEach(function (item) {
+                              //   if(item && item[0]){
+                              //   var postInfo = item[0];
+                              //   var meetTimes = item[1];
+                              if(item){
+                                  var postInfo = item;
+                                  var ownerIcon = '';
+                                  var publish = false;
+                                  if(postInfo.ownerIcon){
+                                      ownerIcon = postInfo.ownerIcon;
+                                  } else {
+                                      var ownerInfo = Meteor.users.findOne({_id: postInfo.ownerId},{fields:{'profile.icon':true}});
+                                      ownerIcon =  ownerInfo?ownerInfo.profile.icon:'';
+                                  }
+                                  if(postInfo.publish){
+                                      publish = postInfo.publish
+                                  } else {
+                                      var post = Posts.findOne({_id:postInfo.postId},{fields:{'publish':true}});
+                                      publish = post.publish;
+                                  }
+                                  var fields = {
+                                      postId:postInfo.postId,
+                                      title: postInfo.name,
+                                      addontitle: postInfo.addonTitle,
+                                      mainImage:postInfo.mainImage,
+                                      mainImageStyle: null,
+                                      heart: 0,
+                                      retweet: 0,
+                                      comment: 0,
+                                      browse:  0,
+                                      publish: publish,
+                                      owner: postInfo.ownerId,
+                                      ownerName: postInfo.ownerName,
+                                      ownerIcon: ownerIcon,
+                                      createdAt: postInfo.createdAt,
+                                      followby:userId
+                                  };
+                                  self.added('followposts',postInfo.postId,fields)
                               }
-                              if(postInfo.publish){
-                                publish = postInfo.publish
-                              } else {
-                                var post = Posts.findOne({_id:postInfo.postId},{fields:{'publish':true}});
-                                publish = post.publish;
-                              }
-                              var fields = {
-                                  postId:postInfo.postId,
-                                  title: postInfo.name,
-                                  addontitle: postInfo.addonTitle,
-                                  mainImage:postInfo.mainImage,
-                                  mainImageStyle: null,
-                                  heart: 0,
-                                  retweet: 0,
-                                  comment: 0,
-                                  browse:  0,
-                                  publish: publish,
-                                  owner: postInfo.ownerId,
-                                  ownerName: postInfo.ownerName,
-                                  ownerIcon: ownerIcon,
-                                  createdAt: postInfo.createdAt,
-                                  followby:userId
-                              };
-                              self.added('followposts',postInfo.postId,fields)
-                          }
-                      });
-                  }
+                          });
+                      }
+                  } catch(e){}
+                  self.ready();
               })
 
               self.onStop(function(){
@@ -2675,7 +2687,7 @@ if(Meteor.isServer){
               self.removed = function(collection, id){
                   //console.log('removing '+id+' in '+collection +' but no, we dont want to resend data to client')
               }
-              return this.ready();
+              return;
           }
           //return FollowPosts.find({followby: this.userId}, {sort: {createdAt: -1}, limit:limit});
       });

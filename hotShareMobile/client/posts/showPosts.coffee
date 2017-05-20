@@ -963,12 +963,17 @@ if Meteor.isClient
               newArray.push(item)
           myHotPosts = newArray
           Meteor.users.update { _id: Meteor.userId() }, $set: 'myHotPosts': myHotPosts
+
+        #todo: need process from client side.
+        toLoadFollowPost()
+        ###
         Meteor.subscribe 'followposts', Session.get('followpostsitemsLimit'), {
-          #onStop: subscribeFollowPostsOnStop
+          onError: subscribeFollowPostsOnStop
           onReady: ()->
             console.log 'followPostsCollection loaded'
             Session.set 'followPostsCollection', 'loaded'
         }
+        ###
       Router.go('/user')
       return
       # , '取消发表故事', ['依然发表','存为草稿']);

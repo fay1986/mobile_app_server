@@ -18,7 +18,7 @@ if(Meteor.isClient){
 
 
 if(Meteor.isClient){
-    var FOLLOWPOSTS_ITEMS_INCREMENT = 10;
+    FOLLOWPOSTS_ITEMS_INCREMENT = 30;
     var FEEDS_ITEMS_INCREMENT = 20;
     var FOLLOWS_ITEMS_INCREMENT = 10;
     var MYPOSTS_ITEMS_INCREMENT = 15;
@@ -74,27 +74,10 @@ if(Meteor.isClient){
         {
             Meteor.setTimeout(function(){
                 Session.set('seriesCollection','loading');
-                Meteor.subscribe('followposts', Session.get('seriesitemsLimit'), {
+                Meteor.subscribe('followSeries', Session.get('seriesitemsLimit'), {
                     onStop: subscribeMySeriesOnStop,
                     onReady: function(){
                         Session.set('seriesCollection','loaded');
-                    }
-                });
-            },2000);
-        }
-    };
-    var subscribeFollowPostsOnStop = function(err){
-        console.log('followPostsCollection ' + err);
-        Session.set('followPostsCollection','error');
-        if(Meteor.user())
-        {
-            Meteor.setTimeout(function(){
-                Session.set('followPostsCollection','loading');
-                Meteor.subscribe('followposts', Session.get('followpostsitemsLimit'), {
-                    onStop: subscribeFollowPostsOnStop,
-                    onReady: function(){
-                        console.log('followPostsCollection loaded');
-                        Session.set('followPostsCollection','loaded');
                     }
                 });
             },2000);
@@ -126,12 +109,52 @@ if(Meteor.isClient){
             keepHistory: 1000 * 60 * 5,
             localSearch: true
         };
+        var followPostsInMemory = 0;
         var fields = ['username', 'profile.fullname'];
         FollowUsersSearch = new SearchSource('followusers', fields, options);
         var topicsfields = ['text'];
         TopicsSearch = new SearchSource('topics', topicsfields, options);
         var postsfields = ['title'];
         PostsSearch = new SearchSource('posts', postsfields, options);
+
+        followPostStatus = 'loaded'
+        subscribeFollowPostsOnError = function(err){
+            console.log('followPostsCollection ' + err);
+            followPostStatus = 'loaded'
+            if(Meteor.user())
+            {
+                Meteor.setTimeout(toLoadFollowPost,2000);
+            }
+        };
+        toLoadFollowPost = function(){
+            console.log('Called here')
+            if( followPostStatus === 'loaded'){
+                followPostStatus = 'loading'
+                Meteor.subscribe('followposts', FOLLOWPOSTS_ITEMS_INCREMENT, followPostsInMemory, {
+                    onError: subscribeFollowPostsOnError,
+                    onStop:function(){
+                        if (followPostStatus === 'loading'){
+                            followPostStatus = 'loaded'
+                        }
+                    },
+                    onReady: function () {
+                        console.log('followPostsCollection loaded');
+                        followPostStatus = 'loaded'
+                    }
+                });
+            }
+        }
+        Tracker.autorun(function(){
+            if(Meteor.user()){
+                followPostsInMemory = FollowPosts.find({followby:Meteor.userId()}).count()
+            }
+        })
+        Tracker.autorun(function() {
+            if (Meteor.user()) {
+                followPostStatus = 'loaded'
+                toLoadFollowPost();
+            }
+        })
         Tracker.autorun(function(){
             if (Meteor.userId()) {
                 Meteor.subscribe('followSeries', Session.get('followSeriesLimit'), {
@@ -146,13 +169,6 @@ if(Meteor.isClient){
                     onReady: function () {
                         console.log('seriesCollection loaded');
                         Session.set('seriesCollection', 'loaded');
-                    }
-                });
-                Meteor.subscribe('followposts', Session.get('followpostsitemsLimit'), {
-                    onStop: subscribeFollowPostsOnStop,
-                    onReady: function () {
-                        console.log('followPostsCollection loaded');
-                        Session.set('followPostsCollection', 'loaded');
                     }
                 });
                 Meteor.subscribe('feeds', Session.get('feedsitemsLimit'), {

@@ -15,18 +15,15 @@ if Meteor.isClient
 #    $('.mainImage').css('height',$(window).height()*0.55)
     $(window).scroll (event)->
         target = $("#showMoreResults");
-        FOLLOWPOSTS_ITEMS_INCREMENT = 10;
         if (!target.length)
             return;
-
         threshold = $(window).scrollTop() + $(window).height() - target.height();
 
         if target.offset().top < threshold
             if (!target.data("visible"))
                 console.log("target became visible (inside viewable area)");
                 target.data("visible", true);
-                Session.set("followpostsitemsLimit",
-                Session.get("followpostsitemsLimit") + FOLLOWPOSTS_ITEMS_INCREMENT);
+                toLoadFollowPost();
         else
             if (target.data("visible"))
                 console.log("target became invisible (below viewable arae)");
@@ -39,14 +36,14 @@ if Meteor.isClient
         0
     myPosts:()->
       myFollowedPosts = FollowPosts.find({followby:Meteor.userId(),publish:{"$ne":false}}, {sort: {createdAt: -1}})
-      Session.setPersistent('persistentMyFollowedPosts',myFollowedPosts.fetch())
+      #Session.setPersistent('persistentMyFollowedPosts',myFollowedPosts.fetch())
       return myFollowedPosts #Session.get('persistentMyFollowedPosts')
     isfollowerpost:(postId)->
       if FollowPosts.find({postId:postId}).count() > 1 and postId isnt null
         followPostsId = FollowPosts.findOne({postId: postId})._id
         FollowPosts.remove({_id:followPostsId})
         myFollowedPosts = FollowPosts.find({followby:Meteor.userId(),publish:{"$ne":false}}, {sort: {createdAt: -1}})
-        Session.setPersistent('persistentMyFollowedPosts',myFollowedPosts.fetch())
+        #Session.setPersistent('persistentMyFollowedPosts',myFollowedPosts.fetch())
         return true
       else
         return true
