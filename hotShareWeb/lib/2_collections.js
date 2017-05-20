@@ -56,6 +56,7 @@ PersonNames = new Meteor.Collection('personNames');
 }*/
 
 Themes = new Meteor.Collection('themes');
+PostExamples = new Meteor.Collection('postExamples');
 
 if(Meteor.isServer){
   Meteor.startup(function(){
@@ -70,6 +71,12 @@ if(Meteor.isServer){
   });
   Meteor.publish('post-example', function(){
     return Posts.find({_id: 'zwmXLe5tuWDKCZQM8'}, {limit: 1});
+  });
+  Meteor.publish('post-examples', function(){
+    return [
+      PostExamples.find({}, {limit: 10}),
+      Posts.find({example: true}, {limit: 10})
+    ]
   });
 
   PeopleHis.allow({
@@ -151,6 +158,7 @@ isPostSafe = function(title,addontitle,mainImage,pub){
 GetStringByteLength = function(str){
   return str ? str.replace(/[^\x00-\xff]/g, 'xx').length : 0;
 }
+
 if(Meteor.isServer)
   PushSendLogs = new Meteor.Collection('pushSendLogs');
 
@@ -163,23 +171,15 @@ ShareURLs = new Meteor.Collection('shareURLs');
 //推送设备token（同一手机只绑定最近一次登录的用户）
 PushTokens = new Meteor.Collection('pushTokens');
 
-if(Meteor.isClient){
-  PostFriends = new Meteor.Collection("postfriends");
-  PostFriendsCount = new Meteor.Collection("postfriendsCount");
-  Newfriends = new Meteor.Collection("newfriends");
-  ViewLists = new Meteor.Collection("viewlists");
-  //User detail has duplicated information with postfriends, so only leave one to save traffic
-  //UserDetail = new Meteor.Collection("userDetail");
-  DynamicMoments = new Meteor.Collection('dynamicmoments');
-  NewDynamicMoments = new Meteor.Collection('newdynamicmoments');
-  SuggestPosts = new Meteor.Collection('suggestposts');
 
-  // ClientPostFriends（groundDB）记录： 新朋友点过的，且count=1的数据
-  ClientPostFriends = new Ground.Collection('ClientPostFriends', { connection: null });
-}
 if(Meteor.isServer){
   RefNames = new Meteor.Collection("refnames");
   PComments = new Meteor.Collection("pcomments");
+  // 服务器启动时查询topicId 和 '婚恋摄影家'用户Id
+  Meteor.startup(function () {
+    topicId = Topics.findOne({text: '婚恋摄影家'})._id;
+    tagFollowerId = Meteor.users.findOne({'profile.fullname':'婚恋摄影家'})._id;
+  });
   PShares = new Meteor.Collection("pshares");
   var insertRePost = function(doc){
     deferSetImmediate(function(){
@@ -246,6 +246,7 @@ if(Meteor.isServer){
     addIds(getIds('丽江古城', 5));
     addIds(getIds('旅游', 5));
 
+    // console.log('makeOldTopicPosts ids:', JSON.stringify(ids));
     OldTopicPosts =  TopicPosts.find({_id: {$in: ids}}, {sort: {createdAt: -1}});
   };
   Meteor.startup(function(){
@@ -347,6 +348,7 @@ if(Meteor.isServer){
             }
             //getViewLists(self,taId,3);
             self.added("postfriends", id, fields);
+            self.count++;
         });
     };
     var newMeetsAddedForNewFriendsDeferHandle = function(self,taId,userId,id,fields){
@@ -1974,7 +1976,7 @@ if(Meteor.isServer){
         if(this.userId === null || !Match.test(limit, Number))
           return this.ready();
         else
-          return Series.find({owner: this.userId}, {sort: {createdAt: -1}, limit:limit});
+          return Series.find({owner: this.userId,publish: true}, {sort: {createdAt: -1}, limit:limit});
     });
     /*for unknown reason, this changed callback is triggered several times, to prevent this behavior, use this variable */
     var firstOneSeriesChangedEvent = true;
@@ -2260,7 +2262,7 @@ if(Meteor.isServer){
                 if(!self._session.skipPostFriend[postId+'_newfriends']){
                     self._session.skipPostFriend[postId+'_newfriends'] = 0;
                 }
-                if(self._session.skipPostFriend[postId] > limit){
+                if(self._session.skipPostFriend[postId] >= limit){
                     self._session.skipPostFriend[postId] = 0;
                 }
                 if(self._session.skipPostFriend[postId+'_newfriends'] > self._session.skipPostFriend[postId] + limit){
@@ -2549,6 +2551,17 @@ if(Meteor.isServer){
           return Posts.find({owner: this.userId, publish: {$ne: false}},{sort: {createdAt: -1},limit:limit,fields:{mainImage:1,title:1,addontitle:1,publish:1,owner:1,createdAt:1}});
       }
   });
+
+  /*
+  Meteor.publish("mypostedposts", function(postId) {
+      if(this.userId === null) {
+          return this.ready();
+      }
+      else{
+          return Posts.find({_id: postId},{sort: {createdAt: -1}});
+      }
+  });
+*/
   Meteor.publish("savedDraftsWithLimit", function(limit) {
       if(this.userId === null|| !Match.test(limit, Number)){
           return this.ready();
@@ -2602,7 +2615,7 @@ if(Meteor.isServer){
               if(!self._session.skipFollowPost[userId]){
                   self._session.skipFollowPost[userId] = 0;
               }
-              if(self._session.skipFollowPost[userId] > limit){
+              if(self._session.skipFollowPost[userId] >= limit){
                   self._session.skipFollowPost[userId] = 0;
               }
               var queryLimit = limit - self._session.skipFollowPost[userId];
@@ -3149,7 +3162,14 @@ if(Meteor.isServer){
     return publishTheFavouritePosts(this,userId,limit)
   });
 
-  Meteor.publish('webUserPublishPosts', function(limit) {
+  Meteor.publish('SaveDraftsByLogin', function() {
+    if(!this.userId)
+      return [];
+
+    return SavedDrafts.find({owner: this.userId}, {sort: {createdAt: -1}});
+  });
+
+   Meteor.publish('webUserPublishPosts', function(limit) {
     if(!this.userId)
       return this.ready();
 
@@ -3788,292 +3808,4 @@ if(Meteor.isServer){
     var parts = searchText.trim().split(/[ \-\:]+/);
     return new RegExp("(" + parts.join('|') + ")", "ig");
   }
-}
-
-if(Meteor.isClient){
-  var FOLLOWPOSTS_ITEMS_INCREMENT = 10;
-  var FEEDS_ITEMS_INCREMENT = 20;
-  var FOLLOWS_ITEMS_INCREMENT = 10;
-  var MYPOSTS_ITEMS_INCREMENT = 15;
-  var MOMENTS_ITEMS_INCREMENT = 10;
-  var FAVOURITE_POSTS_INCREMENT = 10;
-  var POSTFRIENDS_ITEMS_INCREMENT = 10;
-  var SUGGEST_POSTS_INCREMENT = 15;
-  var POST_ID = null;
-  Session.setDefault('followpostsitemsLimit', FOLLOWPOSTS_ITEMS_INCREMENT);
-  Session.setDefault('feedsitemsLimit', FEEDS_ITEMS_INCREMENT);
-  Session.setDefault('followersitemsLimit', FOLLOWS_ITEMS_INCREMENT);
-  Session.setDefault('followeesitemsLimit', FOLLOWS_ITEMS_INCREMENT);
-  Session.setDefault('mypostsitemsLimit', MYPOSTS_ITEMS_INCREMENT);
-  Session.setDefault('momentsitemsLimit', MOMENTS_ITEMS_INCREMENT);
-  Session.setDefault('favouritepostsLimit', FAVOURITE_POSTS_INCREMENT);
-  Session.setDefault('favouritepostsLimit1', FAVOURITE_POSTS_INCREMENT);
-  Session.setDefault('favouritepostsLimit2', FAVOURITE_POSTS_INCREMENT);
-  Session.setDefault('favouritepostsLimit3', FAVOURITE_POSTS_INCREMENT);
-  Session.setDefault('postfriendsitemsLimit', POSTFRIENDS_ITEMS_INCREMENT);
-  Session.setDefault("momentsitemsLimit",MOMENTS_ITEMS_INCREMENT);
-  Session.setDefault("suggestpostsLimit",SUGGEST_POSTS_INCREMENT);
-  Session.set('followPostsCollection','loading');
-  Session.set('feedsCollection','loading');
-  Session.set('followersCollection','loading');
-  Session.set('followeesCollection','loading');
-  Session.set('myPostsCollection','loading');
-  Session.set('momentsCollection','loading');
-  Session.set('postfriendsCollection','loaded');
-  var subscribeFollowPostsOnStop = function(err){
-      console.log('followPostsCollection ' + err);
-      Session.set('followPostsCollection','error');
-      if(Meteor.user())
-      {
-          Meteor.setTimeout(function(){
-              Session.set('followPostsCollection','loading');
-              Meteor.subscribe('followposts', Session.get('followpostsitemsLimit'), {
-                  onStop: subscribeFollowPostsOnStop,
-                  onReady: function(){
-                      console.log('followPostsCollection loaded');
-                      Session.set('followPostsCollection','loaded');
-                  }
-              });
-          },2000);
-      }
-  };
-  var subscribeFeedsOnStop = function(err){
-      console.log('feedsCollection ' + err);
-      Session.set('feedsCollection','error');
-      if(Meteor.user())
-      {
-          Meteor.setTimeout(function(){
-              Session.set('feedsCollection','loading');
-              Meteor.subscribe('feeds', Session.get('feedsitemsLimit'), {
-                  onStop: subscribeFeedsOnStop,
-                  onReady: function(){
-                      console.log('feedsCollection loaded');
-                      Session.set('feedsCollection','loaded');
-                  }
-              });
-          },2000);
-      }
-  };
-  window.refreshMainDataSource = function(){
-      Meteor.subscribe('waitreadcount');
-  };
-  if(Meteor.isCordova){
-      var options = {
-          keepHistory: 1000 * 60 * 5,
-          localSearch: true
-      };
-      var fields = ['username', 'profile.fullname'];
-      FollowUsersSearch = new SearchSource('followusers', fields, options);
-      var topicsfields = ['text'];
-      TopicsSearch = new SearchSource('topics', topicsfields, options);
-      var postsfields = ['title'];
-      PostsSearch = new SearchSource('posts', postsfields, options);
-      Tracker.autorun(function(){
-          if (Meteor.userId()) {
-              Meteor.subscribe('followposts', Session.get('followpostsitemsLimit'), {
-                  onStop: subscribeFollowPostsOnStop,
-                  onReady: function () {
-                      console.log('followPostsCollection loaded');
-                      Session.set('followPostsCollection', 'loaded');
-                  }
-              });
-              Meteor.subscribe('feeds', Session.get('feedsitemsLimit'), {
-                  onStop: subscribeFeedsOnStop,
-                  onReady: function () {
-                      console.log('feedsCollection loaded');
-                      Session.set('feedsCollection', 'loaded');
-                  }
-              });
-              Meteor.subscribe('followToWithLimit', Session.get('followersitemsLimit'), {
-                  onReady: function () {
-                      console.log('followersCollection loaded');
-                      Session.set('followersCollection', 'loaded');
-                  }
-              });
-              Meteor.subscribe('followedByWithLimit', Session.get('followeesitemsLimit'), {
-                  onReady: function () {
-                      console.log('followeesCollection loaded');
-                      Session.set('followeesCollection', 'loaded');
-                  }
-              });
-              Meteor.subscribe('postsWithLimit', Session.get('mypostsitemsLimit'), {
-                  onReady: function(){
-                      console.log('myPostsCollection loaded');
-                      Meteor.setTimeout(function(){
-                        Session.set('myPostsCollection','loaded');
-                      },500);
-                  }
-              });
-
-              Meteor.subscribe('readerpopularposts', {
-                  onReady: function(){
-                      //Session.set('momentsCollection','loaded');
-                  }
-              });
-          }
-      });
-      Tracker.autorun(function(){
-          if (Meteor.userId()){
-              Meteor.subscribe('suggestPosts', 15, {
-                  onReady: function(){
-                      Session.set('momentsCollection','loaded');
-                  }
-              });
-
-              Meteor.subscribe('associatedusers', {
-                  onReady: function() {
-
-                  }
-              });
-          }
-      });
-  }
-  Meteor.setTimeout(function(){
-      Tracker.autorun(function(){
-          if( Session.get("postContent") && Session.get("postContent")._id && Meteor.userId() && Session.get('postfriendsitemsLimit')){
-              //Session.set('postfriendsCollection','loading')
-              Meteor.subscribe('postFriendsV2', Meteor.userId(), Session.get("postContent")._id, Session.get('postfriendsitemsLimit'), {
-                  onReady: function () {
-                      console.log('postfriendsCollection loaded')
-                      Session.set('postfriendsCollection', 'loaded')
-                  }
-              })
-          }
-      });
-  },2000);
-
-  Tracker.autorun(function() {
-    if(Meteor.isCordova) {
-        Meteor.subscribe('versions');
-    }
-  });
-
-  Tracker.autorun(function() {
-    if (Meteor.userId()) {
-        if (Meteor.isCordova){
-            console.log('Refresh Main Data Source when logon');
-            window.refreshMainDataSource();
-        }/*
-        if(withChat) {
-            // 消息会话、最近联系人
-            Meteor.subscribe("msgSession");
-            //群信息
-            Meteor.subscribe("msgGroup");
-        }*/
-        if(Session.get("postContent")){
-            if(POST_ID !== Session.get("postContent")._id)
-            {
-                POST_ID = Session.get("postContent")._id;
-                Session.set('momentsitemsLimit', MOMENTS_ITEMS_INCREMENT);
-            }
-            Meteor.subscribe('newDynamicMoments', Session.get("postContent")._id, Session.get('momentsitemsLimit'), {
-                onReady: function(){
-                    console.log('momentsCollection loaded');
-                    window.momentsCollection_getmore = 'done';
-                    Session.set('momentsCollection','loaded');
-                    Session.set('momentsCollection_getmore','done');
-                },
-                onError: function(){
-                    console.log('momentsCollection Error');
-                    window.momentsCollection_getmore = 'done';
-                    Session.set('momentsCollection','loaded');
-                    Session.set('momentsCollection_getmore','done');
-                }
-            });
-        }
-    }
-  });
-
-
-  Tracker.autorun(function() {
-    if (Meteor.userId()) {
-        Meteor.subscribe('favouriteposts', Session.get('favouritepostsLimit'), {
-            onReady: function(){
-                console.log('Favourite Posts Collection loaded');
-                window.favouritepostsCollection_getmore = 'done';
-                Session.set('favouritepostsCollection','loaded');
-                Session.set('favouritepostsCollection_getmore','done');
-            },
-            onError: function(){
-                console.log('Favourite Posts Collection Error');
-                window.favouritepostsCollection_getmore = 'done';
-                Session.set('favouritepostsCollection','loaded');
-                Session.set('favouritepostsCollection_getmore','done');
-            }
-        });
-    }
-  });
-
-  Tracker.autorun(function() {
-    if (Session.get("ProfileUserId1")) {
-        Meteor.subscribe('userfavouriteposts', Session.get("ProfileUserId1"), Session.get('favouritepostsLimit1'), {
-            onReady: function(){
-                console.log('Favourite Posts Collection loaded');
-                window.favouritepostsCollection1_getmore = 'done';
-                Session.set('favouritepostsCollection1','loaded');
-                Session.set('favouritepostsCollection1_getmore','done');
-            },
-            onError: function(){
-                console.log('Favourite Posts Collection Error');
-                window.favouritepostsCollection1_getmore = 'done';
-                Session.set('favouritepostsCollection1','loaded');
-                Session.set('favouritepostsCollection1_getmore','done');
-            }
-        });
-    }
-  });
-
-  Tracker.autorun(function() {
-    if (Session.get("ProfileUserId2")) {
-        Meteor.subscribe('userfavouriteposts', Session.get("ProfileUserId2"), Session.get('favouritepostsLimit2'), {
-            onReady: function(){
-                console.log('Favourite Posts Collection loaded');
-                window.favouritepostsCollection2_getmore = 'done';
-                Session.set('favouritepostsCollection2','loaded');
-                Session.set('favouritepostsCollection2_getmore','done');
-            },
-            onError: function(){
-                console.log('Favourite Posts Collection Error');
-                window.favouritepostsCollection2_getmore = 'done';
-                Session.set('favouritepostsCollection2','loaded');
-                Session.set('favouritepostsCollection2_getmore','done');
-            }
-        });
-    }
-  });
-
-  Tracker.autorun(function() {
-    if (Session.get("ProfileUserId3")) {
-        Meteor.subscribe('userfavouriteposts', Session.get("ProfileUserId3"), Session.get('favouritepostsLimit3'), {
-            onReady: function(){
-                console.log('Favourite Posts Collection loaded');
-                window.favouritepostsCollection3_getmore = 'done';
-                Session.set('favouritepostsCollection3','loaded');
-                Session.set('favouritepostsCollection3_getmore','done');
-            },
-            onError: function(){
-                console.log('Favourite Posts Collection Error');
-                window.favouritepostsCollection3_getmore = 'done';
-                Session.set('favouritepostsCollection3','loaded');
-                Session.set('favouritepostsCollection3_getmore','done');
-            }
-        });
-    }
-  });
-  Tracker.autorun(function() {
-    if (Session.get('storyListsType') === 'publishedStories') {
-        Meteor.subscribe('userRecommendStory', Session.get('storyListsLimit'), {
-            onReady: function(){
-                count = Posts.find({owner: Meteor.userId()}).count()
-                Session.set('storyListsCounts',count)
-                Session.set('storyListsLoaded',true)
-            },
-            onError: function(){
-                count = Posts.find({owner: Meteor.userId()}).count()
-                Session.set('storyListsCounts',count)
-                Session.set('storyListsLoaded',true)
-            }
-        });
-    }
-  });
 }

@@ -332,8 +332,8 @@ if Meteor.isClient
         $(".chatBtn .chat-icon-img").removeClass('twinkling')
       , 10000);
     ###
-    #Calc Wechat token after post rendered.
-    calcPostSignature(window.location.href.split('#')[0]);
+    #Calc Wechat token after post rendered. not on mobile
+    #calcPostSignature(window.location.href.split('#')[0]);
     if Session.get("postPageScrollTop") isnt undefined and Session.get("postPageScrollTop") isnt 0
       setTimeout ()->
           document.body.scrollTop = Session.get("postPageScrollTop")

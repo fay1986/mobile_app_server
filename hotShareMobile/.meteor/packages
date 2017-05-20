@@ -24,6 +24,7 @@ servicelocale:geoip
 
 matb33:collection-hooks
 meteor-swipe
+meteorhacks:inject-initial
 email@1.1.17_1
 meteorhacks:cluster
 tmeasday:publish-counts
@@ -45,13 +46,16 @@ spacebars@1.0.12
 check@1.2.3
 
 
+ccorcos:neo4j
 npm-container
 crosswalk@1.6.2
 meteorhacks:subs-manager
 tap:i18n
+gadicohen:sitemaps
 reactive-var@1.0.10
 accounts-ui@1.1.9
 accounts-base@1.2.11
+meteorhacks:ssr
 service-configuration@1.0.10
 tap:i18n-bundler
 mkarliner:mqtt

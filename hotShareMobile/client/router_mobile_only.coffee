@@ -1,17 +1,17 @@
-subs = new SubsManager({
-  #maximum number of cache subscriptions
-  cacheLimit: 999,
-  # any subscription will be expire after 30 days, if it's not subscribed again
-  expireIn: 60*24*30
-});
 
 if Meteor.isClient
+  subs = new SubsManager({
+    #maximum number of cache subscriptions
+    cacheLimit: 999,
+    # any subscription will be expire after 30 days, if it's not subscribed again
+    expireIn: 60*24*30
+  });
   @refreshPostContent=()->
     layoutHelperInit()
     Session.set("displayPostContent",false)
     setTimeout ()->
       Session.set("displayPostContent",true)
-      calcPostSignature(window.location.href.split('#')[0])
+      #calcPostSignature(window.location.href.split('#')[0])
     ,300
   renderPost = (self,post)->
     if !post
@@ -571,18 +571,3 @@ if Meteor.isClient
     Router.route 'recommendStory',()->
       this.render 'recommendStory'
       return
-if Meteor.isServer
-  Router.route '/posts/:_id', {
-      waitOn: ->
-          [Meteor.subscribe("publicPosts",this.params._id),
-           Meteor.subscribe("postsAuthor",this.params._id),
-           Meteor.subscribe "pcomments"]
-    }
-  Router.route('/restapi/date', (req, res, next)->
-    headers = {
-      'Content-type':'text/html;charest=utf-8',
-      'Date': Date.now()
-    }
-    this.response.writeHead(200, headers)
-    this.response.end(Date.now().toString())
-  ,{where: 'server'})

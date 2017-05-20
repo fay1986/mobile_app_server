@@ -4,10 +4,18 @@
 
 if(Meteor.isServer){
     getFollowPostFromNeo4J = function(userId,skip,limit){
-        var queryString = 'MATCH (u:User{userId:"'+userId+'"})-[f:FOLLOW]->(u1:User) with u1 '+
+        /*var queryString = 'MATCH (u:User{userId:"'+userId+'"})-[f:FOLLOW]->(u1:User) with u1 '+
             'MATCH (p:Post{ownerId:u1.userId})'+
             'RETURN p ORDER BY p.createdAt DESC SKIP '+skip+' LIMIT ' + limit
-
+        */
+        // we need show posts wrote by self
+        var queryString = 'MATCH (u:User{userId:"'+userId+'"})-[f:FOLLOW]->(u1:User) with u1 ' +
+            'MATCH (p:Post{ownerId:u1.userId}) ' +
+            'WITH COLLECT(p) AS pc ' +
+            'OPTIONAL MATCH (p1:Post{ownerId:"'+userId+'"}) ' +
+            'WITH COLLECT(p1)+pc AS pAll ' +
+            'UNWIND pAll AS all ' +
+            'RETURN all ORDER BY all.createdAt DESC SKIP '+skip+' LIMIT '+limit
         var e, queryResult;
 
         try {
