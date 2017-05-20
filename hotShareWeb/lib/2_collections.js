@@ -2072,7 +2072,7 @@ if(Meteor.isServer){
                 if(!self._session.momentSkip[postId]){
                     self._session.momentSkip[postId] = 0;
                 }
-                if(self._session.momentSkip[postId] > limit){
+                if(self._session.momentSkip[postId] >= limit){
                     self._session.momentSkip[postId] = 0;
                 }
                 var queryLimit = limit - self._session.momentSkip[postId];
@@ -2611,6 +2611,8 @@ if(Meteor.isServer){
               var userId = this.userId;
               var toSkip = 0;
               var queryLimit = limit;
+
+              this.unblock();
               if(typeof skip !== 'undefined'){
                   if(skip >= 0){
                       console.log('Skip '+skip+' limit '+limit);
@@ -2680,7 +2682,6 @@ if(Meteor.isServer){
                   } catch(e){}
                   self.ready();
               })
-
               self.onStop(function(){
                   //console.log('onStop New Friend')
               })
