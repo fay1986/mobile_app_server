@@ -46,7 +46,7 @@ if(Meteor.isClient){
     Session.setDefault("followSeriesLimit",FOLLOW_SERIES_INCREMENT);
     Session.set('followSeriesCollection','loading');
     Session.set('seriesCollection','loading');
-    Session.set('followPostsCollection','loading');
+    Session.set('followPostsCollection','loaded');
     Session.set('feedsCollection','loading');
     Session.set('followersCollection','loading');
     Session.set('followeesCollection','loading');
