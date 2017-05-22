@@ -298,6 +298,29 @@ var reportToWechatRoomAlertALL = function(string){
         globalRoom.say(string,globalRoom.memberList())
     }
 }
+var recorder = {};
+var simpleMessageHandle = function(message){
+    if(globalRoom &&  message.room() ===  globalRoom){
+        if(message.typeApp()){
+            console.log('APP Type is '+message.typeApp())
+            var appMsg = message.obj;
+            var url = appMsg.url;
+            var from = appMsg.from;
+            var newMsg = '';
+            if(!recorder[from]){
+                recorder[from] = new Date()
+                newMsg += '这是本次监控记录中您第1次发帖'
+            } else {
+                var timeDiff = new Date() - recorder[from]
+                newMsg += '这个帖子和您上次发帖的间隔是'+Math.round(timeDiff/1000/60)+'分钟'
+                console.log(timeDiff)
+            }
+            globalRoom.say(newMsg, message.from())
+            console.log(message.mentioned())
+        }
+    }
+}
+
 wechatInstance = Wechaty.instance() // Singleton
 
 wechatInstance.on('scan', (url, code) => console.log(`Scan QR Code to login: ${code}\n${url}`))
@@ -313,8 +336,11 @@ wechatInstance.on('message', function(message){
             reportHowManyProductionServerIsBeingMonitored()
             console.log(room)
         }
+    } else {
+        simpleMessageHandle(message)
     }
     console.log(`Message: ${message}`)
+    //console.log(message)
 })
 wechatInstance.init()
 
