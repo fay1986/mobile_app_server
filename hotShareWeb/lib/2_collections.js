@@ -1229,6 +1229,10 @@ if(Meteor.isServer){
                 });
             }
             catch(error){}
+            try{
+                mqttRemoveNewPostHook(userId, doc._id, doc.createdAt)
+            }
+            catch(error){}
         });
     };
     var postsUpdateHookDeferHandle = function(userId,doc,fieldNames, modifier){
@@ -1560,6 +1564,10 @@ if(Meteor.isServer){
                 }
             }
             catch(error){}
+            try{
+                mqttFollowerInsertHook(doc);
+            }
+            catch(error){}
         });
     };
     var followerRemoveHookDeferHook=function(userId,doc){
@@ -1574,6 +1582,10 @@ if(Meteor.isServer){
             catch(error){}
             try{
                 SeriesFollow.remove({creatorId: doc.followerId, owner: userId});
+            }
+            catch(error){}
+            try{
+                mqttFollowerRemoveHook(doc.userId, doc.followerId);
             }
             catch(error){}
         });

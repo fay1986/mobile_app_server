@@ -7,6 +7,7 @@ var DDP = require('ddp');
 var login = require('ddp-login');
 var async = require('async');
 var mqtt = require('mqtt');
+var http= require('http');
 
 var Datastore = require('nedb')
     , db = new Datastore({ filename: 'wechatbot.db', autoload: true });
@@ -234,14 +235,15 @@ function testSwitchAccount(callback){
 function testPostNew(callback){
     var begin = new Date();
     var post = example();
-    post._id = mongoid();
-    ddpClient.call('/posts/insert', post, function(error, res){
+    post._id = new Date().getTime() + '' + Math.round(Math.random()*9999999);
+    ddpClient.call('/posts/insert', [post], function(error, res){
         if (error){
             try{ddpClient.close()}catch(e){}
             return callback('发贴失败');
         }
 
-        ddpClient.call('/posts/remove', {_id: post._id}, function(){
+        ddpClient.call('/posts/remove', [{_id: post._id}], function(){
+            console.log('post-id:', post._id);
             var timeDiff = new Date() - begin;
             try{callback && callback(null,'发贴('+timeDiff+'ms)');}catch(e){}
         });
@@ -249,7 +251,39 @@ function testPostNew(callback){
 }
 
 function testImportPost(callback){
-    
+    var begin = new Date();
+    var req = http.request({
+        hostname: 'host1.tiegushi.com',
+        port: 80,
+        path: '/import-server/ras6CfDNxX7mD6zq7/' + encodeURIComponent('http://www.baidu.com'),
+        method: 'GET'
+    }, function(res){
+        var text = '';
+        res.setEncoding('utf8'); 
+        res.on('data', function(chunk){
+            text += chunk;
+        });
+        res.on('end', function(){
+            var result = text.trim().split('\r\n');
+            var json = JSON.parse(result[result.length-1]).json;
+            var id = json.substr(json.lastIndexOf('/')+1);
+            console.log('http res:', result);
+            console.log('import post id:', id);
+
+            var timeDiff = new Date() - begin;
+            try{
+                callback && callback(null,'快速导入('+timeDiff+'ms)');
+                http.get('http://host1.tiegushi.com/import-cancel/' + id);
+                ddpClient.call('/posts/remove', [{_id: id}]);
+            }catch(e){}
+        });
+    });
+    req.on('error', function(err){
+        try{ddpClient.close()}catch(e){}
+        console.log('http err:', err);
+        return callback('快速导入失败');
+    });
+    req.end();
 }
 
 var globalRoom = null
@@ -283,7 +317,7 @@ wechatInstance.on('message', function(message){
 })
 wechatInstance.init()
 
-taskList = [testLogin,testSwitchAccount,testSubscribeShowPost,testNeo4J,getProductionServerOnlineStatus]
+taskList = [testLogin,testPostNew,testImportPost,testSwitchAccount,testSubscribeShowPost,testNeo4J,getProductionServerOnlineStatus]
 
 var intervalTask = function(){
     async.series(taskList,function(err,results){

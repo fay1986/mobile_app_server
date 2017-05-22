@@ -35,6 +35,15 @@ if(Meteor.isServer){
                 })
             }catch(e){}
         }
+        mqttRemoveNewPostHook = function(ownerId,postId,createdAt) {
+            try{
+                sendMqttMessage('unPublishPost',{
+                    ownerId: ownerId,
+                    postId: postId,
+                    createdAt: createdAt
+                });
+            }catch(e){}
+        }
         mqttUserCreateHook=function(userId,fullname,username){
             try{
                 sendMqttMessage('newUser',{
@@ -43,6 +52,29 @@ if(Meteor.isServer){
                     username:username
                 })
             }catch(e){}
+        }
+        mqttFollowerInsertHook = function(doc){
+            try{
+                sendMqttMessage('followUser',{
+                    userId: doc.userId,
+                    userName: doc.username,
+                    userIcon: doc.userIcon,
+                    userDesc: doc.userDesc,
+                    followerId: doc.followerId,
+                    followerName: doc.followerName,
+                    followerIcon: doc.followerIcon,
+                    followerDesc: doc.followerDesc,
+                    createAt: doc.createAt
+                })
+            } catch(e){}
+        }
+        mqttFollowerRemoveHook = function(userId, followerId) {
+            try{
+                sendMqttMessage('unFollowUser',{
+                    userId: userId,
+                    followerId: followerId
+                })
+            } catch (e){}
         }
     }
 
