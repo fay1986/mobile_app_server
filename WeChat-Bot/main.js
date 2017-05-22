@@ -314,6 +314,7 @@ var simpleMessageHandle = function(message){
                 var timeDiff = new Date() - recorder[from]
                 newMsg += '这个帖子和您上次发帖的间隔是'+Math.round(timeDiff/1000/60)+'分钟'
                 console.log(timeDiff)
+                recorder[from] = new Date()
             }
             globalRoom.say(newMsg, message.from())
             console.log(message.mentioned())
