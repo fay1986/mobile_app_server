@@ -16,6 +16,22 @@ var redisServerConnectionLists=[
         return_buffers: true,
         socket_keepalive: true,
         retry_strategy: retry_strategy_func
+    },
+    {
+        host: 'usurlanalyser.tiegushi.com',
+        port: 6379,
+        password: 'uwAL539mUJ',
+        return_buffers: true,
+        socket_keepalive: true,
+        retry_strategy: retry_strategy_func
+    },
+    {
+        host: 'urlanalyser.tiegushi.com',
+        port: 6379,
+        password: 'uwAL539mUJ',
+        return_buffers: true,
+        socket_keepalive: true,
+        retry_strategy: retry_strategy_func
     }
 ]
 var redisLists = []
