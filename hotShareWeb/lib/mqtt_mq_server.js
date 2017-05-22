@@ -44,6 +44,28 @@ if(Meteor.isServer){
                 })
             }catch(e){}
         }
+        mqttFollowerInsertHook = function(doc){
+            try{
+                sendMqttMessage('followUser',{
+                    userName: doc.username,
+                    userIcon: doc.userIcon,
+                    userDesc: doc.userDesc,
+                    followerId: doc.followerId,
+                    followerName: doc.followerName,
+                    followerIcon: doc.followerIcon,
+                    followerDesc: doc.followerDesc,
+                    createAt: doc.createAt
+                })
+            } catch(e){}
+        }
+        mqttFollowerRemoveHook = function(userId, followerId) {
+            try{
+                sendMqttMessage('unFollowUser',{
+                    userId: userId,
+                    followerId: followerId
+                })
+            } catch (e){}
+        }
     }
 
     Meteor.startup(function(){

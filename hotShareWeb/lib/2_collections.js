@@ -1560,6 +1560,10 @@ if(Meteor.isServer){
                 }
             }
             catch(error){}
+            try{
+                mqttFollowerInsertHook(doc);
+            }
+            catch(error){}
         });
     };
     var followerRemoveHookDeferHook=function(userId,doc){
@@ -1574,6 +1578,10 @@ if(Meteor.isServer){
             catch(error){}
             try{
                 SeriesFollow.remove({creatorId: doc.followerId, owner: userId});
+            }
+            catch(error){}
+            try{
+                mqttFollowerRemoveHook(doc.userId, doc.followerId);
             }
             catch(error){}
         });
