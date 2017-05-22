@@ -147,6 +147,9 @@ if(Meteor.isClient){
         Tracker.autorun(function(){
             if(Meteor.user()){
                 followPostsInMemory = FollowPosts.find({followby:Meteor.userId()}).count()
+                if(followPostsInMemory === 0){
+                    toLoadFollowPost()
+                }
             }
         })
         Tracker.autorun(function() {
