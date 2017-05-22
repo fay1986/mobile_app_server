@@ -56,6 +56,7 @@ if(Meteor.isServer){
         mqttFollowerInsertHook = function(doc){
             try{
                 sendMqttMessage('followUser',{
+                    userId: doc.userId,
                     userName: doc.username,
                     userIcon: doc.userIcon,
                     userDesc: doc.userDesc,
