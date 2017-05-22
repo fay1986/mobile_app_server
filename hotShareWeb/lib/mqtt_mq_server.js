@@ -35,6 +35,15 @@ if(Meteor.isServer){
                 })
             }catch(e){}
         }
+        mqttRemoveNewPostHook = function(ownerId,postId,createdAt) {
+            try{
+                sendMqttMessage('unPublishPost',{
+                    ownerId: ownerId,
+                    postId: postId,
+                    createdAt: createdAt
+                });
+            }catch(e){}
+        }
         mqttUserCreateHook=function(userId,fullname,username){
             try{
                 sendMqttMessage('newUser',{
