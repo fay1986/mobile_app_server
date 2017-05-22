@@ -234,14 +234,15 @@ function testSwitchAccount(callback){
 function testPostNew(callback){
     var begin = new Date();
     var post = example();
-    post._id = mongoid();
-    ddpClient.call('/posts/insert', post, function(error, res){
+    post._id = new Date().getTime() + '' + Math.round(Math.random()*9999999);
+    ddpClient.call('/posts/insert', [post], function(error, res){
         if (error){
             try{ddpClient.close()}catch(e){}
             return callback('发贴失败');
         }
 
-        ddpClient.call('/posts/remove', {_id: post._id}, function(){
+        ddpClient.call('/posts/remove', [{_id: post._id}], function(){
+            console.log('post-id:', post._id);
             var timeDiff = new Date() - begin;
             try{callback && callback(null,'发贴('+timeDiff+'ms)');}catch(e){}
         });
@@ -283,7 +284,7 @@ wechatInstance.on('message', function(message){
 })
 wechatInstance.init()
 
-taskList = [testLogin,testSwitchAccount,testSubscribeShowPost,testNeo4J,getProductionServerOnlineStatus]
+taskList = [testLogin,testPostNew,testSwitchAccount,testSubscribeShowPost,testNeo4J,getProductionServerOnlineStatus]
 
 var intervalTask = function(){
     async.series(taskList,function(err,results){
