@@ -11,6 +11,12 @@ var neo4jServerLists=[
         endpoint: '/db/data',
         user: 'neo4j',
         pass: '5MW-wU3-V9t-bF6'
+    },
+    {
+        server:'http://120.24.247.107:7474',
+        endpoint: '/db/data',
+        user: 'neo4j',
+        pass: '5MW-wU3-V9t-bF6'
     }
 ]
 var dbGraphList = []
