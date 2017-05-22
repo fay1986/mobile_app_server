@@ -50,7 +50,7 @@ if(Meteor.isServer){
             addontitle:1,
             ownerName:1,
             owner:1,
-            mainImage
+            mainImage:1
         }})
         var postInfo = {
             postId: doc._id,

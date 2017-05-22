@@ -703,6 +703,9 @@ if Meteor.isServer
           TopicPosts.remove({postId:postId})
           FavouritePosts.remove({postId:postId})
           refreshPostsCDNCaches(postId)
+          try
+            mqttRemoveNewPostHook(userId,postId,null)
+          catch error
       "unpublishPosts":(postId,userId,drafts)->
         Meteor.defer ()->
           Posts.remove {_id:postId}
