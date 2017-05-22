@@ -342,7 +342,7 @@ var intervalTask = function(){
     }
 }
 setInterval(intervalTask, 1*60*1000)
-setInterval(reportHowManyProductionServerIsBeingMonitored,15*60*100)
+setInterval(reportHowManyProductionServerIsBeingMonitored,15*60*1000)
 
 intervalTask()
 reportHowManyProductionServerIsBeingMonitored()
