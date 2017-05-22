@@ -12,7 +12,8 @@
     "mqtt":"^2.7.2",
     "nedb":"^1.8.0",
     "seraph":"^0.15.2",
-    "async":"2.4.0"
+    "redis": "~2.7.1",
+    "async":"~2.4.0"
   },
   "devDependencies": {
   },

@@ -13,6 +13,7 @@ var Datastore = require('nedb')
     , db = new Datastore({ filename: 'wechatbot.db', autoload: true });
 
 var testNeo4J = require('./test_neo4j');
+var testRedis = require('./test_redis');
 var mqttOptions = {
     keepalive:30,
     reconnectPeriod:20*1000
@@ -317,7 +318,8 @@ wechatInstance.on('message', function(message){
 })
 wechatInstance.init()
 
-taskList = [testLogin,testPostNew,testImportPost,testSwitchAccount,testSubscribeShowPost,testNeo4J,getProductionServerOnlineStatus]
+taskList = [testLogin,testPostNew,testImportPost,testSwitchAccount,
+    testSubscribeShowPost,testNeo4J,testRedis,getProductionServerOnlineStatus]
 
 var intervalTask = function(){
     async.series(taskList,function(err,results){
