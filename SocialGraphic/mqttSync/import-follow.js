@@ -68,6 +68,7 @@ function grab_follow_in_hotshare(db,query){
 
     function eachFollowInfo(err,doc){
         if(doc ===null){
+            console.log('sync follower finished!')
             return
         }
         if(!err){

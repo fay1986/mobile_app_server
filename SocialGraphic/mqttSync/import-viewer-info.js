@@ -39,6 +39,7 @@ function grab_viewerInfo_in_hotshare(db,query){
 
     function eachViewersInfo(err,doc){
         if(doc ===null){
+            console.log('sync viewers finished!')
             return
         }
         if(!err){

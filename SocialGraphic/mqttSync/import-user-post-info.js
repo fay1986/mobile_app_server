@@ -175,6 +175,7 @@ function grab_userInfo_in_hotshare(db,query){
     var cursor =db.collection('users').find(query);//.limit(3000);
     function eachUserInfo(err,doc){
         if(doc ===null){
+            console.log('sync users finished!')
             return
         }
         if(!err){
@@ -205,6 +206,7 @@ function grab_postsInfo_in_hotshare(db,query){
     }});//.limit(3000).sort({createdAt:-1});
     function eachPostsInfo(err,doc){
         if(doc ===null){
+            console.log('sync posts finished!')
             return
         }
         if(!err){

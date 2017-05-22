@@ -439,17 +439,66 @@ function reportStatusInterval(){
   initReportSyncInfo();
 }
 
+function subscribe_topics(){
+    client.subscribe('postView', {qos:1}, function(err, granted){
+        if (err){
+            console.log('subscribe postView err');
+            return;
+        }
+        console.log('subscribe postView granted ' + JSON.stringify(granted))
+    })
+    client.subscribe('publishPost', {qos:1}, function(err, granted){
+        if (err){
+            console.log('subscribe publishPost err');
+            return;
+        }
+        console.log('subscribe publishPost granted ' + JSON.stringify(granted))
+    })
+    client.subscribe('unPublishPost', {qos:1}, function(err, granted){
+        if (err){
+            console.log('subscribe unPublishPost err');
+            return;
+        }
+        console.log('subscribe unPublishPost granted ' + JSON.stringify(granted))
+    })
+    client.subscribe('newUser', {qos:1}, function(err, granted){
+        if (err){
+            console.log('subscribe newUser err');
+            return;
+        }
+        console.log('subscribe newUser granted ' + JSON.stringify(granted))
+    })
+    client.subscribe('followUser', {qos:1}, function(err, granted){
+        if (err){
+            console.log('subscribe followUser err');
+            return;
+        }
+        console.log('subscribe followUser granted ' + JSON.stringify(granted))
+    })
+    client.subscribe('unFollowUser', {qos:1}, function(err, granted){
+        if (err){
+            console.log('subscribe unFollowUser err');
+            return;
+        }
+        console.log('subscribe unFollowUser granted ' + JSON.stringify(granted))
+    })
+}
+
+function unsubscribe_topics(){
+    client.unsubscribe('postView')
+    client.unsubscribe('publishPost')
+    client.unsubscribe('unPublishPost')
+    client.unsubscribe('newUser')
+    client.unsubscribe('followUser')
+    client.unsubscribe('unFollowUser')
+}
+
 function initMqttClient() {
   client  = mqtt.connect('ws://tmq.tiegushi.com:80',mqttOptions);
 
   client.on('connect' ,function () {
     console.log('Connected to server')
-    client.subscribe('postView',{qos:1});
-    client.subscribe('publishPost',{qos:1});
-    client.subscribe('unPublishPost',{qos:1});
-    client.subscribe('newUser',{qos:1});
-    client.subscribe('followUser',{qos:1});
-    client.subscribe('unFollowUser',{qos:1});
+    subscribe_topics();
 
     client.on('message', function (topic, message) {
       // message is Buffer
@@ -526,5 +575,26 @@ function initMqttClient() {
       }
     });
   });
+  client.on('reconnect', function () {
+      unsubscribe_topics();
+      console.log('reconnect to mqtt server');
+  });
+  client.on('close', function () {
+      unsubscribe_topics();
+      console.log('close to mqtt server');
+  });
+  client.on('disconnect', function (topic, message) {
+      unsubscribe_topics();
+      console.log('disconnected')
+  });
+  client.on('offline', function () {
+      unsubscribe_topics();
+      console.log('disconnected')
+  });
+  client.on('error', function () {
+      unsubscribe_topics();
+      console.log('error to mqtt server');
+  });
+
   setInterval(reportStatusInterval,30*1000)
 }
