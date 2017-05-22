@@ -17,7 +17,7 @@ var dbGraph = require("seraph")({ server: process.env.NEO4J_SERVER,
 function remove_follow_relationship(doc, cb) {
     if (doc && doc.drop && doc.userId && doc.followerId) {
       //MATCH ()-[r1:FOLLOW]->() WITH r1 WHERE r1.itemid is not NULL RETURN r1
-      var removestr = 'MATCH (:User{userId:"'+doc.userId+'"})-[f:FOLLOW"}]->(:User{userId:"'+doc.followerId+'"}) DELETE f';
+      var removestr = 'MATCH (:User{userId:"'+doc.userId+'"})-[f:FOLLOW]->(:User{userId:"'+doc.followerId+'"}) DELETE f';
 
       //console.log(removestr);
       dbGraph.query(removestr, function(err1, result) {
@@ -36,10 +36,11 @@ function remove_follow_relationship(doc, cb) {
 
 function save_follow_relationship(doc,cb){
     if (doc && doc.userId && doc.followerId && doc.createAt) {
+        var ts = new Date(doc.createAt)
 
         var createstr = 'MATCH (u:User {userId:"'+doc.userId+'"}),(u1:User {userId:"'+doc.followerId+'"}) '+
         'MERGE  (u)-[f:FOLLOW]->(u1) '+
-        'SET f.by = '+doc.createAt.getTime()+' ' +
+        'SET f.by = '+ts.getTime()+' ' +
         'WITH head(collect(f)) as v1, tail(collect(f)) as coll '+
         'FOREACH(x in coll | delete x) '+
         'RETURN v1';
@@ -77,7 +78,7 @@ function grab_follow_in_hotshare(db,query){
                 },0)
             })
         } else{
-            console.log('Got error in db find '+err)
+            console.log('Got error in db find follower '+err)
             setTimeout(function(){
                 cursor.next(eachFollowInfo)
             },0)

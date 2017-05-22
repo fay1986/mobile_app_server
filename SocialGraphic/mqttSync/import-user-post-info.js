@@ -185,7 +185,7 @@ function grab_userInfo_in_hotshare(db,query){
                 },0)
             })
         } else{
-            console.log('Got error in db find '+err)
+            console.log('Got error in db find users '+err)
             setTimeout(function(){
                 cursor.next(eachUserInfo)
             },0)
@@ -215,7 +215,7 @@ function grab_postsInfo_in_hotshare(db,query){
                 },0)
             })
         } else{
-            console.log('Got error in db find '+err)
+            console.log('Got error in db find posts '+err)
             setTimeout(function(){
                 cursor.next(eachPostsInfo)
             },0)

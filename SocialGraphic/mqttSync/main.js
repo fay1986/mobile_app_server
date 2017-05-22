@@ -8,6 +8,8 @@ var mongodb = require('mongodb');
 var mqtt    = require('mqtt');
 //var restify = require('restify');
 
+var client = null
+
 var conn = {
   mongo: process.env.MONGO_URL,
   oplog: process.env.MONGO_OPLOG,
@@ -63,6 +65,7 @@ MongoClient.connect(conn.mongo, conn.mongo_opts, function(err, tdb) {
         //oplog_connect();
     });
 
+    initMqttClient();
     //oplog_connect();
 });
 
@@ -165,7 +168,16 @@ function oplog_connect() {
 }
 
 function on_post_remove(doc){
-  var postId = doc.o._id;
+  var postId = null;
+
+  if(doc && doc.postId)
+      postId = doc.postId;
+  else if(doc && doc.o && doc.o._id)
+      postId = doc.o._id;
+
+  if(!postId)
+      return
+
   console.log('on_post_remove:', doc);
   console.log('on_post_remove[postId]:', postId);
   savePostUser.remove_post(postId);
@@ -301,7 +313,7 @@ function sync_to_neo4j(ns, postDoc, userDoc, viewerDoc, followDoc) {
     if(!followDoc.drop) {
       saveFollow.save_follow_relationship(followDoc,function(err){
         if(err === null)
-          console.log('Follow saved: fid=' + followDoc._id)
+          console.log('Follow saved: fid=' + followDoc.followerId)
         else
           console.log('Follow Info saved: error:' + err)
       })
@@ -309,7 +321,7 @@ function sync_to_neo4j(ns, postDoc, userDoc, viewerDoc, followDoc) {
     else {
       saveFollow.remove_follow_relationship(followDoc, function(err){
         if(err === null)
-          console.log('Follow removed fid=' + followDoc._id)
+          console.log('Follow removed fid=' + followDoc.followerId)
         else
           console.log('Follow Info removed: error:' + err)
       });
@@ -353,8 +365,6 @@ var mqttOptions = {
   keepalive:30,
   reconnectPeriod:20*1000
 }
-
-var client  = mqtt.connect('ws://tmq.tiegushi.com:80',mqttOptions);
 
 function new_usernode(doc, cb){
   db.collection('users').findOne({_id:doc.userId},{fields:{
@@ -424,78 +434,97 @@ function reportStatusInterval(){
     succ: reportSyncInfo.succ,
     detail:reportSyncInfo
   }
-  client.publish('status/service',JSON.stringify(report))
+  if(client)
+    client.publish('status/service',JSON.stringify(report))
   initReportSyncInfo();
 }
 
-setInterval(reportStatusInterval,30*1000)
+function initMqttClient() {
+  client  = mqtt.connect('ws://tmq.tiegushi.com:80',mqttOptions);
 
-client.on('connect' ,function () {
-  console.log('Connected to server')
-  client.subscribe('postView',{qos:1});
-  client.subscribe('publishPost',{qos:1});
-  client.subscribe('newUser',{qos:1});
+  client.on('connect' ,function () {
+    console.log('Connected to server')
+    client.subscribe('postView',{qos:1});
+    client.subscribe('publishPost',{qos:1});
+    client.subscribe('unPublishPost',{qos:1});
+    client.subscribe('newUser',{qos:1});
+    client.subscribe('followUser',{qos:1});
+    client.subscribe('unFollowUser',{qos:1});
 
-  client.on('message', function (topic, message) {
-    // message is Buffer
-    console.log(topic+': '+message.toString());
-    var json = JSON.parse(message)
-    if(topic === 'postView'){
-      if (!json.userId || !json.postId){
-        return
-      }
-      if (json.postId.indexOf('?')>0){
-        json.postId = json.postId.split('?')[0];
-      }
-      if (!json.createdAt){
-        json.createdAt = new Date();
-      }
-      console.log('To save postview: '+JSON.stringify(json));
-      save_viewer_node(json,function(error){
-        if(!error){
-          reportSyncInfo.succ++;
-          reportSyncInfo.postView++;
+    client.on('message', function (topic, message) {
+      // message is Buffer
+      console.log(topic+': '+message.toString());
+      var json = JSON.parse(message)
+      if(topic === 'postView'){
+        if (!json.userId || !json.postId){
+          return
         }
-      })
-    } else if(topic === 'newUser'){
-      db.collection('users').findOne({_id:json.userId},{fields:{
-        username: true,
-        createdAt:true,
-        'profile.fullname': true,
-        type: true,
-        'profile.sex':true,
-        'profile.lastLogonIP':true,
-        'profile.anonymous':true,
-        'profile.browser':true,
-        'profile.location':true
-      }},function(err, user) {
-        savePostUser.save_user_node(user,function(error){
+        if (json.postId.indexOf('?')>0){
+          json.postId = json.postId.split('?')[0];
+        }
+        if (!json.createdAt){
+          json.createdAt = new Date();
+        }
+        //console.log('To save postview: '+JSON.stringify(json));
+        save_viewer_node(json,function(error){
           if(!error){
-            console.log('User Info saved')
             reportSyncInfo.succ++;
-            reportSyncInfo.newUser++;
+            reportSyncInfo.postView++;
           }
         })
-      });
-    } else if(topic === 'publishPost'){
-      db.collection('posts').findOne({_id:json.postId},{fields:{
-        browse:true,
-        title:true,
-        addontitle:true,
-        owner:true,
-        _id:true,
-        ownerName:true,
-        createdAt:true,
-        mainImage:true
-      }},function(err, post) {
-        savePostUser.save_post_node(post,function(error){
-          if(!error){
-            console.log('publishPost Info saved')
-            reportSyncInfo.succ++;
-            reportSyncInfo.publishPost++;
-          }
-        })
-      });
-    }
+      } else if(topic === 'newUser'){
+        db.collection('users').findOne({_id:json.userId},{fields:{
+          username: true,
+          createdAt:true,
+          'profile.fullname': true,
+          type: true,
+          'profile.sex':true,
+          'profile.lastLogonIP':true,
+          'profile.anonymous':true,
+          'profile.browser':true,
+          'profile.location':true
+        }},function(err, user) {
+          savePostUser.save_user_node(user,function(error){
+            if(!error){
+              console.log('User Info saved')
+              reportSyncInfo.succ++;
+              reportSyncInfo.newUser++;
+            }
+          })
+        });
+      } else if(topic === 'publishPost'){
+        if(json && json.ownerId && json.ownerId == 'ras6CfDNxX7mD6zq7') {
+            console.log('this is test user')
+            return;
+        }
+
+        db.collection('posts').findOne({_id:json.postId},{fields:{
+          browse:true,
+          title:true,
+          addontitle:true,
+          owner:true,
+          _id:true,
+          ownerName:true,
+          createdAt:true,
+          mainImage:true
+        }},function(err, post) {
+          savePostUser.save_post_node(post,function(error){
+            if(!error){
+              console.log('publishPost Info saved')
+              reportSyncInfo.succ++;
+              reportSyncInfo.publishPost++;
+            }
+          })
+        });
+      } else if(topic === 'unPublishPost'){
+        on_post_remove(json);
+      } else if(topic === 'followUser'){
+        sync_to_neo4j('hotShare.follower', null, null, null, json);
+      } else if(topic === 'unFollowUser'){
+        json.drop = true;
+        sync_to_neo4j('hotShare.follower', null, null, null, json);
+      }
+    });
   });
-});
+  setInterval(reportStatusInterval,30*1000)
+}
