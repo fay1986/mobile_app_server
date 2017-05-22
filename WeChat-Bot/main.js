@@ -320,19 +320,26 @@ wechatInstance.init()
 
 taskList = [testLogin,testPostNew,testImportPost,testSwitchAccount,
     testSubscribeShowPost,testNeo4J,testRedis,getProductionServerOnlineStatus]
-
+var isTesting = false;
 var intervalTask = function(){
-    async.series(taskList,function(err,results){
-        if(!err){
-            console.log(err)
-            var msg = '['+ results.length + '/'+ taskList.length + '] 检查通过,详情:' + results.toString()
-            reportToWechatRoom(msg)
-            console.log(msg)
-        } else {
-            console.log('失败：'+err)
-            reportToWechatRoomAlertALL(err)
-        }
-    })
+    if(isTesting){
+        console.log('队列中的任务正在执行中')
+        return
+    } else {
+        isTesting = true;
+        async.series(taskList,function(err,results){
+            isTesting = false;
+            if(!err){
+                console.log(err)
+                var msg = '['+ results.length + '/'+ taskList.length + '] 检查通过,详情:' + results.toString()
+                reportToWechatRoom(msg)
+                console.log(msg)
+            } else {
+                console.log('失败：'+err)
+                reportToWechatRoomAlertALL(err)
+            }
+        })
+    }
 }
 setInterval(intervalTask, 1*60*1000)
 setInterval(reportHowManyProductionServerIsBeingMonitored,15*60*100)
