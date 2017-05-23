@@ -1,0 +1,19 @@
+{
+  "name": "mqtt-pushnotification",
+  "version": "1.2.0",
+  "description": "mqtt-pushnotification server",
+  "main": "main.js",
+  "scripts": {
+    "test": "test",
+    "start": "node main.js"
+  },
+  "keywords": [
+    "mqtt",
+    "pushnotification"
+  ],
+  "author": "sraita@139.com",
+  "license": "ISC",
+  "dependencies": {
+    "mongodb": "^2.2.26"
+  }
+}
