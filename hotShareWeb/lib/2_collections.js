@@ -3360,7 +3360,9 @@ if(Meteor.isServer){
         postMessageToGeneralChannel(JSON.stringify(postInfo))
      });
 
-      insertRePost(doc);
+      var repost = _.clone(doc);
+      _.extend(repost, {createdAt: new Date()});
+      insertRePost(repost);
       return true;
     }
 
