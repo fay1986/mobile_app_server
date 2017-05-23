@@ -2257,7 +2257,7 @@ if(Meteor.isServer){
   });
     if(withNeo4JInDynamicPostFriend){
         Meteor.publish("postFriendsV2", function (userId,postId,limit) {
-            if(this.userId === null || !Match.test(postId, String) ){
+            if(this.userId === null || !Match.test(postId, String) || limit > 10){
                 return this.ready();
             }
             else{
