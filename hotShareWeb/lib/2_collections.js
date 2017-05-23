@@ -2292,7 +2292,8 @@ if(Meteor.isServer){
                     // Since this was called in memont fetching, no need to check again.
                     // Momont subscriber is called before this one on client side if behavior changed, check here.
                     //ensureUserViewPostInNeo4j(userId,postId)
-                    var queryResult = getPostNewFriends( userId /*Test_userId*/,postId,self._session.skipPostFriend[postId],queryLimit);
+                    // var queryResult = getPostNewFriends( userId /*Test_userId*/,postId,self._session.skipPostFriend[postId],queryLimit);
+                    var queryResult = getPostNewFriends( userId,postId,0,100);
                     self._session.skipPostFriend[postId] += queryLimit;
 
                     if(queryResult && queryResult.length > 0){

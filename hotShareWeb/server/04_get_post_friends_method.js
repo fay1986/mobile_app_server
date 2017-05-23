@@ -6,9 +6,9 @@ if(Meteor.isServer){
         }
         var queryString = 'MATCH (u:User) WHERE u.userId="'+userId+'" WITH u ' +
             'MATCH (p:Post) WHERE p.postId="'+postId+'" WITH u,p ' +
-            'MATCH (u1:User)-[v1:VIEWER]->(p:Post) WHERE u1.userId <>"'+userId+'" WITH distinct u1 as meeter,u,p ' +
-            'MATCH (meeter)-[v2:VIEWER]->(p1:Post)<-[v3:VIEWER]-(u) WITH distinct meeter as meeter1,size(collect(distinct p1)) as meetsCount ' +
-            'RETURN distinct meeter1.userId,meetsCount ORDER BY meetsCount DESC SKIP '+skip+' LIMIT '+limit;
+            'MATCH (u1:User)-[v1:VIEWER]->(p:Post) WHERE u1.userId <>"'+userId+'" WITH distinct u1 as meeter,u,p SKIP '+skip+' LIMIT '+ limit +
+            ' MATCH (meeter)-[v2:VIEWER]->(p1:Post)<-[v3:VIEWER]-(u) WITH distinct meeter as meeter1,size(collect(distinct p1)) as meetsCount ' +
+            'RETURN distinct meeter1.userId,meetsCount,meeter1.createdAt ORDER BY meeter1.createdAt';
 
         /*
          var queryString = 'MATCH (u:User)-[v:VIEWER]->(p:Post)<-[v1:VIEWER]-(u1:User) ' +
