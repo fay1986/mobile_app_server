@@ -21,7 +21,8 @@ var mqttOptions = {
 var mqttClient  = mqtt.connect('ws://tmq.tiegushi.com:80',mqttOptions);
 mqttClient.on('connect' ,function () {
     console.log('Connected to mqtt server')
-    mqttClient.subscribe('status/service',{qos:1})
+    mqttClient.subscribe('status/service',{qos:1});
+    mqttClient.subscribe('/wechat-bot/reposts',{qos:1});
 })
 mqttClient.on('message' ,function (topic,message) {
     console.log(topic+': '+message);
@@ -41,6 +42,18 @@ mqttClient.on('message' ,function (topic,message) {
                 // A new document { _id: 'id5', planet: 'Pluton', distance: 38 } has been added to the collection
             });
         }
+    } else if (topic === '/wechat-bot/reposts'){
+         var json = JSON.parse(message);
+         var text = '';
+         if (json.texts.length <= 0)
+            return;
+        for(var i=0;i<json.texts.length;i++){
+            if (text.length > 0)
+                text += ',';
+            text += json.texts[i].title + '('+json.texts[i].time+')';
+        }
+        console.log(json.texts.length+' 条待审核的贴子:', text);
+        reportToWechatRoom(json.texts.length+'条待审核的贴子:', text)
     }
 })
 var switchAccount = require('./switch-account');

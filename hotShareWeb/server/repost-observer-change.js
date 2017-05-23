@@ -47,14 +47,14 @@ var repostTimeout = function(){
 
     for(var i=0;i<posts.length;i++){
       texts.push({
-        time: new Date() - posts[i].createdAt,
+        time: posts[i].createdAt.getHours() + ':' + posts[i].createdAt.getMinutes() + ':' + posts[i].createdAt.getSeconds(),
         title: posts[i].title
       });
     }
     console.log('待审核故事:', texts);
-    // sendMqttMessage('/wechat-bot/reposts', {
-    //   texts: texts
-    // });
+    sendMqttMessage('/wechat-bot/reposts', {
+      texts: texts
+    });
   });
 
   // handle = cursor.observeChanges({
