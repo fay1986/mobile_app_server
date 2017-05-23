@@ -53,7 +53,7 @@ mqttClient.on('message' ,function (topic,message) {
             text += json.texts[i].title + '('+json.texts[i].time+')';
         }
         console.log(json.texts.length+' 条待审核的贴子:', text);
-        reportToWechatRoom(json.texts.length+'条待审核的贴子:', text)
+        reportToWechatRoom(json.texts.length+'条待审核的贴子:'+text)
     }
 })
 var switchAccount = require('./switch-account');
