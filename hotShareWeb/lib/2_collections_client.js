@@ -145,17 +145,11 @@ if(Meteor.isClient){
             }
         }
         Tracker.autorun(function(){
-            if(Meteor.user()){
+            if(Meteor.userId()){
                 followPostsInMemory = FollowPosts.find({followby:Meteor.userId()}).count()
                 if(followPostsInMemory === 0){
-                    toLoadFollowPost()
+                    toLoadFollowPost();
                 }
-            }
-        })
-        Tracker.autorun(function() {
-            if (Meteor.user()) {
-                followPostStatus = 'loaded'
-                toLoadFollowPost();
             }
         })
         Tracker.autorun(function(){
