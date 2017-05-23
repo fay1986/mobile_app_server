@@ -2615,6 +2615,78 @@ if(Meteor.isServer){
           return Moments.find({currentPostId: postId},{sort: {createdAt: -1},limit:limit});
       }
   });
+    var global_followposts_subscriber = {}
+    function setFollowPostsSubscriber(userId,subscriber){
+        if(!Match.test(userId, String)){
+            return;
+        }
+        global_followposts_subscriber[userId] = subscriber
+    }
+    function clearFollowPostsSubscriber(userId){
+        if(!Match.test(userId, String)){
+            return;
+        }
+        if(global_followposts_subscriber[userId]){
+
+            global_followposts_subscriber[userId] = null
+        }
+    }
+    function getFollowPostsSubscriber(userId){
+        if(!Match.test(userId, String)){
+            return;
+        }
+        return global_followposts_subscriber[userId]
+    }
+    function removePostInfoInFollowPostsInCallbackContent(userId,postId){
+        try{
+            var self = getFollowPostsSubscriber(userId)
+            if(self){
+                self.removed('followposts',postId)
+            }
+        } catch(e){}
+    }
+    function addPostInfoInFollowPostsInCallbackContent(userId,postInfo){
+        var self = getFollowPostsSubscriber(userId)
+        if(self){
+            addPostInfoInFollowPosts(self,userId,postInfo)
+        }
+    }
+    function addPostInfoInFollowPosts(self,userId,postInfo){
+        try{
+            var ownerIcon = '';
+            var publish = false;
+            if(postInfo.ownerIcon){
+                ownerIcon = postInfo.ownerIcon;
+            } else {
+                var ownerInfo = Meteor.users.findOne({_id: postInfo.ownerId},{fields:{'profile.icon':true}});
+                ownerIcon =  ownerInfo?ownerInfo.profile.icon:'';
+            }
+            if(typeof postInfo.publish !== 'undefined'){
+                publish = postInfo.publish
+            } else {
+                var post = Posts.findOne({_id:postInfo.postId},{fields:{'publish':true}});
+                publish = post.publish;
+            }
+            var fields = {
+                postId:postInfo.postId,
+                title: postInfo.name || postInfo.title,
+                addontitle: postInfo.addonTitle,
+                mainImage:postInfo.mainImage,
+                mainImageStyle: null,
+                heart: 0,
+                retweet: 0,
+                comment: 0,
+                browse:  0,
+                publish: publish,
+                owner: postInfo.ownerId,
+                ownerName: postInfo.ownerName,
+                ownerIcon: ownerIcon,
+                createdAt: postInfo.createdAt,
+                followby:userId
+            };
+            self.added('followposts',postInfo.postId,fields)
+        } catch(e){}
+    }
   if(withNeo4JInFollowPosts){
       Meteor.publish("followposts", function(limit,skip) {
           if(this.userId === null || !Match.test(limit, Number))
@@ -2625,7 +2697,7 @@ if(Meteor.isServer){
               var toSkip = 0;
               var queryLimit = limit;
 
-              this.unblock();
+              //this.unblock();
               if(typeof skip !== 'undefined'){
                   if(skip >= 0){
                       console.log('Skip '+skip+' limit '+limit);
@@ -2645,58 +2717,25 @@ if(Meteor.isServer){
                   queryLimit = limit - self._session.skipFollowPost[userId];
                   self._session.skipFollowPost[userId] += queryLimit;
               }
-              deferSetImmediate(function(){
-                  //ensureFollowInNeo4j(userId,postId)
+              //deferSetImmediate(function(){
                   try{
+                      ensureFollowInNeo4j(userId)
                       var queryResult = getFollowPostFromNeo4J( userId, toSkip,queryLimit);
 
                       if(queryResult && queryResult.length > 0){
                           queryResult.forEach(function (item) {
-                              //   if(item && item[0]){
-                              //   var postInfo = item[0];
-                              //   var meetTimes = item[1];
                               if(item){
-                                  var postInfo = item;
-                                  var ownerIcon = '';
-                                  var publish = false;
-                                  if(postInfo.ownerIcon){
-                                      ownerIcon = postInfo.ownerIcon;
-                                  } else {
-                                      var ownerInfo = Meteor.users.findOne({_id: postInfo.ownerId},{fields:{'profile.icon':true}});
-                                      ownerIcon =  ownerInfo?ownerInfo.profile.icon:'';
-                                  }
-                                  if(postInfo.publish){
-                                      publish = postInfo.publish
-                                  } else {
-                                      var post = Posts.findOne({_id:postInfo.postId},{fields:{'publish':true}});
-                                      publish = post.publish;
-                                  }
-                                  var fields = {
-                                      postId:postInfo.postId,
-                                      title: postInfo.name,
-                                      addontitle: postInfo.addonTitle,
-                                      mainImage:postInfo.mainImage,
-                                      mainImageStyle: null,
-                                      heart: 0,
-                                      retweet: 0,
-                                      comment: 0,
-                                      browse:  0,
-                                      publish: publish,
-                                      owner: postInfo.ownerId,
-                                      ownerName: postInfo.ownerName,
-                                      ownerIcon: ownerIcon,
-                                      createdAt: postInfo.createdAt,
-                                      followby:userId
-                                  };
-                                  self.added('followposts',postInfo.postId,fields)
+                                  addPostInfoInFollowPosts(self,userId,item);
                               }
                           });
                       }
                   } catch(e){}
                   self.ready();
-              })
+              //})
+              setFollowPostsSubscriber(userId,self);
               self.onStop(function(){
                   //console.log('onStop New Friend')
+                  clearFollowPostsSubscriber(userId);
               })
               self.removed = function(collection, id){
                   //console.log('removing '+id+' in '+collection +' but no, we dont want to resend data to client')
@@ -3340,7 +3379,7 @@ if(Meteor.isServer){
           }
       }
     }
-
+    addPostInfoInFollowPostsInCallbackContent(userId,doc)
 
     if(!postSafe){
       doc.isReview = false;
@@ -3410,6 +3449,7 @@ if(Meteor.isServer){
     },
       remove: function (userId, doc) {
           if(doc.owner === userId){
+              removePostInfoInFollowPostsInCallbackContent(userId, doc._id)
               postsRemoveHookDeferHandle(userId,doc);
               // Need refresh CDN since the post data is going to be removed
               // Currently our quota is 10k.
