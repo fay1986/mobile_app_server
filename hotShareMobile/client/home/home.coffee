@@ -36,7 +36,7 @@ if Meteor.isClient
     _localLatestVersion = toNum(window.localStorage.getItem("latestVersion"))
     
     if _latestVersion > _version_of_build and _latestVersion > _localLatestVersion
-      window.localStorage.setItem("latestVersion", latestVersion)
+      # window.localStorage.setItem("latestVersion", latestVersion)
       console.log 'set latestVersionAlert true. '
       Session.set('latestVersionAlert', true)
     else
@@ -82,7 +82,7 @@ if Meteor.isClient
     checkNewVersion()
 
 Tracker.autorun((t)->
-  if !Session.get('isFlag') and Session.get('latestVersionAlert')
+  if Session.get('latestVersionAlert')
     t.stop()
     setTimeout(()->
       # Dialogs.alert('我们已为您备好更有趣新版本，记得去更新哦~', null, '新版本提示', '好的')
