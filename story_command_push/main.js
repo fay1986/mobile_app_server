@@ -1,13 +1,14 @@
 var MongoClient = require('mongodb').MongoClient;
 var f = require('./lib/foreach.js')
 
-var serverUrl = process.env.SERVER_URL || 'http://host1.tiegushi.com/';
+var serverUrl = 'http://host1.tiegushi.com/';
 var DB_CONN = process.env.MONGO_URL;
 var db = null;
 var postId = process.env.POST_ID;
 var postTitle = process.env.POST_TITLE;
 var postAuthor =  process.env.POST_AUTHOR;
 var postCommandText = process.env.POST_COMMAND_TEXT;
+var platform = process.env.PLAT_FORM || null;
 
 function mqttPushNotificationInit() {
      MongoClient.connect(DB_CONN, {poolSize:20 , reconnectTries: Infinity}, function(err, mongodb){
@@ -32,14 +33,20 @@ function sendNotification(db, cb) {
   var usersdb = db.collection('users');
   var pushTokens = db.collection('pushTokens');
   var PushMessages = db.collection('pushmessages');
-
-  usersdb.find({type:{$exists: true},token:{$exists: true}},{fields:{'type':1, 'token':1,'profile.waitReadCount':1}}).toArray(function(err,users){
+  var userSelect = {
+    type:{$exists: true},
+    token:{$exists: true}
+  }
+  if(platform && platform != null){
+    userSelect.type = platform;
+  }
+  usersdb.find(userSelect,{fields:{'type':1, 'token':1,'profile.waitReadCount':1}}).toArray(function(err,users){
     if (err) {
       console.log('Error:'+err)
       return cb && cb(err);
     }
     console.log('users count ====',users.length)
-    users.forEach(function(user){
+    users.forEach(function(user,index){
       if (user && user.type && user.token) {
         pushTokens.findOne({ type: user.type, token: user.token }, function (err, pushTokenObj) {
           if (err) {
@@ -54,8 +61,7 @@ function sendNotification(db, cb) {
             type: user.type,
             token: user.token
           };
-          content = '故事贴小秘:';
-          var commentText = '';
+          content = '故事贴小秘:推荐「'+postTitle+'」'+' ——'+postCommandText;
           var extras = {
             type: 'tiegushirecommend',
             postId: postId
@@ -66,7 +72,7 @@ function sendNotification(db, cb) {
             postId: postId,
             postTitle: postTitle,
             ownerName: postAuthor,
-            commentText: commentText
+            commentText: postCommandText
           };
 
           var dataObj = {
@@ -82,21 +88,30 @@ function sendNotification(db, cb) {
           }
           var dataArray = [];
           dataArray.push(dataObj);
-          console.log(JSON.stringify(dataArray))
-          // PushMessages.insert({pushMessage: dataArray, createAt: new Date()},function(err,result){
-          //   if(err){
-          //     console.log('Error:'+err);
-          //     return cb && cb(err);
-          //   } else {
-          //     console.log(result)
-          //     return cb && cb(null);
-          //   }
-          // })
+          // console.log(JSON.stringify(dataArray))
+          PushMessages.insert({pushMessage: dataArray, createAt: new Date()},function(err,result){
+            if(err){
+              console.log('Error: ',err);
+              console.log('进度'+(index+1)+'/'+(users.length));
+              console.log('userInfo===',JSON.stringify(user));
+              if(index == (users.length-1)){
+                console.log('发送任务已完成！  按下 ctrl+c 退出');
+              }
+              return cb && cb(err);
+            } else {
+              // console.log(result)
+              console.log('进度:'+(index+1)+'/'+(users.length));
+              if(index == (users.length-1)){
+                console.log('发送任务已完成！  按下 ctrl+c 退出');
+              }
+              return cb && cb(null);
+            }
+          })
         });
       }
       else {
         return cb && cb('toUser/type/token not found');
-      }
+      }  
     });
   });
 }
