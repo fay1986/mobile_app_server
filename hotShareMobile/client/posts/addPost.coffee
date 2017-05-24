@@ -950,9 +950,9 @@ if Meteor.isClient
         PUB.page '/user'
       else
         history.back()
-  insertPostOnTheHomePage = (postId,postInfo)->
+  @insertPostOnTheHomePage = (postId,postInfo)->
     FollowPosts._collection.insert({
-      _id: postId},{
+      _id: postId,
       postId:postId,
       title: postInfo.title,
       addontitle: postInfo.addontitle,
@@ -963,8 +963,8 @@ if Meteor.isClient
       comment: [],
       browse:  0,
       publish: postInfo.publish,
-      owner: postInfo.ownerId,
-      ownerName: postInfo.owner,
+      owner: postInfo.owner,
+      ownerName: postInfo.ownerName,
       ownerIcon: postInfo.ownerIcon,
       createdAt: postInfo.createdAt,
       followby: Meteor.userId()

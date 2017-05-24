@@ -487,6 +487,7 @@ if Meteor.isClient
               isReview: true,
               createdAt: new Date()
           }
+          insertPostOnTheHomePage(postId,newPostData)
           Session.set('newpostsdata', newPostData)
           Router.go('/newposts/'+postId)
         Session.set 'showDraft', false
