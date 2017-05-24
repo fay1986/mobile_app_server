@@ -21,7 +21,7 @@ if Meteor.isClient
       return address
     anonymousOrWeiChat :->
       if Meteor.user()
-        Meteor.user().profile.anonymous || Meteor.user().services.weixin
+        Meteor.user().profile.anonymous or (Meteor.user().services and Meteor.user().services.weixin)
       else
         ''
     allowLanguageSetting:->
