@@ -56,19 +56,21 @@ if Meteor.isClient
       return
   @checkNewVersion = ->
     platform = if Blaze._globalHelpers.isIOS() then 'ios' else (if Blaze._globalHelpers.isAndroid() then 'android' else 'others')
-    version = Versions.findOne({})
+    # version = Versions.findOne({})
     if !window.localStorage.getItem("latestVersion")
       console.log 'no localStorage latestVersion.'
       window.localStorage.setItem("latestVersion", version_of_build)
-    if version and version[platform]
-      latestVersion = version[platform]
-    else
-      latestVersion = version_of_build
+    # if version and version[platform]
+    #   latestVersion = version[platform]
+    # else
+    #   latestVersion = version_of_build
+    latestVersion =  window.localStorage.getItem("latestVersion")
     _latestVersion = toNum(latestVersion) 
     _version_of_build = toNum(version_of_build)
-    _localLatestVersion = toNum(window.localStorage.getItem("latestVersion"))
+    # _localLatestVersion = toNum(window.localStorage.getItem("latestVersion"))
     
-    if _latestVersion > _version_of_build and _latestVersion > _localLatestVersion
+    # if _latestVersion > _version_of_build and _latestVersion > _localLatestVersion
+    if _latestVersion > _version_of_build
       # window.localStorage.setItem("latestVersion", latestVersion)
       console.log 'set latestVersionAlert true. '
       Session.set('latestVersionAlert', true)

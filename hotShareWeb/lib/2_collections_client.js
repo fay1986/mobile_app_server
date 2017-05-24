@@ -219,11 +219,11 @@ if(Meteor.isClient){
             }
         });
 
-        Tracker.autorun(function() {
-            if(Meteor.isCordova) {
-                Meteor.subscribe('versions');
-            }
-        })
+        // Tracker.autorun(function() {
+        //     if(Meteor.isCordova) {
+        //         Meteor.subscribe('versions');
+        //     }
+        // })
         Tracker.autorun(function() {
             if (Meteor.userId()) {
                 if (Meteor.isCordova) {
