@@ -53,14 +53,14 @@ if(Meteor.isClient){
     Session.set('myPostsCollection','loading');
     Session.set('momentsCollection','loading');
     Session.set('postfriendsCollection','loaded');
-    var subscribeFollowSeriesOnStop = function(err){
+    var subscribeFollowSeriesOnError = function(err){
         Session.set('followSeriesCollection','error');
         if(Meteor.user())
         {
             Meteor.setTimeout(function(){
                 Session.set('followSeriesCollection','loading');
                 Meteor.subscribe('followSeries',Session.get('followSeriesLimit'),{
-                    onStop: subscribeFollowSeriesOnStop,
+                    onError: subscribeFollowSeriesOnError,
                     onReady: function(){
                         Session.set('followSeriesCollection','loaded');
                     }
@@ -68,14 +68,14 @@ if(Meteor.isClient){
             },2000);
         }
     };
-    var subscribeMySeriesOnStop = function(err){
+    var subscribeMySeriesOnError = function(err){
         Session.set('seriesCollection','error');
         if(Meteor.user())
         {
             Meteor.setTimeout(function(){
                 Session.set('seriesCollection','loading');
                 Meteor.subscribe('followSeries', Session.get('seriesitemsLimit'), {
-                    onStop: subscribeMySeriesOnStop,
+                    onError: subscribeMySeriesOnError,
                     onReady: function(){
                         Session.set('seriesCollection','loaded');
                     }
@@ -83,7 +83,7 @@ if(Meteor.isClient){
             },2000);
         }
     };
-    var subscribeFeedsOnStop = function(err){
+    var subscribeFeedsOnError = function(err){
         console.log('feedsCollection ' + err);
         Session.set('feedsCollection','error');
         if(Meteor.user())
@@ -91,7 +91,7 @@ if(Meteor.isClient){
             Meteor.setTimeout(function(){
                 Session.set('feedsCollection','loading');
                 Meteor.subscribe('feeds', Session.get('feedsitemsLimit'), {
-                    onStop: subscribeFeedsOnStop,
+                    onError: subscribeFeedsOnError,
                     onReady: function(){
                         console.log('feedsCollection loaded');
                         Session.set('feedsCollection','loaded');
@@ -155,21 +155,21 @@ if(Meteor.isClient){
         Tracker.autorun(function(){
             if (Meteor.userId()) {
                 Meteor.subscribe('followSeries', Session.get('followSeriesLimit'), {
-                    onStop: subscribeMySeriesOnStop,
+                    onError: subscribeMySeriesOnError,
                     onReady: function () {
                         console.log('followSeriesCollection loaded');
                         Session.set('followSeriesCollection', 'loaded');
                     }
                 });
                 Meteor.subscribe('mySeries', Session.get('seriesitemsLimit'), {
-                    onStop: subscribeMySeriesOnStop,
+                    onError: subscribeMySeriesOnError,
                     onReady: function () {
                         console.log('seriesCollection loaded');
                         Session.set('seriesCollection', 'loaded');
                     }
                 });
                 Meteor.subscribe('feeds', Session.get('feedsitemsLimit'), {
-                    onStop: subscribeFeedsOnStop,
+                    onError: subscribeFeedsOnError,
                     onReady: function () {
                         console.log('feedsCollection loaded');
                         Session.set('feedsCollection', 'loaded');
