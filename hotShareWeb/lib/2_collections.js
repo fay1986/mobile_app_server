@@ -2089,6 +2089,7 @@ if(Meteor.isServer){
                 }
                 var queryLimit = limit - self._session.momentSkip[postId];
                 //console.log(self._session._namedSubs[self._subscriptionId])
+                this.unblock();
                 deferSetImmediate(function() {
                     ensureUserViewPostInNeo4j(userId,postId)
                     var queryResult = getSuggestPostsFromNeo4J(userId,postId,self._session.momentSkip[postId],queryLimit)
@@ -2284,7 +2285,7 @@ if(Meteor.isServer){
                 // Test code
                 // if your neo4j is not sync to ready, hard code this one for testing.
                 // Test_userId = "myZDgPM7YG2PE7ffh";
-
+                this.unblock();
                 deferSetImmediate(function(){
                     if(self._session.skipPostFriend[postId+'_newfriends'] === 0){
                         try{self.added("postfriendsCount", userId+'_'+postId, {count: self._session.skipPostFriend[postId+'_newfriends']});}catch(e){}
@@ -2666,7 +2667,6 @@ if(Meteor.isServer){
               var toSkip = 0;
               var queryLimit = limit;
 
-              //this.unblock();
               if(typeof skip !== 'undefined'){
                   if(skip >= 0){
                       console.log('Skip '+skip+' limit '+limit);
@@ -2686,6 +2686,7 @@ if(Meteor.isServer){
                   queryLimit = limit - self._session.skipFollowPost[userId];
                   self._session.skipFollowPost[userId] += queryLimit;
               }
+              this.unblock();
               //deferSetImmediate(function(){
                   try{
                       ensureFollowInNeo4j(userId)
