@@ -950,6 +950,25 @@ if Meteor.isClient
         PUB.page '/user'
       else
         history.back()
+  insertPostOnTheHomePage = (postId,postInfo)->
+    FollowPosts._collection.insert({
+      _id: postId},{
+      postId:postId,
+      title: postInfo.title,
+      addontitle: postInfo.addontitle,
+      mainImage:postInfo.mainImage,
+      mainImageStyle: postInfo.mainImageStyle,
+      heart: [],
+      retweet: [],
+      comment: [],
+      browse:  0,
+      publish: postInfo.publish,
+      owner: postInfo.ownerId,
+      ownerName: postInfo.owner,
+      ownerIcon: postInfo.ownerIcon,
+      createdAt: postInfo.createdAt,
+      followby: Meteor.userId()
+    })
   @publishPostHandle = ()->
     layout = JSON.stringify(gridster.serialize())
     pub=[]
@@ -1118,6 +1137,7 @@ if Meteor.isClient
         createdAt: new Date(),
         style: style
     }
+    insertPostOnTheHomePage(postId,newPostData)
     Session.set('newpostsdata', newPostData)
     #Delete from SavedDrafts if it is a saved draft.
     if SavedDrafts.find().count() is 1

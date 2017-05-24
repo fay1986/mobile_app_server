@@ -963,9 +963,10 @@ if Meteor.isClient
               newArray.push(item)
           myHotPosts = newArray
           Meteor.users.update { _id: Meteor.userId() }, $set: 'myHotPosts': myHotPosts
-
+        FollowPosts._collection.remove({_id:postId})
         #todo: need process from client side.
-        toLoadFollowPost()
+        #toLoadFollowPost()
+
         ###
         Meteor.subscribe 'followposts', Session.get('followpostsitemsLimit'), {
           onError: subscribeFollowPostsOnStop
