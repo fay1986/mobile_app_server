@@ -9,12 +9,15 @@ if(Meteor.isClient){
             var mqttOptions = {
                 clean:false,
                 keepalive:20,
-                reconnectPeriod:1*1000,
+                reconnectPeriod:40*1000,
                 /*incomingStore: mqtt_store_manager.incoming,
                 outgoingStore: mqtt_store_manager.outgoing,*/
                 clientId:clientId
             }
             mqtt_connection=mqtt.connect('ws://tmq.tiegushi.com:80',mqttOptions);
+            mqtt_connection.on('disconnect',function(){
+                mqtt_connected = false;
+            })
             mqtt_connection.on('connect',function(){
                 // get MQTT_TIME_DIFF
                 var url = 'http://'+server_domain_name+'/restapi/date/';
@@ -139,7 +142,7 @@ if(Meteor.isClient){
       uninitMQTT();
     };
     Deps.autorun(function(){
-        if(Meteor.userId()){
+        if(Meteor.user()){
             Meteor.setTimeout(function(){
                 initMQTT(Meteor.userId());
             },1000)
