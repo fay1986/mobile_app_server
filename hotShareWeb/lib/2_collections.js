@@ -2615,42 +2615,6 @@ if(Meteor.isServer){
           return Moments.find({currentPostId: postId},{sort: {createdAt: -1},limit:limit});
       }
   });
-    var global_followposts_subscriber = {}
-    function setFollowPostsSubscriber(userId,subscriber){
-        if(!Match.test(userId, String)){
-            return;
-        }
-        global_followposts_subscriber[userId] = subscriber
-    }
-    function clearFollowPostsSubscriber(userId){
-        if(!Match.test(userId, String)){
-            return;
-        }
-        if(global_followposts_subscriber[userId]){
-
-            global_followposts_subscriber[userId] = null
-        }
-    }
-    function getFollowPostsSubscriber(userId){
-        if(!Match.test(userId, String)){
-            return;
-        }
-        return global_followposts_subscriber[userId]
-    }
-    function removePostInfoInFollowPostsInCallbackContent(userId,postId){
-        try{
-            var self = getFollowPostsSubscriber(userId)
-            if(self){
-                self.removed('followposts',postId)
-            }
-        } catch(e){}
-    }
-    function addPostInfoInFollowPostsInCallbackContent(userId,postInfo){
-        var self = getFollowPostsSubscriber(userId)
-        if(self){
-            addPostInfoInFollowPosts(self,userId,postInfo)
-        }
-    }
     function addPostInfoInFollowPosts(self,userId,postInfo){
         try{
             var ownerIcon = '';
@@ -2685,10 +2649,15 @@ if(Meteor.isServer){
                 followby:userId
             };
             self.added('followposts',postInfo.postId,fields)
-        } catch(e){}
+        } catch(e){
+            console.log('exception in addPostInfoInFollowPosts')
+            console.log(e)
+        }
     }
   if(withNeo4JInFollowPosts){
       Meteor.publish("followposts", function(limit,skip) {
+          console.log('in publish followposts skip:'+skip+' limit:'+limit)
+
           if(this.userId === null || !Match.test(limit, Number))
               return this.ready();
           else{
@@ -2732,10 +2701,8 @@ if(Meteor.isServer){
                   } catch(e){}
                   self.ready();
               //})
-              setFollowPostsSubscriber(userId,self);
               self.onStop(function(){
                   //console.log('onStop New Friend')
-                  clearFollowPostsSubscriber(userId);
               })
               self.removed = function(collection, id){
                   //console.log('removing '+id+' in '+collection +' but no, we dont want to resend data to client')
@@ -3379,7 +3346,6 @@ if(Meteor.isServer){
           }
       }
     }
-    addPostInfoInFollowPostsInCallbackContent(userId,doc)
 
     if(!postSafe){
       doc.isReview = false;
@@ -3449,7 +3415,6 @@ if(Meteor.isServer){
     },
       remove: function (userId, doc) {
           if(doc.owner === userId){
-              removePostInfoInFollowPostsInCallbackContent(userId, doc._id)
               postsRemoveHookDeferHandle(userId,doc);
               // Need refresh CDN since the post data is going to be removed
               // Currently our quota is 10k.
