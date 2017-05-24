@@ -20,7 +20,40 @@ if Meteor.isClient
       i++
     res = c.join('')
     res
-
+  @checkNewVersion2 = ->
+    if CHECK_UPDATE
+      platform = if Blaze._globalHelpers.isIOS() then 'ios' else (if Blaze._globalHelpers.isAndroid() then 'android' else 'others')
+      HTTP.get(version_host_url,(err,result)->
+        if err
+          console.log(err)
+          return
+        data = result.data
+        console.log(data)
+        currentVersion = version_of_build
+        if platform is 'ios'
+          stableVersion = data.stable_ios
+          latestVersion = data.latest_ios
+          stableRelease = data.stable_release_ios
+          latestRelease = data.latest_release_ios
+        if platform is 'android'
+          stableVersion = data.stable_android
+          latestVersion = data.latest_android
+          stableRelease = data.stable_release_android
+          latestRelease = data.latest_release_android
+        window.localStorage.setItem('stableVersion',stableVersion)
+        window.localStorage.setItem('latestVersion',latestVersion)
+        if currentVersion < stableVersion
+          # 强制升级
+          navigator.notification.alert('建议升级到' + latestVersion+'\n主要更新'+stableRelease,goToUpdate,'您使用的故事贴版本太旧啦！', '立即升级')
+        else if currentVersion < latestVersion
+          # 推荐升级
+          navigator.notification.confirm('故事贴 V' + latestVersion+' 已经发布\n主要更新: \n'+latestRelease, (index)->
+            if index is 1
+              goToUpdate()
+          '有新版本', '立即升级,稍后再说')
+      )
+    else
+      return
   @checkNewVersion = ->
     platform = if Blaze._globalHelpers.isIOS() then 'ios' else (if Blaze._globalHelpers.isAndroid() then 'android' else 'others')
     version = Versions.findOne({})
@@ -31,7 +64,7 @@ if Meteor.isClient
       latestVersion = version[platform]
     else
       latestVersion = version_of_build
-    _latestVersion = toNum(latestVersion)
+    _latestVersion = toNum(latestVersion) 
     _version_of_build = toNum(version_of_build)
     _localLatestVersion = toNum(window.localStorage.getItem("latestVersion"))
     

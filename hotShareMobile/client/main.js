@@ -95,6 +95,7 @@ if (Meteor.isCordova) {
         document.addEventListener("backbutton", eventBackButton, false); // 返回键
         document.addEventListener("pause", eventPause, false);//挂起
         document.addEventListener("resume", eventResume, false);
+        checkNewVersion2();
         TAPi18n.precacheBundle = true;
         // if(isUSVersion){
         //   Session.set("display_lang",'en');
@@ -153,6 +154,7 @@ if (Meteor.isCordova) {
         if (Meteor.status().connected !== true)
           Meteor.reconnect();
         
+        checkNewVersion2();
         if (Meteor.user()) {
             console.log('Refresh Main Data Source when resume');
             if (Meteor.isCordova) {
