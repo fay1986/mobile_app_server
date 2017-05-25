@@ -68,24 +68,23 @@ var repostTimeout = function(){
 };
 
 Meteor.startup(function(){
-  if(process.env.PRODUCTION || process.env.NODE_ENV === 'development')
-    return;
-
-  var timeoutFun = null;
-  RePosts.find({owner: {$ne: 'ras6CfDNxX7mD6zq7'}}).observeChanges({
-    added: function(id, fields){
-      repostTimeout();
-      if (timeoutFun){Meteor.clearTimeout(timeoutFun);timeoutFun=null;}
-      timeoutFun = Meteor.setTimeout(function(){
+  if(process.env.PRODUCTION != true && process.env.NODE_ENV === 'production'){
+    var timeoutFun = null;
+    RePosts.find({owner: {$ne: 'ras6CfDNxX7mD6zq7'}}).observeChanges({
+      added: function(id, fields){
         repostTimeout();
-      }, 1000*30+200);
-    },
-    changed: function(id, fields){
-      repostTimeout();
-    },
-    removed: function(id){
-      repostTimeout();
-    }
-  });
-  console.log('listening repost...');
+        if (timeoutFun){Meteor.clearTimeout(timeoutFun);timeoutFun=null;}
+        timeoutFun = Meteor.setTimeout(function(){
+          repostTimeout();
+        }, 1000*30+200);
+      },
+      changed: function(id, fields){
+        repostTimeout();
+      },
+      removed: function(id){
+        repostTimeout();
+      }
+    });
+    console.log('listening repost...');
+  }
 });

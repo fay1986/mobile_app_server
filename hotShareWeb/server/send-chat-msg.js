@@ -220,7 +220,7 @@ Meteor.startup(function(){
       try{mqttMessages.remove({_id: id});}catch(e){}
     });
   };
-  if(!process.env.PRODUCTION && process.env.NODE_ENV != 'development'){
+  if(process.env.PRODUCTION != true && process.env.NODE_ENV === 'production'){
     mqttMessages.find({}).observeChanges({
       added: function(id, fields){
         publishPostToUser(id, fields);
