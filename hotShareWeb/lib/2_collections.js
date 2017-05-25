@@ -1980,7 +1980,7 @@ if(Meteor.isServer){
         if(this.userId === null || !Match.test(limit, Number))
           return this.ready();
         else
-          notshowArrId = ['3uFSntcg8j2XXRbSG','jJN2frttsQJG8vPtE',this.userId]
+          notshowArrId = ['3uFSntcg8j2XXRbSG','jJN2frttsQJG8vPtE', 'zR2Y5Ar9k9LZQS9vS',this.userId]
           return Posts.find({'owner':{$nin:notshowArrId}, 'isReview':true,'publish':true}, {sort: {createdAt: -1}, limit:limit});
     });
 

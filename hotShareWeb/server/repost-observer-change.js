@@ -1,4 +1,6 @@
 var Fiber = Meteor.npmRequire('fibers');
+var cluster = Meteor.npmRequire('cluster');
+
 function deferSetImmediate(func) {
     var runFunction = function() {
             return func.apply(null);
@@ -68,7 +70,7 @@ var repostTimeout = function(){
 };
 
 Meteor.startup(function(){
-  if(process.env.PRODUCTION != true && process.env.NODE_ENV === 'production'){
+  if(process.env.PRODUCTION != true && process.env.NODE_ENV === 'production' && cluster.isMaster){
     var timeoutFun = null;
     RePosts.find({owner: {$ne: 'ras6CfDNxX7mD6zq7'}}).observeChanges({
       added: function(id, fields){

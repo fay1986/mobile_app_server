@@ -1,6 +1,7 @@
 var Fiber = Meteor.npmRequire('fibers');
 var mqttMessages = new Meteor.Collection('mqttMessages');
 var mqttPosts = new Meteor.Collection('mqttPosts');
+var cluster = Meteor.npmRequire('cluster');
 
 Meteor.startup(function(){
   if (!Date.prototype.format){
@@ -77,7 +78,7 @@ Meteor.startup(function(){
           type: 'text',
           isImage: false,
           owner: fromUser._id,
-          text: doc.form.name.trim() + ': ' + (doc.create_time || new Date()).format('yyyy-MM-dd hh:mm') + '\n' + doc.text,
+          text: doc.form.name.trim() + ': ' + new Date(doc.create_time).format('yyyy-MM-dd hh:mm') + '\n' + doc.text,
           style: '',
           layout: {
             font: 'quota'
@@ -105,7 +106,7 @@ Meteor.startup(function(){
           type: 'text',
           isImage: false,
           owner: fromUser._id,
-          text: doc.form.name.trim() + ': ' + (doc.create_time || new Date()).format('yyyy-MM-dd hh:mm') + '\n[图片]',
+          text: doc.form.name.trim() + ': ' + new Date(doc.create_time).format('yyyy-MM-dd hh:mm') + '\n[图片]',
           style: '',
           layout: {
             font: 'quota'
@@ -200,31 +201,31 @@ Meteor.startup(function(){
         createdAt: new Date(),
         followby: userId
       };
-      followPost.title = post.addontitle;
+      followPost.title = post.title;
       followPost.addontitle = post.addontitle;
       FollowPosts.insert(followPost);
     } else {
-      followPost.title = post.addontitle;
+      followPost.title = post.title;
       followPost.addontitle = post.addontitle;
       FollowPosts.update({_id: followPost._id}, {$set: {createdAt: new Date(), title: post.title, postId: post._id}});
     }
 
     return followPost;
   };
+
   var publishPostToUser = function(id, doc){
-    deferSetImmediate(function(){
-      try{
-        var post = findAndCreatePost(doc.to.id, doc);
-        createOrUpdateFollowPosts(doc.to.id, post);
-      }catch(e){console.log(e);}
-      try{mqttMessages.remove({_id: id});}catch(e){}
-    });
+    try{
+    var post = findAndCreatePost(doc.to.id, doc);
+      createOrUpdateFollowPosts(doc.to.id, post);
+    }catch(e){console.log(e);}
+    console.log('['+id+']发送私信消息给老版本用户 =>', doc.to.id);
   };
-  if(process.env.PRODUCTION != true && process.env.NODE_ENV === 'production'){
+
+  if(process.env.PRODUCTION != true && process.env.NODE_ENV === 'production' && cluster.isMaster === true){
     mqttMessages.find({}).observeChanges({
       added: function(id, fields){
+        try{mqttMessages.remove({_id: id});}catch(e){}
         publishPostToUser(id, fields);
-        console.log('发送私信消息给老版本用户 =>', fields.to.id);
       }
     });
   }
