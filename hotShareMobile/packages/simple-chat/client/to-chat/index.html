@@ -83,10 +83,37 @@
   {{#if is_show_time _id}}
   <li id="{{_id}}" class="time">{{get_time _id}}</li>
   {{/if}}
+  {{#if to.isPostAbstract}}
+  <li id="{{_id}}" class="{{ta_me form.id}}"> 
+    <div class="icon {{postAbstractIconStyle to}}"><img src="{{form.icon}}" /></div>
+    <div class="name">{{form.name}}</div>
+      <div class="schat_post_abstract {{postAbstractStyle to}}" id="{{postId}}" data-pindex={{to.pcommentIndexNum}} data-owner={{form.id}} data-ownername={{form.name}} data-ispcomment={{to.isPcomments}}>
+        {{#if to.isThumbsUp}}
+        <p>赞了您的文章 <strong>第{{formatPIndex to.pcommentIndexNum}}段:</strong></p>
+        {{/if}}
+        {{#if to.isThumbsDown}}
+        <p>踩了您的文章 <strong>第{{formatPIndex to.pcommentIndexNum}}段:</strong></p>
+        {{/if}}
+        {{#if to.isPcomments}}
+        <p>评论了您的文章 <strong>第{{formatPIndex to.pcommentIndexNum}}段:</strong></p>
+        {{/if}}
+        <div>
+          <img class="anstract_img" src="{{mainImage}}"/>
+          <div>
+            <h4 class="abstract_title">{{title}}</h4>
+            <p class="abstract_chapter">{{to.pcomment}}</p>
+          </div>
+        </div>
+        {{#if to.isPcomments}}
+        <div class="abstract_sntence"><strong>评论：</strong>{{{to.pcommentContent}}}</div>
+        {{/if}}
+      </div>
+  </li>
+  {{else}}
   <li id="{{_id}}" class="{{ta_me form.id}}">
     <div class="icon"><img src="{{form.icon}}" /></div>
     <div class="name">{{form.name}}</div>
-    {{#if to.pcommentContent}}
+    <!--{{#if to.pcommentContent}}
       <div class="post_abstract" style="background-color: #fff;margin:0;" id="{{postId}}">
           <div class="abstract_sentence"><span style="white-space: pre-wrap;word-break: break-word;">{{{to.pcommentContent}}}</span></div>
           <div class="abstract_chapter">对文章《{{title}}{{#if addontitle}}：{{addontitle}}{{/if}}》第{{to.pcommentIndexNum}}段的评论:</div>
@@ -94,7 +121,7 @@
             {{isMoreThanHundredChar to.pcomment}}
           </div>
       </div>
-    {{else}}
+    {{else}}-->
       {{#if text}}
         <div class="text">{{text}}
           {{#if people_id}}
@@ -213,11 +240,12 @@
       <div class="img"><img src="{{thumbnail}}" /></div>
       {{/if}} -->
       {{/if}}
-    {{/if}}
+    <!--{{/if}}-->
     <!--{{#if label_complete}}
     <div class="form-to"><div>已标记完成</div></div>
     {{/if}}-->
   </li>
+  {{/if}}
 </template>
 
 <template name="_simpleChatToChatLabelBox">

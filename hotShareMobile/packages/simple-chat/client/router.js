@@ -382,18 +382,39 @@ Template._simpleChatToChatItem.events({
     $('li#' + id + ' div.text .imgs').removeAttr('style');
     $('li#' + id + ' div.text .imgs-1-box').removeAttr('style');
   },
-  'click li div.post_abstract':function(e){
+  'click li div.schat_post_abstract':function(e){
     console.log(e.currentTarget.id);
-    postId = e.currentTarget.id;
+    var postId = e.currentTarget.id;
 
-    console.log("e val is: ", JSON.stringify(e.currentTarget.innerText));
-    text = JSON.stringify(e.currentTarget.innerText);
-    firstSubstring = "第";
-    secSubsrting = "段的评论";
-    subtext = text.match(new RegExp(firstSubstring + "(.*)" + secSubsrting));
-    console.log("sub text is: ", subtext[1]);
-    paraIndex = subtext[1];
-    Router.go('/posts/' + postId +'/' + paraIndex);
+    // console.log("e val is: ", JSON.stringify(e.currentTarget.innerText));
+    // text = JSON.stringify(e.currentTarget.innerText);
+    // firstSubstring = "第";
+    // secSubsrting = "段的评论";
+    // subtext = text.match(new RegExp(firstSubstring + "(.*)" + secSubsrting));
+    // console.log("sub text is: ", subtext[1]);
+    // paraIndex = subtext[1];
+    var history = [];
+    var paraIndex = $(e.currentTarget).data('pindex');
+    var owner = $(e.currentTarget).data('owner');
+    var ownerName = $(e.currentTarget).data('ownername');
+    history.push({
+      view: 'bellcontent',
+      scrollTop: document.body.scrollTop
+    });
+
+    Session.set("history_view", history);
+
+    Session.set("pcurrentIndex", paraIndex);
+    Session.set("pcommetsId", owner);
+    Session.set("pcommentsName", ownerName);
+    Session.set("toasted", false);
+    console.log('ispcomment---'+paraIndex+'---'+owner+'---'+ownerName+'---'+$(e.currentTarget).data('ispcomment'))
+    if ($(e.currentTarget).data('ispcomment')) {
+      Session.set("isPcommetReply", true);
+    } else {
+      Session.set("isPcommetReply", false);
+    }
+    Router.go('/posts/' + postId);
   },
   'click .check': function(){
     Template._simpleChatLabelDevice.open(this);
@@ -934,6 +955,32 @@ Template._simpleChatToChatLayout.events({
 });
 
 Template._simpleChatToChatItem.helpers({
+  formatPIndex:function(index){
+    if(index == 0){
+      return '1'
+    }
+    return index
+  },
+  postAbstractStyle:function(to){
+    if(to.isThumbsUp){
+      return 'schat_post_abstract_up'
+    }
+    if(to.isThumbsDown){
+      return 'schat_post_abstract_down'
+    }
+    return ''
+  },
+  postAbstractIconStyle:function(to){
+    if(to.isThumbsUp){
+      return 'schat_post_abstract_up_icon'
+    }
+    if(to.isThumbsDown){
+      return 'schat_post_abstract_down_icon'
+    }
+    if(to.isPcomments){
+      return 'schat_post_abstract_icon'
+    }
+  },
   isMoreThanHundredChar: function(text){
     if (text.length > 50)
       return text.substring(0,50) + "...";

@@ -225,3 +225,108 @@ div.simple-chat > .msg-box > .header{
 }
 .writeMeaaage{font-weight: normal; padding-right: 10px;}
 
+
+.schat_post_abstract {
+    position: relative;
+    padding: 8px 12px;
+    color: #000;
+    border-radius: 5px;
+    border: 1px solid #d2d2d2;
+    z-index: 1;
+    background: #feffff;
+    box-shadow: 0px 16px 18px -18px #555;
+}
+.me > .schat_post_abstract{
+  text-align: justify;
+}
+.me > .schat_post_abstract_icon:after{
+  border-left: 10px solid #00bfff;
+}
+.me > .schat_post_abstract_up_icon:after{
+  border-left: 10px solid #00bfff;
+}
+.me > .schat_post_abstract_down_icon:after{
+  border-left: 10px solid #00bfff;
+}
+.schat_post_abstract:before {
+    content: " ";
+    position: absolute;
+    top: 0;
+    right: 0;
+    border-bottom: 25px solid transparent;
+    border-top: 25px solid gray;
+    border-right: 25px solid gray;
+    border-left: 25px solid transparent;
+}
+div.schat_post_abstract_up:before{
+  border-top: 25px solid deeppink;
+  border-right: 25px solid deeppink;
+}
+div.schat_post_abstract_down:before{
+  border-top: 25px solid deepskyblue;
+  border-right: 25px solid deepskyblue;
+}
+div.schat_post_abstract_up:after{
+  content: "赞";
+  top: 4px;
+  right: 8px;
+}
+div.schat_post_abstract_down:after{
+  content: "踩";
+  top: 4px;
+  right: 8px;
+}
+.schat_post_abstract:after {
+    content: "评论";
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    z-index: 3;
+    color: #fff;
+    transform: rotate(45deg);
+    font-size: 14px;
+    text-shadow: 1px 0 0 #000;
+}
+img.anstract_img {
+    width: 70px;
+    height: 70px;
+    border-radius: 5px;
+    outline: none;
+    border: none;
+    float: left;
+    margin-right: 10px;
+    object-fit: cover;
+}
+.abstract_title {
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: bold;
+    line-height: 25px;
+    height: 25px;
+    margin: 0;
+    margin-bottom: 5px;
+}
+.abstract_chapter {
+    font-size: 12px;
+    color: #5d5d5d;
+    line-height: 20px;
+    height: 40px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: break-all;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    margin: 0;
+}
+.abstract_sntence {
+    border-top: 2px dotted #757575;
+    line-height: 20px;
+    font-size: 14px;
+    padding-top: 8px;
+    color: #000;
+    margin-top: 10px;
+    word-wrap: break-word;
+}

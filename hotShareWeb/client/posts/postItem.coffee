@@ -3,13 +3,18 @@ if Meteor.isClient
   @sendMqttMessageToUser=(type,to,postData)->
     username = Meteor.user().profile.fullname || Meteor.user().username
     if type is 'thumbsUp'
+      to.isThumbsUp = true
       text = '我赞了你的文章《' + postData.title + '》哦~'
     else if type is 'thumbsDown'
+      to.isThumbsDown = true
       text = '我踩了你的文章《' + postData.title + '》哦~'
     else
+      to.isPcomments = true
       text = '我评论了你的文章《' + postData.title + '》中的段落'
       if to.pcommentContent
         text = '“' + to.pcommentContent + '”' + '\n' + "---- " + '我评论了你的文章《' + postData.title + '》中的段落'
+    to.isPostAbstract = true
+    to.mainImage = postData.mainImage
     msg = {
         _id: new Mongo.ObjectID()._str,
         form:{
@@ -19,6 +24,7 @@ if Meteor.isClient
         },
         title: postData.title,
         addontitle: postData.addontitle,
+        mainImage: postData.mainImage,
         postId: postData._id,
         to: to,
         to_type: 'user',
@@ -131,6 +137,7 @@ if Meteor.isClient
     #)
   Template.postItem.events
     'click .thumbsUp': (e)->
+      i = this.index
       Session.set("pcommetsId","")
       thumbsUpHandler(e,this)
       Session.set('postPageScrollTop',document.body.scrollTop)
@@ -139,11 +146,14 @@ if Meteor.isClient
       to = {
         id: postData.owner,
         name: postData.ownerName,
-        icon: postData.ownerIcon
+        icon: postData.ownerIcon,
+        pcommentIndexNum: i,
+        pcomment: Session.get("postContent").pub[i].text
       }
       if to.id isnt Meteor.userId()
         sendMqttMessageToUser(type,to,postData)
     'click .thumbsDown': (e)->
+      i = this.index
       Session.set("pcommetsId","")
       thumbsDownHandler(e,this)
       Session.set('postPageScrollTop',document.body.scrollTop)
@@ -152,7 +162,9 @@ if Meteor.isClient
       to = {
         id: postData.owner,
         name: postData.ownerName,
-        icon: postData.ownerIcon
+        icon: postData.ownerIcon,
+        pcommentIndexNum: i,
+        pcomment: Session.get("postContent").pub[i].text
       }
       if to.id isnt Meteor.userId()
         sendMqttMessageToUser(type,to,postData)
