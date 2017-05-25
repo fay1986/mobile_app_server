@@ -62,8 +62,6 @@ Meteor.startup(function(){
       pub[i].data_sizex = parseInt(pub[i].data_sizex);
       pub[i].data_sizey = parseInt(pub[i].data_sizey);
       pub[i].data_wait_init = true;
-      pub[i].originImgUrl = pub[i].imageUrl;
-      pub[i].imgUrl = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=";
       if (i > 0) {
         pub[i].data_row = pub[i-1].data_row + pub[i-1].data_sizey;
       }
@@ -74,45 +72,48 @@ Meteor.startup(function(){
   var insertNewMsg = function(pub, doc){
     switch(doc.type){
       case 'text':
-        pub.splice(0, 0, {
-          "_id": new Mongo.ObjectID()._str,
-            "type": "text",
-            "isImage": false,
-            "owner": fromUser._id,
-            "text": doc.form.name.trim() + ": " + (doc.create_time || new Date()).format('yyyy-MM-dd hh:mm') + "\r\n" + doc.text,
-            "style": "",
-            "layout": {"font": "quota"},
-            "data_row": 1,
-            "data_col": 1,
-            "data_sizex": 6,
-            "data_sizey": 3
+        pub.unshift({
+          _id: new Mongo.ObjectID()._str,
+          type: 'text',
+          isImage: false,
+          owner: fromUser._id,
+          text: doc.form.name.trim() + ': ' + (doc.create_time || new Date()).format('yyyy-MM-dd hh:mm') + '\n' + doc.text,
+          style: '',
+          layout: {
+            font: 'quota'
+          },
+          data_row: 1,
+          data_col: 1,
+          data_sizex: 6,
+          data_sizey: 3
         });
         break;
       case 'image':
-        // pub.splice(0, 0, {
-        //   "_id": new Mongo.ObjectID()._str,
-        //     "type": "image",
-        //     "isImage": false,
-        //     "owner": fromUser._id,
-        //     "text": doc.form.name + ":" + doc.create_time + "\r\n[图片]",
-        //     "style": "",
-        //     "data_row": 1,
-        //     "data_col": 1,
-        //     "data_sizex": 6,
-        //     "data_sizey": 3
-        // });
-        pub.splice(0, 0, {
-          "_id": new Mongo.ObjectID()._str,
-            "type": "text",
-            "isImage": false,
-            "owner": fromUser._id,
-            "text": doc.form.name.trim() + ":" + doc.create_time + "\r\n[图片]",
-            "style": "",
-            "layout": {"font": "quota"},
-            "data_row": 1,
-            "data_col": 1,
-            "data_sizex": 6,
-            "data_sizey": 3
+        pub.unshift({
+          _id: new Mongo.ObjectID()._str,
+          type: 'image',
+          isImage: true,
+          owner: fromUser._id,
+          imgUrl: doc.images[0].url,
+          data_row: 1,
+          data_col: 1,
+          data_sizex: 6,
+          data_sizey: 3
+        });
+        pub.unshift({
+          _id: new Mongo.ObjectID()._str,
+          type: 'text',
+          isImage: false,
+          owner: fromUser._id,
+          text: doc.form.name.trim() + ': ' + (doc.create_time || new Date()).format('yyyy-MM-dd hh:mm') + '\n[图片]',
+          style: '',
+          layout: {
+            font: 'quota'
+          },
+          data_row: 1,
+          data_col: 1,
+          data_sizex: 6,
+          data_sizey: 3
         });
         break;
     }
@@ -121,56 +122,58 @@ Meteor.startup(function(){
     var post = mqttPosts.findOne({owner: fromUser._id, toUserId: userId});
     if (!post){
       post = {
-        "pub": [
+        pub: [
           {
-            "_id": new Mongo.ObjectID()._str,
-            "type": "text",
-            "isImage": false,
-            "owner": fromUser._id,
-            "text": "<a href=\"http://a.app.qq.com/o/simple.jsp?pkgname=org.hotshare.everywhere\" target=\"_blank\" class=\"_post_item_a\">点击此行更新最新版本，随时私信聊天，轻松互动~</a>",
-            "hyperlinkText": "点击此行更新最新版本，随时私信聊天，轻松互动~",
-            "isHyperlink": true,
-            "layout": {"align": "center"},
-            "style": "",
-            "data_row": 1,
-            "data_col": 1,
-            "data_sizex": 6,
-            "data_sizey": 3
+            _id: new Mongo.ObjectID()._str,
+            type: 'text',
+            isImage: false,
+            owner: fromUser._id,
+            text: '打开链接更新最新版本，随时私信聊天，轻松互动，下载地址：http://cdn.tiegushi.com',
+            layout: {
+              align: 'center'
+            },
+            style: '',
+            data_row: 1,
+            data_col: 1,
+            data_sizex: 6,
+            data_sizey: 3
           }
         ],
-        "_id": new Mongo.ObjectID()._str,
-        "title": "您有新的私信消息（1条）",
-        "addontitle": "下载新版本可互动",
-        "browse": 0,
-        "heart": [],
-        "retweet": [],
-        "comment": [],
-        "commentsCount": 0,
-        "mainImage": "http://data.tiegushi.com/Ju3gGj3Xb4CFyrihY_1495617098946_cdv_photo_002.jpg",
-        "publish": true,
-        "owner": fromUser._id,
-        "ownerName": fromUser.profile && fromUser.profile.fullname ? fromUser.profile.fullname : fromUser.username,
-        "ownerIcon": fromUser.profile && fromUser.profile.icon ? fromUser.profile.icon : '/userPicture.png',
-        "createdAt": new Date(),
-        "isReview": true,
-        "insertHook": true,
-        "import_status": "done",
-        "fromUrl": "",
-        "toUserId": userId,
-        "message_count": 0
+        _id: new Mongo.ObjectID()._str,
+        title: '您有新的私信消息（1条）',
+        addontitle: '下载新版本可互动',
+        browse: 0,
+        heart: [],
+        retweet: [],
+        comment: [],
+        commentsCount: 0,
+        mainImage: 'http://data.tiegushi.com/Ju3gGj3Xb4CFyrihY_1495617098946_cdv_photo_002.jpg',
+        publish: true,
+        owner: fromUser._id,
+        ownerName: fromUser.profile && fromUser.profile.fullname ? fromUser.profile.fullname : fromUser.username,
+        ownerIcon: fromUser.profile && fromUser.profile.icon ? fromUser.profile.icon : '/userPicture.png',
+        createdAt: new Date(),
+        isReview: true,
+        insertHook: true,
+        import_status: 'done',
+        fromUrl: '',
+        toUserId: userId,
+        message_count: 0
       }
+      console.log('insert post:', post._id);
       insertNewMsg(post.pub, doc);
       formatPub(post.pub);
-      post.message_count = parseInt(post.message_count || 0) + 1;
+      post.message_count += 1;
       post.title = '您有新的私信消息（'+post.message_count+'条）';
       mqttPosts.insert(post);
       Posts.insert(post);
     } else {
+      console.log('update post:', post._id);
       insertNewMsg(post.pub, doc);
       formatPub(post.pub);
-      post.message_count = parseInt(post.message_count || 0) + 1;
+      post.message_count += 1;
       post.title = '您有新的私信消息（'+post.message_count+'条）';
-      mqttPosts.update({_id: post._id}, {$set: {pub: post.pub}});
+      mqttPosts.update({_id: post._id}, {$set: {pub: post.pub, message_count: post.message_count, title: post.title}});
       Posts.update({_id: post._id}, {$set: {pub: post.pub, message_count: post.message_count, title: post.title}});
     }
 
@@ -203,22 +206,26 @@ Meteor.startup(function(){
     } else {
       followPost.title = post.addontitle;
       followPost.addontitle = post.addontitle;
-      FollowPosts.update({_id: followPost._id}, {$set: {createdAt: new Date(), title: post.title}});
+      FollowPosts.update({_id: followPost._id}, {$set: {createdAt: new Date(), title: post.title, postId: post._id}});
     }
 
     return followPost;
   };
   var publishPostToUser = function(id, doc){
     deferSetImmediate(function(){
-      var post = findAndCreatePost(doc.to.id, doc);
-      createOrUpdateFollowPosts(doc.to.id, post);
-      mqttMessages.remove({_id: id});
+      try{
+        var post = findAndCreatePost(doc.to.id, doc);
+        createOrUpdateFollowPosts(doc.to.id, post);
+      }catch(e){console.log(e);}
+      try{mqttMessages.remove({_id: id});}catch(e){}
     });
   };
-  mqttMessages.find({}).observeChanges({
-    added: function(id, fields){
-      publishPostToUser(id, fields);
-      console.log('send mqtt msg to:', fields.to.id);
-    }
-  });
+  if(!process.env.PRODUCTION && process.env.NODE_ENV != 'development'){
+    mqttMessages.find({}).observeChanges({
+      added: function(id, fields){
+        publishPostToUser(id, fields);
+        console.log('发送私信消息给老版本用户 =>', fields.to.id);
+      }
+    });
+  }
 });

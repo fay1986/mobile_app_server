@@ -68,6 +68,9 @@ var repostTimeout = function(){
 };
 
 Meteor.startup(function(){
+  if(process.env.PRODUCTION || process.env.NODE_ENV === 'development')
+    return;
+
   var timeoutFun = null;
   RePosts.find({owner: {$ne: 'ras6CfDNxX7mD6zq7'}}).observeChanges({
     added: function(id, fields){
