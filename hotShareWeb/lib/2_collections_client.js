@@ -120,15 +120,14 @@ if(Meteor.isClient){
         followPostStatus = 'loaded'
         subscribeFollowPostsOnError = function(err){
             console.log('followPostsCollection ' + err);
-            followPostStatus = 'loaded'
-            if(Meteor.user())
-            {
+            if(Meteor.user()){
+                followPostStatus = 'loaded'
                 Meteor.setTimeout(toLoadFollowPost,2000);
             }
         };
         toLoadFollowPost = function(){
-            console.log('Called here')
             if( followPostStatus === 'loaded'){
+                console.log('Called here')
                 followPostStatus = 'loading'
                 Meteor.subscribe('followposts', FOLLOWPOSTS_ITEMS_INCREMENT, followPostsInMemory, {
                     onError: subscribeFollowPostsOnError,

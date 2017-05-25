@@ -8,15 +8,25 @@ if(Meteor.isClient){
         if(!mqtt_connection){
             var mqttOptions = {
                 clean:false,
-                keepalive:20,
-                reconnectPeriod:40*1000,
+                connectTimeout: 10*1000,
+                keepalive:30,
+                reconnectPeriod:10*1000,
                 /*incomingStore: mqtt_store_manager.incoming,
                 outgoingStore: mqtt_store_manager.outgoing,*/
                 clientId:clientId
             }
             mqtt_connection=mqtt.connect('ws://tmq.tiegushi.com:80',mqttOptions);
-            mqtt_connection.on('disconnect',function(){
+            mqtt_connection.on('offline',function(){
                 mqtt_connected = false;
+                console.log('MQTT offline')
+            })
+            mqtt_connection.on('error',function(){
+                mqtt_connected = false;
+                console.log('MQTT error')
+            })
+            mqtt_connection.on('reconnect',function(){
+                mqtt_connected = false;
+                console.log('MQTT reconnecting')
             })
             mqtt_connection.on('connect',function(){
                 // get MQTT_TIME_DIFF
