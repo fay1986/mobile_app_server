@@ -213,9 +213,23 @@ Meteor.startup(function(){
     return followPost;
   };
 
+  var tasks = [];
+  var task = null;
+  var runTask = function(){
+    if (task)
+      return;
+
+    task = tasks.shift();
+    if (task){
+      publishPostToUser(task.id, task.doc);
+      task = null;
+      return runTask();
+    }
+  };
+
   var publishPostToUser = function(id, doc){
     try{
-    var post = findAndCreatePost(doc.to.id, doc);
+      var post = findAndCreatePost(doc.to.id, doc);
       createOrUpdateFollowPosts(doc.to.id, post);
     }catch(e){console.log(e);}
     console.log('['+id+']发送私信消息给老版本用户 =>', doc.to.id);
@@ -225,7 +239,9 @@ Meteor.startup(function(){
     mqttMessages.find({}).observeChanges({
       added: function(id, fields){
         try{mqttMessages.remove({_id: id});}catch(e){}
-        publishPostToUser(id, fields);
+        tasks.push({id: id, doc: fields});
+        runTask();
+        // publishPostToUser(id, fields);
       }
     });
   }
