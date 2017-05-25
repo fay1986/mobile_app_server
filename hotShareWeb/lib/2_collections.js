@@ -2707,7 +2707,7 @@ if(Meteor.isServer){
                       }
                   } catch(e){}
                   self.ready();
-              })
+              //})
               return;
           }
           //return FollowPosts.find({followby: this.userId}, {sort: {createdAt: -1}, limit:limit});
