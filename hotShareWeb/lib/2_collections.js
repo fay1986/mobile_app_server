@@ -2686,6 +2686,12 @@ if(Meteor.isServer){
                   queryLimit = limit - self._session.skipFollowPost[userId];
                   self._session.skipFollowPost[userId] += queryLimit;
               }
+              self.onStop(function(){
+                  //console.log('onStop New Friend')
+              })
+              self.removed = function(collection, id){
+                  //console.log('removing '+id+' in '+collection +' but no, we dont want to resend data to client')
+              }
               this.unblock();
               //deferSetImmediate(function(){
                   try{
@@ -2701,13 +2707,7 @@ if(Meteor.isServer){
                       }
                   } catch(e){}
                   self.ready();
-              //})
-              self.onStop(function(){
-                  //console.log('onStop New Friend')
               })
-              self.removed = function(collection, id){
-                  //console.log('removing '+id+' in '+collection +' but no, we dont want to resend data to client')
-              }
               return;
           }
           //return FollowPosts.find({followby: this.userId}, {sort: {createdAt: -1}, limit:limit});
