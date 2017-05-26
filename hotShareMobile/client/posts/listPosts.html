@@ -2,8 +2,10 @@
   {{>connectionBanner}}
   <div id="wrapper">
     <div id="list">
-      {{#if loading}}
-        <div>{{_ "isLoading"}}</div>
+      {{#if followPostsNoData}}
+        {{#if loading}}
+          <div>{{_ "isLoading"}}</div>
+        {{/if}}
       {{/if}}
       {{#if loadError}}
           <div>{{_ "loadFailNotification"}}</div>
