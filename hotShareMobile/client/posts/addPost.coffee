@@ -972,23 +972,29 @@ if Meteor.isClient
         followby: Meteor.userId()
       })
     else
-      FollowPosts._collection.update({
-        postId:postId,
-        title: postInfo.title,
-        addontitle: postInfo.addontitle,
-        mainImage:postInfo.mainImage,
-        mainImageStyle: postInfo.mainImageStyle,
-        heart: [],
-        retweet: [],
-        comment: [],
-        browse:  0,
-        publish: postInfo.publish,
-        owner: postInfo.owner,
-        ownerName: postInfo.ownerName,
-        ownerIcon: postInfo.ownerIcon,
-        createdAt: postInfo.createdAt,
-        followby: Meteor.userId()
-      })
+      FollowPosts._collection.update(
+        {
+          _id:postId
+        },
+        {
+          $set:{
+            postId:postId,
+            title: postInfo.title,
+            addontitle: postInfo.addontitle,
+            mainImage:postInfo.mainImage,
+            mainImageStyle: postInfo.mainImageStyle,
+            heart: [],
+            retweet: [],
+            comment: [],
+            browse:  0,
+            publish: postInfo.publish,
+            owner: postInfo.owner,
+            ownerName: postInfo.ownerName,
+            ownerIcon: postInfo.ownerIcon,
+            createdAt: postInfo.createdAt,
+            followby: Meteor.userId()
+          }
+        })
   @publishPostHandle = ()->
     layout = JSON.stringify(gridster.serialize())
     pub=[]
