@@ -181,8 +181,11 @@ if Meteor.isClient
         pcommentIndexNum: i,
         pcomment: postData.pub[i].text
       }
+      likeUserId = postData.pub[i].likeUserId
+      userId = Meteor.userId()
       if to.id isnt Meteor.userId()
-        sendMqttMessageToUser(type,to,postData)
+        unless likeUserId and likeUserId[userId]
+          sendMqttMessageToUser(type,to,postData)
     'click .thumbsDown': (e)->
       i = this.index
       Session.set("pcommetsId","")
@@ -196,8 +199,11 @@ if Meteor.isClient
         pcommentIndexNum: i,
         pcomment: Session.get("postContent").pub[i].text
       }
+      dislikeUserId = postData.pub[i].dislikeUserId
+      userId = Meteor.userId()
       if to.id isnt Meteor.userId()
-        sendMqttMessageToUser(type,to,postData)
+        unless dislikeUserId and dislikeUserId[userId]
+          sendMqttMessageToUser(type,to,postData)
     'click .pcomments': (e)->
       Session.set("pcommetsClicked",true)
       Session.set("pcommetsReply",false)
