@@ -2616,39 +2616,43 @@ if(Meteor.isServer){
           return Moments.find({currentPostId: postId},{sort: {createdAt: -1},limit:limit});
       }
   });
+    function formatFollowPost(userId,postInfo){
+      var ownerIcon = '';
+      var publish = false;
+      if(postInfo.ownerIcon){
+          ownerIcon = postInfo.ownerIcon;
+      } else {
+          var ownerInfo = Meteor.users.findOne({_id: postInfo.ownerId},{fields:{'profile.icon':true}});
+          ownerIcon =  ownerInfo?ownerInfo.profile.icon:'';
+      }
+      if(typeof postInfo.publish !== 'undefined'){
+          publish = postInfo.publish
+      } else {
+          var post = Posts.findOne({_id:postInfo.postId},{fields:{'publish':true}});
+          publish = post.publish;
+      }
+      var fields = {
+          postId:postInfo.postId,
+          title: postInfo.name || postInfo.title,
+          addontitle: postInfo.addonTitle,
+          mainImage:postInfo.mainImage,
+          mainImageStyle: null,
+          heart: 0,
+          retweet: 0,
+          comment: 0,
+          browse:  0,
+          publish: publish,
+          owner: postInfo.ownerId,
+          ownerName: postInfo.ownerName,
+          ownerIcon: ownerIcon,
+          createdAt: postInfo.createdAt,
+          followby:userId
+      };
+      return fields;
+    }
     function addPostInfoInFollowPosts(self,userId,postInfo){
         try{
-            var ownerIcon = '';
-            var publish = false;
-            if(postInfo.ownerIcon){
-                ownerIcon = postInfo.ownerIcon;
-            } else {
-                var ownerInfo = Meteor.users.findOne({_id: postInfo.ownerId},{fields:{'profile.icon':true}});
-                ownerIcon =  ownerInfo?ownerInfo.profile.icon:'';
-            }
-            if(typeof postInfo.publish !== 'undefined'){
-                publish = postInfo.publish
-            } else {
-                var post = Posts.findOne({_id:postInfo.postId},{fields:{'publish':true}});
-                publish = post.publish;
-            }
-            var fields = {
-                postId:postInfo.postId,
-                title: postInfo.name || postInfo.title,
-                addontitle: postInfo.addonTitle,
-                mainImage:postInfo.mainImage,
-                mainImageStyle: null,
-                heart: 0,
-                retweet: 0,
-                comment: 0,
-                browse:  0,
-                publish: publish,
-                owner: postInfo.ownerId,
-                ownerName: postInfo.ownerName,
-                ownerIcon: ownerIcon,
-                createdAt: postInfo.createdAt,
-                followby:userId
-            };
+            var fields = formatFollowPost(userId, postInfo);
             self.added('followposts',postInfo.postId,fields)
         } catch(e){
             console.log('exception in addPostInfoInFollowPosts')
@@ -2688,9 +2692,71 @@ if(Meteor.isServer){
         //return FollowPosts.find({followby: this.userId}, {sort: {createdAt: -1}, limit:limit});
     });
   if(withNeo4JInFollowPosts){
+      var sessions = {};
+      var sessionObj = function(userId){
+        if (sessions[userId])
+          return sessions[userId];
+
+        var obj = new Object();
+        var changeds = [];
+        var addeds = [];
+        var docs =[];
+        var interval = Meteor.setInterval(function(){
+          try{
+            var queryResult = getFollowPostFromNeo4J(userId, 0, docs.length >= 50 ? 50 : (docs.length <= 0 ? 10 : docs.length));
+            if (queryResult && queryResult.length > 0){
+              queryResult.forEach(function (item){
+                var fields = formatFollowPost(userId, item);
+                var index = _.pluck(docs, 'postId').indexOf(item.postId);
+                if (index >= 0){
+                  if (!EJSON.equals(fields, docs[index])){
+                    docs[index] = fields;
+                    changeds.forEach(function(callback){
+                      callback && callback(item.postId, fields);
+                    });
+                  }
+                } else {
+                  docs.push(fields);
+                  addeds.forEach(function(callback){
+                    callback && callback(item.postId, fields);
+                  });
+                }
+              });
+            }
+            console.log('refresh followpost', docs.length >= 50 ? 50 : (docs.length <= 0 ? 10 : docs.length), ' =>', userId);
+          } catch(e){console.log('refresh followpost error:', e);}
+        }, 1000*30);
+        obj.onAdded = function(callback){
+          callback && addeds.push(callback);
+        };
+        obj.onChanged = function(callback){
+          callback && changeds.push(callback);
+        };
+        obj.addDoc = function(doc){
+          if (_.pluck(docs, 'postId').indexOf(doc.postId) >= 0)
+            return;
+
+          var fields = formatFollowPost(userId, doc);
+          docs.push(fields);
+        };
+        obj.stop = function(){
+          try{if(interval){Meteor.clearInterval(interval);}}catch(e){}
+          delete sessions[userId];
+          addeds = null;
+          changeds = null;
+          docs = null;
+          interval = null;
+          console.log('close followpost refresh', userId);
+        };
+
+        console.log('init followpost session =>', userId);
+        sessions[userId] = obj;
+        return obj;
+      };
+
       Meteor.publish("followposts", function(limit,skip) {
           console.log('in publish followposts skip:'+skip+' limit:'+limit)
-
+          
           if(this.userId === null || !Match.test(limit, Number))
               return this.ready();
           else{
@@ -2718,8 +2784,18 @@ if(Meteor.isServer){
                   queryLimit = limit - self._session.skipFollowPost[userId];
                   self._session.skipFollowPost[userId] += queryLimit;
               }
+
+              var session = new sessionObj(self.userId);
+              session.onAdded(function(id, fields){
+                self.added('followposts', id, fields);
+              });
+              session.onChanged(function(id, fields){
+                self.changed('followposts', id, fields);
+              });
+
               self.onStop(function(){
-                  //console.log('onStop New Friend')
+                  // console.log('onStop New Friend')
+                  session.stop();
               })
               self.removed = function(collection, id){
                   //console.log('removing '+id+' in '+collection +' but no, we dont want to resend data to client')
@@ -2733,6 +2809,7 @@ if(Meteor.isServer){
                       if(queryResult && queryResult.length > 0){
                           queryResult.forEach(function (item) {
                               if(item){
+                                  session.addDoc(item);
                                   addPostInfoInFollowPosts(self,userId,item);
                               }
                           });
