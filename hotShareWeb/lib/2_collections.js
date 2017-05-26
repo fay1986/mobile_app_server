@@ -2655,6 +2655,38 @@ if(Meteor.isServer){
             console.log(e)
         }
     }
+    Meteor.publish("loadLatestFollowedPost", function(since) {
+
+        if(this.userId === null || !Match.test(since, Number))
+            return this.ready();
+        else{
+            var self = this;
+            var userId = this.userId;
+            self.onStop(function(){
+                //console.log('onStop New Friend')
+            })
+            self.removed = function(collection, id){
+                //console.log('removing '+id+' in '+collection +' but no, we dont want to resend data to client')
+            }
+            this.unblock();
+            //deferSetImmediate(function(){
+            try{
+                var queryResult = getLatestFollowPostFromNeo4J(userId, toSkip,queryLimit);
+
+                if(queryResult && queryResult.length > 0){
+                    queryResult.forEach(function (item) {
+                        if(item){
+                            addPostInfoInFollowPosts(self,userId,item);
+                        }
+                    });
+                }
+            } catch(e){}
+            self.ready();
+            //})
+            return;
+        }
+        //return FollowPosts.find({followby: this.userId}, {sort: {createdAt: -1}, limit:limit});
+    });
   if(withNeo4JInFollowPosts){
       Meteor.publish("followposts", function(limit,skip) {
           console.log('in publish followposts skip:'+skip+' limit:'+limit)
