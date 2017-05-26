@@ -2746,6 +2746,7 @@ if(Meteor.isServer){
           changeds = null;
           docs = null;
           interval = null;
+          obj = null;
           console.log('close followpost refresh', userId);
         };
 
