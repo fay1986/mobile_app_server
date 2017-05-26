@@ -951,24 +951,44 @@ if Meteor.isClient
       else
         history.back()
   @insertPostOnTheHomePage = (postId,postInfo)->
-    FollowPosts._collection.insert({
-      _id: postId,
-      postId:postId,
-      title: postInfo.title,
-      addontitle: postInfo.addontitle,
-      mainImage:postInfo.mainImage,
-      mainImageStyle: postInfo.mainImageStyle,
-      heart: [],
-      retweet: [],
-      comment: [],
-      browse:  0,
-      publish: postInfo.publish,
-      owner: postInfo.owner,
-      ownerName: postInfo.ownerName,
-      ownerIcon: postInfo.ownerIcon,
-      createdAt: postInfo.createdAt,
-      followby: Meteor.userId()
-    })
+    count = FollowPosts.find({_id:postId}).count()
+    if count is 0
+      FollowPosts._collection.insert({
+        _id: postId,
+        postId:postId,
+        title: postInfo.title,
+        addontitle: postInfo.addontitle,
+        mainImage:postInfo.mainImage,
+        mainImageStyle: postInfo.mainImageStyle,
+        heart: [],
+        retweet: [],
+        comment: [],
+        browse:  0,
+        publish: postInfo.publish,
+        owner: postInfo.owner,
+        ownerName: postInfo.ownerName,
+        ownerIcon: postInfo.ownerIcon,
+        createdAt: postInfo.createdAt,
+        followby: Meteor.userId()
+      })
+    else
+      FollowPosts._collection.update({
+        postId:postId,
+        title: postInfo.title,
+        addontitle: postInfo.addontitle,
+        mainImage:postInfo.mainImage,
+        mainImageStyle: postInfo.mainImageStyle,
+        heart: [],
+        retweet: [],
+        comment: [],
+        browse:  0,
+        publish: postInfo.publish,
+        owner: postInfo.owner,
+        ownerName: postInfo.ownerName,
+        ownerIcon: postInfo.ownerIcon,
+        createdAt: postInfo.createdAt,
+        followby: Meteor.userId()
+      })
   @publishPostHandle = ()->
     layout = JSON.stringify(gridster.serialize())
     pub=[]
@@ -1845,6 +1865,7 @@ if Meteor.isClient
               return
             #post_id = Drafts.findOne({})._id
             publishPostHandle()
+            console.log 'draftToBeUploadedImageData length > 0'
             removeImagesFromCache(draftImageData)
             # Meteor.subscribe('publicPosts', post_id, {
             #   onStop: ()->
