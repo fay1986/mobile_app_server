@@ -2722,8 +2722,13 @@ if(Meteor.isServer){
               }
 
               var lastTime = new Date().getTime()-30*1000
-              var interval = Meteor.setInterval(function(){
-                  var latest = getLatestFollowPostFromNeo4J(userId,lastTime)
+              if(self._session.followPostInterval){
+                  Meteor.clearInterval(self._session.followPostInterval);
+                  self._session.followPostInterval = null;
+              }
+              self._session.followPostInterval = Meteor.setInterval(function(){
+                  var queryResult = getLatestFollowPostFromNeo4J(userId,lastTime)
+                  lastTime = new Date().getTime()-30*1000
                   try{
                       if(queryResult && queryResult.length > 0){
                           queryResult.forEach(function (item) {
@@ -2735,19 +2740,19 @@ if(Meteor.isServer){
                   } catch(e) {
                       console.log(e)
                       console.log('in followposts get latest, exception')
-                      if(interval){
-                          Meteor.clearInterval(interval);
-                          interval = null;
+
+                      if(self._session.followPostInterval){
+                          Meteor.clearInterval(self._session.followPostInterval);
+                          self._session.followPostInterval = null;
                       }
                   }
-                  lastTime = new Date().getTime()-30*1000
               }, 1000*30);
 
               self.onStop(function(){
                   console.log('onStop follow post subscriber')
-                  if(interval){
-                      Meteor.clearInterval(interval);
-                      interval = null;
+                  if(self._session.followPostInterval){
+                      Meteor.clearInterval(self._session.followPostInterval);
+                      self._session.followPostInterval = null;
                   }
               })
               self.removed = function(collection, id){
