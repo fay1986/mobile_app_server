@@ -1,5 +1,23 @@
 
 if Meteor.isClient
+  @checkMqttMsgSessionToUser=(to,text)->
+    count = SimpleChat.MsgSession.find({'userId':to.id,'toUserId':Meteor.userId()}).count()
+    if count is 0
+      doc = {
+        _id: new Mongo.ObjectID()._str,
+        count:0,
+        createAt: new Date(),
+        lastText: text,
+        sessionType: "user",
+        toUserIcon: Meteor.user().profile.icon || '/userPicture.png',
+        toUserId: Meteor.userId(),
+        toUserName: Meteor.user().profile.fullname || Meteor.user().username,
+        updateAt: new Date(),
+        userIcon: to.icon,
+        userId: to.id,
+        userName: to.name
+      }
+      SimpleChat.MsgSession.insert doc
   @sendMqttMessageToUser=(type,to,postData)->
     username = Meteor.user().profile.fullname || Meteor.user().username
     if type is 'thumbsUp'
@@ -37,6 +55,7 @@ if Meteor.isClient
     SimpleChat.Messages.insert msg, ()->
       console.log 'Messages insert.'
       sendMqttUserMessage(msg.to.id, msg)
+    checkMqttMsgSessionToUser(to,text)
   @getLocalImagePath=(path,uri,id)->
     if !path or !id
       return ''
