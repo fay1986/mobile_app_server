@@ -1,3 +1,45 @@
+if (Meteor.isCordova) {
+    var openNotificationInIOSCallback = function(data){
+      try{
+        if (data.additionalData.foreground === true) {
+          return;
+        }
+        console.log("openNotificationInIOSCallback");
+        console.log("##RDBG data: " + JSON.stringify(data));
+
+        bToObj = data;
+        var extras = bToObj.additionalData;
+
+        var type = extras["t"];
+        switch(type){
+         case "dailyrecommend":
+            var postId = extras["id"];
+            console.log('##RDBG dailyrecommend postid: ' + postId);
+            Meteor.subscribe('postInfoById', postId, {
+                onStop: function() {},
+                onReady: function(){
+                    console.log("##RDBG dailyrecommend onReady");
+                    PUB.page('/posts/'+postId);
+                }
+            });
+            break;
+         case "comment":
+         case "palsocomment":
+         case "palsocommentReply":
+         case "pcommentowner":
+         case "personalletter":
+            if(Meteor.user()){
+              Router.go('/bell');
+            }
+            break;
+        }
+      }
+      catch(exception){
+        console.log("openNotificationInIOSCallback:openCallback "+exception);
+      }
+      return
+    }
+}
 if (Meteor.isClient) {
   console.log('on isCordova');
   Meteor.startup(function () {
@@ -63,7 +105,8 @@ if (Meteor.isClient) {
             if(Meteor.user().profile.waitReadCount > 0){
               Meteor.users.update({_id: Meteor.user()._id}, {$set: {'profile.waitReadCount': 0}});
             }
-            if (data.additionalData.foreground === false) {
+            openNotificationInIOSCallback(data);
+            if (data.additionalData.foreground === false) {    
               console.log('Push notification when background');
               window.refreshMainDataSource();
               return;
