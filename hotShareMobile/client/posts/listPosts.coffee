@@ -49,8 +49,6 @@ if Meteor.isClient
     #     return true
     moreResults:->
       !(FollowPosts.find().count() < Session.get("followpostsitemsLimit"))
-    followPostsNoData: ->
-      FollowPosts.find().count() <= 0
     loading:->
       Session.equals('followPostsCollection','loading')
     loadError:->
