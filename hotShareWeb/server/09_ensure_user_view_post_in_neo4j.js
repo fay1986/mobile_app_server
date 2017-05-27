@@ -88,10 +88,57 @@ if(Meteor.isServer){
             console.log('Need insert user')
             insertUserToNeo4j(userId)
         }
-        var viewInNeo4j = runQueryOne('MATCH (u:User{userId:"'+userId+'"})-[v:VIEWER]->(p:Post{postId:"'+postId+'"})  RETURN v')
+        var viewInNeo4j = runQueryOne()
         if(!viewInNeo4j){
             console.log('Need insert view')
             insertViewerToNeo4j(userId,postId)
+        }
+
+        var queryString = 'MATCH (u:User)-[v:VIEWER]->(p:Post{postId:"'+postId+'"})  RETURN count(v),collect(u.userId)'
+        var queryResult = null;
+        try {
+            queryResult = Neo4j.query(queryString);
+        } catch (_error) {
+        }
+        if (queryResult && queryResult.length>0){
+            var count = queryResult[0][0]
+            console.log(count)
+            var inDBCount = Viewers.find({postId:postId}).count()
+            if(count !== inDBCount){
+                var inNeo4jViewerIDs=queryResult[0][1]
+                var inDBViewerIDs = Viewers.find({postId:postId},{fields:{_id:false,userId:true}}).fetch()
+                inDBViewerIDs = inDBViewerIDs.map(function(item){
+                    if(item && item.userId){
+                        return item.userId
+                    } else {
+                        return null
+                    }
+                })
+                console.log('Count of userId('+inDBCount+') is not same as in NEO4j('+ count +')')
+                console.log(inDBViewerIDs)
+                var toRemoveInNeo4j = inNeo4jViewerIDs.diff(inDBViewerIDs)
+                var toAddToNeo4j = inDBViewerIDs.diff(inNeo4jViewerIDs)
+                console.log('To Remove in Neo4J:'+toRemoveInNeo4j)
+                if(toRemoveInNeo4j && toRemoveInNeo4j.length > 0){
+                    toRemoveInNeo4j.forEach(function(otherUserId){
+                        var removestr = 'MATCH (:User{userId:"'+otherUserId+'"})-[v:VIEWER]->(:Post{postId:"'+postId+'"}) DELETE v';
+                        try {
+                            queryResult = Neo4j.query(removestr);
+                        } catch (_error) {
+                            console.log(_error)
+                        }
+                    })
+                }
+                console.log('To Add in Neo4J:'+toAddToNeo4j)
+                if(toAddToNeo4j && toAddToNeo4j.length > 0){
+                    toAddToNeo4j.forEach(function(otherUserId){
+                        insertViewerToNeo4j(otherUserId,postId)
+                    })
+                }
+                //var userListIn
+            } else {
+                console.log('Count of user('+inDBCount+') is same as in NEO4j('+ count +')')
+            }
         }
     }
 }

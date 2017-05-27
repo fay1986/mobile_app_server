@@ -122,6 +122,9 @@ if(Meteor.isClient){
             console.log('followPostsCollection ' + err);
             if(Meteor.user()){
                 followPostStatus = 'loaded'
+                Session.set('followPostsCollection','error')
+
+                Session.set("followpostsitemsLimit",FollowPosts.find({followby:Meteor.userId()}).count())
                 Meteor.setTimeout(toLoadFollowPost,2000);
             }
         };
@@ -129,16 +132,22 @@ if(Meteor.isClient){
             if( followPostStatus === 'loaded'){
                 console.log('Called here')
                 followPostStatus = 'loading'
+                Session.set('followPostsCollection','loading')
+                Session.set("followpostsitemsLimit", FOLLOWPOSTS_ITEMS_INCREMENT+followPostsInMemory);
                 Meteor.subscribe('followposts', FOLLOWPOSTS_ITEMS_INCREMENT, followPostsInMemory, {
                     onError: subscribeFollowPostsOnError,
                     onStop:function(){
                         if (followPostStatus === 'loading'){
                             followPostStatus = 'loaded'
+                            Session.set('followPostsCollection','loaded')
+                            Session.set("followpostsitemsLimit",FollowPosts.find({followby:Meteor.userId()}).count())
                         }
                     },
                     onReady: function () {
                         console.log('followPostsCollection loaded');
                         followPostStatus = 'loaded'
+                        Session.set("followpostsitemsLimit",FollowPosts.find({followby:Meteor.userId()}).count())
+                        Session.set('followPostsCollection','loaded')
                     }
                 });
             }

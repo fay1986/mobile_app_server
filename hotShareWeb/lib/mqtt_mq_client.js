@@ -8,9 +8,9 @@ if(Meteor.isClient){
         if(!mqtt_connection){
             var mqttOptions = {
                 clean:false,
-                connectTimeout: 10*1000,
+                connectTimeout: 30*1000,
                 keepalive:30,
-                reconnectPeriod:10*1000,
+                reconnectPeriod: 40*1000,
                 /*incomingStore: mqtt_store_manager.incoming,
                 outgoingStore: mqtt_store_manager.outgoing,*/
                 clientId:clientId

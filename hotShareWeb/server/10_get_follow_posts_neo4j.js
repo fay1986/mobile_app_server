@@ -3,14 +3,14 @@
  */
 
 if(Meteor.isServer){
-    getLatestFollowPostFromNeo4J = function(since){
+    getLatestFollowPostFromNeo4J = function(userId,since){
         // we need show posts wrote by self
         var queryString = 'MATCH (u:User{userId:"'+userId+'"})-[f:FOLLOW]->(u1:User) with u1 ' +
             'MATCH (p:Post{ownerId:u1.userId}) ' +
-            'WHERE p.createdAt > ' + since +
+            'WHERE p.createdAt > ' + since + ' ' +
             'WITH COLLECT(p) AS pc ' +
             'OPTIONAL MATCH (p1:Post{ownerId:"'+userId+'"}) ' +
-            'WHERE p1.createdAt > ' + since +
+            'WHERE p1.createdAt > ' + since + ' ' +
             'WITH COLLECT(p1)+pc AS pAll ' +
             'UNWIND pAll AS all ' +
             'RETURN all ORDER BY all.createdAt DESC LIMIT '+ 30

@@ -2290,9 +2290,7 @@ if(Meteor.isServer){
                     if(self._session.skipPostFriend[postId+'_newfriends'] === 0){
                         try{self.added("postfriendsCount", userId+'_'+postId, {count: self._session.skipPostFriend[postId+'_newfriends']});}catch(e){}
                     }
-                    // Since this was called in memont fetching, no need to check again.
-                    // Momont subscriber is called before this one on client side if behavior changed, check here.
-                    //ensureUserViewPostInNeo4j(userId,postId)
+                    ensureUserViewPostInNeo4j(userId,postId)
                     // var queryResult = getPostNewFriends( userId /*Test_userId*/,postId,self._session.skipPostFriend[postId],queryLimit);
                     var queryResult = getPostNewFriends( userId,postId,0,100);
                     self._session.skipPostFriend[postId] += queryLimit;
@@ -2692,69 +2690,6 @@ if(Meteor.isServer){
         //return FollowPosts.find({followby: this.userId}, {sort: {createdAt: -1}, limit:limit});
     });
   if(withNeo4JInFollowPosts){
-      var sessions = {};
-      var sessionObj = function(userId){
-        if (sessions[userId])
-          return sessions[userId];
-
-        var obj = new Object();
-        var changeds = [];
-        var addeds = [];
-        var docs =[];
-        var interval = Meteor.setInterval(function(){
-          try{
-            var queryResult = getFollowPostFromNeo4J(userId, 0, docs.length >= 50 ? 50 : (docs.length <= 0 ? 10 : docs.length));
-            if (queryResult && queryResult.length > 0){
-              queryResult.forEach(function (item){
-                var fields = formatFollowPost(userId, item);
-                var index = _.pluck(docs, 'postId').indexOf(item.postId);
-                if (index >= 0){
-                  if (!EJSON.equals(fields, docs[index])){
-                    docs[index] = fields;
-                    changeds.forEach(function(callback){
-                      callback && callback(item.postId, fields);
-                    });
-                  }
-                } else {
-                  docs.push(fields);
-                  addeds.forEach(function(callback){
-                    callback && callback(item.postId, fields);
-                  });
-                }
-              });
-            }
-            console.log('refresh followpost', docs.length >= 50 ? 50 : (docs.length <= 0 ? 10 : docs.length), ' =>', userId);
-          } catch(e){console.log('refresh followpost error:', e);}
-        }, 1000*30);
-        obj.onAdded = function(callback){
-          callback && addeds.push(callback);
-        };
-        obj.onChanged = function(callback){
-          callback && changeds.push(callback);
-        };
-        obj.addDoc = function(doc){
-          if (_.pluck(docs, 'postId').indexOf(doc.postId) >= 0)
-            return;
-
-          var fields = formatFollowPost(userId, doc);
-          docs.push(fields);
-        };
-        obj.stop = function(){
-          try{if(interval){Meteor.clearInterval(interval);}}catch(e){}
-          delete sessions[userId];
-          addeds = null;
-          changeds = null;
-          docs = null;
-          interval = null;
-          obj = null;
-          console.log('close followpost refresh', userId);
-        };
-
-        console.log('init followpost session =>', userId);
-        sessions[userId] = obj;
-        return obj;
-      };
-
       Meteor.publish("followposts", function(limit,skip) {
           console.log('in publish followposts skip:'+skip+' limit:'+limit)
           
@@ -2786,17 +2721,34 @@ if(Meteor.isServer){
                   self._session.skipFollowPost[userId] += queryLimit;
               }
 
-              var session = new sessionObj(self.userId);
-              session.onAdded(function(id, fields){
-                self.added('followposts', id, fields);
-              });
-              session.onChanged(function(id, fields){
-                self.changed('followposts', id, fields);
-              });
+              var lastTime = new Date().getTime()-30*1000
+              var interval = Meteor.setInterval(function(){
+                  var latest = getLatestFollowPostFromNeo4J(userId,lastTime)
+                  try{
+                      if(queryResult && queryResult.length > 0){
+                          queryResult.forEach(function (item) {
+                              if(item){
+                                  addPostInfoInFollowPosts(self,userId,item);
+                              }
+                          });
+                      }
+                  } catch(e) {
+                      console.log(e)
+                      console.log('in followposts get latest, exception')
+                      if(interval){
+                          Meteor.clearInterval(interval);
+                          interval = null;
+                      }
+                  }
+                  lastTime = new Date().getTime()-30*1000
+              }, 1000*30);
 
               self.onStop(function(){
-                  // console.log('onStop New Friend')
-                  session.stop();
+                  console.log('onStop follow post subscriber')
+                  if(interval){
+                      Meteor.clearInterval(interval);
+                      interval = null;
+                  }
               })
               self.removed = function(collection, id){
                   //console.log('removing '+id+' in '+collection +' but no, we dont want to resend data to client')
@@ -2810,12 +2762,14 @@ if(Meteor.isServer){
                       if(queryResult && queryResult.length > 0){
                           queryResult.forEach(function (item) {
                               if(item){
-                                  session.addDoc(item);
                                   addPostInfoInFollowPosts(self,userId,item);
                               }
                           });
                       }
-                  } catch(e){}
+                  } catch(e){
+                      console.log(e)
+                      console.log('in followposts publish, exception')
+                  }
                   self.ready();
               //})
               return;
