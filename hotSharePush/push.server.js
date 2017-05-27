@@ -46,7 +46,7 @@ exports.CordovaPush = function(androidServerKey, options) {
 
     var apnConnection = new apn.Connection( options );
     // (cert.pem and key.pem)
-    self.sendIOS = function(from, userToken, title, text, count, priority) {
+    self.sendIOS = function(from, userToken, title, text, count, extras, priority) {
         priority = (priority || priority === 0)? priority : 10;
 
         var myDevice = new apn.Device(userToken);
@@ -58,7 +58,11 @@ exports.CordovaPush = function(androidServerKey, options) {
         note.sound = "ping.aiff";
         //note.sound = ""; // XXX: Does this work?
         note.alert = text;
-        note.payload = {'messageFrom': from };
+        if(extras && extras.postId){
+            note.payload = {'messageFrom': from, 'id':extras.postId,'t':extras.type };
+        } else {
+            note.payload = {'messageFrom': from };
+        }
         note.priority = priority;
 
         //console.log('I:Send message to: ' + userToken + ' count=' + count);

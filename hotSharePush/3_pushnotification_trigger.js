@@ -71,7 +71,7 @@
     pushServer.sendIOS('me', token, '', content, waitReadCount);
 }*/
           console.log("Send notification: iOS,  token="+token+", content="+content);
-          return pushServer.sendIOS('me', token, '', content, waitReadCount);
+          return pushServer.sendIOS('me', token, '', content, waitReadCount,extras);
         } else if (pushToken.type === 'GCM') {
           token = pushToken.token;
           console.log("Send notification: GCM,  token="+token+", content="+content);
