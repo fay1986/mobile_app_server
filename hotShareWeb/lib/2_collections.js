@@ -3496,6 +3496,9 @@ if(Meteor.isServer){
           return false;
       },
     update: function(userId, doc, fieldNames, modifier) {
+      if (doc.message_post)
+        return false;
+
       // Need refresh CDN since the post data is going to be changed
       // Currently our quota is 10k.
       deferSetImmediate(function(){

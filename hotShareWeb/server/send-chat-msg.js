@@ -70,14 +70,14 @@ Meteor.startup(function(){
 
     return pub;
   };
-  var insertNewMsg = function(pub, doc){
+  var insertNewMsg = function(pub, doc, userId){
     switch(doc.type){
       case 'text':
         pub.unshift({
           _id: new Mongo.ObjectID()._str,
           type: 'text',
           isImage: false,
-          owner: fromUser._id,
+          owner: userId,
           text: doc.form.name.trim() + ': ' + new Date(doc.create_time).format('yyyy-MM-dd hh:mm') + '\n' + doc.text,
           style: '',
           layout: {
@@ -94,7 +94,7 @@ Meteor.startup(function(){
           _id: new Mongo.ObjectID()._str,
           type: 'image',
           isImage: true,
-          owner: fromUser._id,
+          owner: userId,
           imgUrl: doc.images[0].url,
           data_row: 1,
           data_col: 1,
@@ -105,7 +105,7 @@ Meteor.startup(function(){
           _id: new Mongo.ObjectID()._str,
           type: 'text',
           isImage: false,
-          owner: fromUser._id,
+          owner: userId,
           text: doc.form.name.trim() + ': ' + new Date(doc.create_time).format('yyyy-MM-dd hh:mm') + '\n[图片]',
           style: '',
           layout: {
@@ -119,8 +119,33 @@ Meteor.startup(function(){
         break;
     }
   };
+  var upsetTipImg = function(pub, userId){
+    var index = -1;
+    for(var i=0;i<pub.length;i++){
+      if(pub[i].tipImg){
+        index = i;
+        break;
+      }
+    }
+    if(index >= 0)
+      pub.splice(index, 1);
+
+    pub.unshift({
+      _id: new Mongo.ObjectID()._str,
+      type: 'image',
+      isImage: true,
+      owner: userId,
+      imgUrl: 'http://data.tiegushi.com/Ju3gGj3Xb4CFyrihY_1495872904864_cdv_photo_003.jpg',
+      data_row: 1,
+      data_col: 1,
+      data_sizex: 6,
+      data_sizey: 3,
+      tipImg: true
+    });
+  }
   var findAndCreatePost = function(userId, doc){
-    var post = mqttPosts.findOne({owner: fromUser._id, toUserId: userId});
+    var user = Meteor.users.findOne({_id: userId});
+    var post = mqttPosts.findOne({owner: userId, message_post: true});
     if (!post){
       post = {
         pub: [
@@ -128,7 +153,7 @@ Meteor.startup(function(){
             _id: new Mongo.ObjectID()._str,
             type: 'text',
             isImage: false,
-            owner: fromUser._id,
+            owner: user._id,
             text: '打开链接更新最新版本，随时私信聊天，轻松互动，下载地址：http://cdn.tiegushi.com',
             layout: {
               align: 'center'
@@ -148,21 +173,22 @@ Meteor.startup(function(){
         retweet: [],
         comment: [],
         commentsCount: 0,
-        mainImage: 'http://data.tiegushi.com/Ju3gGj3Xb4CFyrihY_1495617098946_cdv_photo_002.jpg',
+        mainImage: 'http://data.tiegushi.com/Ju3gGj3Xb4CFyrihY_1495869374666_cdv_photo_002.jpg',
         publish: true,
-        owner: fromUser._id,
-        ownerName: fromUser.profile && fromUser.profile.fullname ? fromUser.profile.fullname : fromUser.username,
-        ownerIcon: fromUser.profile && fromUser.profile.icon ? fromUser.profile.icon : '/userPicture.png',
+        owner: user._id,
+        ownerName: user.profile && user.profile.fullname ? user.profile.fullname : user.username,
+        ownerIcon: user.profile && user.profile.icon ? user.profile.icon : '/userPicture.png',
         createdAt: new Date(),
         isReview: true,
         insertHook: true,
         import_status: 'done',
         fromUrl: '',
-        toUserId: userId,
+        message_post: true,
         message_count: 0
       }
       console.log('insert post:', post._id);
       insertNewMsg(post.pub, doc);
+      upsetTipImg(post.pub, userId);
       formatPub(post.pub);
       post.message_count += 1;
       post.title = '您有新的私信消息（'+post.message_count+'条）';
@@ -171,6 +197,7 @@ Meteor.startup(function(){
     } else {
       console.log('update post:', post._id);
       insertNewMsg(post.pub, doc);
+      upsetTipImg(post.pub, userId);
       formatPub(post.pub);
       post.message_count += 1;
       post.title = '您有新的私信消息（'+post.message_count+'条）';
@@ -181,7 +208,7 @@ Meteor.startup(function(){
     return post;
   };
   var createOrUpdateFollowPosts = function(userId, post){
-    var followPost = FollowPosts.findOne({owner: fromUser._id, followby: userId});
+    var followPost = FollowPosts.findOne({owner: userId, message_post: true});
     if (!followPost){
       followPost = {
         _id: new Mongo.ObjectID()._str,
@@ -199,6 +226,7 @@ Meteor.startup(function(){
         ownerName:post.ownerName,
         ownerIcon:post.ownerIcon,
         createdAt: new Date(),
+        message_post: true,
         followby: userId
       };
       followPost.title = post.title;
