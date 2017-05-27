@@ -63,7 +63,7 @@ function sendNotification(db, cb) {
           };
           content = '故事贴小秘:推荐「'+postTitle+'」'+' ——'+postCommandText;
           var extras = {
-            type: 'tiegushirecommend',
+            type: 'dailyrecommend',
             postId: postId
           }
           var waitReadCount = (user.profile && user.profile.waitReadCount) ? user.profile.waitReadCount : 1;
@@ -77,7 +77,7 @@ function sendNotification(db, cb) {
 
           var dataObj = {
             fromserver: encodeURIComponent(serverUrl),
-            eventType: 'tiegushirecommend',
+            eventType: 'dailyrecommend',
             doc: tidyDoc,
             userId: 'AsK6G8FvBn525bgEC',
             content: content,
