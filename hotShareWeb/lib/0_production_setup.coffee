@@ -34,5 +34,5 @@
 @withNeo4JInMoment = true
 @withNeo4JInFollowPosts = true
 @MQTT_TIME_DIFF = 0
-@withLoginTokenMax = 10
+# @withLoginTokenMax = 10
 @CHECK_UPDATE = true # 强制更新和推荐更新启用标志
