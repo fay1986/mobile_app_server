@@ -44,13 +44,20 @@ if Meteor.isClient
         window.localStorage.setItem('latestVersion',latestVersion)
         if currentVersion < stableVersion
           # 强制升级
-          navigator.notification.alert('建议升级到' + latestVersion+'\n主要更新'+stableRelease,goToUpdate,'您使用的故事贴版本太旧啦！', '立即升级')
+          window.updateAPPVersion(data.stable_title,stableRelease, data.stable_styles,false)
+          # navigator.notification.alert('建议升级到' + stableVersion+'\n主要更新'+stableRelease,goToUpdate,'您使用的故事贴版本太旧啦！', '立即升级')
         else if currentVersion < latestVersion
+          updateTipTimes = window.localStorage.getItem('stable_update_tip_times')
           # 推荐升级
-          navigator.notification.confirm('故事贴 V' + latestVersion+' 已经发布\n主要更新: \n'+latestRelease, (index)->
-            if index is 1
-              goToUpdate()
-          '有新版本', '立即升级,稍后再说')
+          # navigator.notification.confirm('故事贴 V' + latestVersion+' 已经发布\n主要更新: \n'+latestRelease, (index)->
+          #   if index is 1
+          #     goToUpdate()
+          # '有新版本', '立即升级,稍后再说')
+          if !updateTipTimes
+            window.localStorage.setItem('stable_update_tip_times',1)
+          window.localStorage.setItem('stable_update_tip_times',Number(updateTipTimes)+1)
+          if updateTipTimes and updateTipTimes%data.latest_times is 0
+            window.updateAPPVersion(data.latest_title,latestRelease, data.latest_styles,true)
       )
     else
       return
