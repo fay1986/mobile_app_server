@@ -29,6 +29,13 @@ window.updateAPPVersion = function (title,release,styles,isLatest){
                 '<div class="nw-box-foot" style="'+(styles.foot || '')+'">'+foot+'</div>'+
             '</div>'+
         '</div>';
-  $('body').append(html);
-  $('.newVersion').fadeIn();
+  var updateBg = new Image();
+  updateBg.onload = function(){
+    $('body').append(html);
+    $('.newVersion').fadeIn();
+  }
+  updateBg.onerror = function(){
+    console.log('load update background error')
+  }
+  updateBg.src = styles.bgimg;
 };

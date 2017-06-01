@@ -80,7 +80,7 @@ if Meteor.isClient
     if _latestVersion > _version_of_build
       # window.localStorage.setItem("latestVersion", latestVersion)
       console.log 'set latestVersionAlert true. '
-      Session.set('latestVersionAlert', true)
+      # Session.set('latestVersionAlert', true) # 使用新的升级提醒
     else
       Session.set('latestVersionAlert', false)
 
