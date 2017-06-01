@@ -15,19 +15,21 @@ var versionInfo = {
     stable_title:'升级到新版本',
     latest_title:'更新内容',
     stable_styles: {
-        bg:'background: url(http://192.168.0.104:8080/bg.png) no-repeat center 100%;background-size: cover;',
+        bgimg:'http://data.tiegushi.com/versions/bg.png',
+        bg:'background: url(http://data.tiegushi.com/versions/bg.png) no-repeat center 100%;background-size: cover;',
         box: 'text-align: center;top: auto;transform: none;left: 10%;bottom: 40px;background: none;',
-        head: '',
-        body: 'text-align: center;height: 160px;min-height: 160px;',
+        head: 'font-size:24px;',
+        body: 'text-align: center;height: 50%;min-height: 160px;',
         foot:'',
-        upbtn:'color: #fff;border-radius: 6px; width: 100%; background: #1a78d7;',
+        upbtn:'color: #fff;border-radius: 6px; width: 100%; background: #1a78d7;margin:0; height:48px;line-height:48px;',
         laterbtn:''
     },
     latest_styles: {
+        bgimg:'http://data.tiegushi.com/versions/bg2.png',
         bg:'',
-        box: 'background: url(http://192.168.0.104:8080/bg2.png) no-repeat;background-size: cover;max-width: 320px;',
+        box: 'background: url(http://data.tiegushi.com/versions/bg2.png) no-repeat;background-size: cover;max-width: 320px;',
         head: 'margin-top: 112px;text-align: left;position: absolute;left: 24px;height: 30px;line-height: 30px;',
-        body: 'margin: 10px 30px;margin-top: 126px;height: 140px;border: 1px dotted #000000;border-image: url(http://192.168.0.104:8080/border.png) 4; border-width: 2px;padding: 10px;',
+        body: 'margin: 10px 30px;margin-top: 126px;height: 140px;border: 1px dotted #000000;border-image: url(http://data.tiegushi.com/versions/border.png) 4; border-width: 2px;padding: 10px;',
         foot:'',
         upbtn:'color: #fff;background: #1a78d7;border-radius: 16px;',
         laterbtn:'border: none;'
