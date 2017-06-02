@@ -68,6 +68,16 @@ if(Meteor.isServer){
         runQueryOne(queryString)
     }
     function insertViewerToNeo4j(userId,postId){
+
+        /* 在Neo4J中创建用户看了帖子的VIEWER关系记录
+         * 需要注意不要创建出多条相同语义的关系，这里使用Merge来确保操作的是同一条 MERGE SET是操作同一条
+         * SET v.count = CASE v.count WHEN NULL THEN 1 ELSE v.count+1 END 计算v关系中阅读此书+1
+         * 如果Neo4J中已经保存了多条同等关系，这句话是用来确保 删除多余的数据
+         * collect(v) 是将满足约束的关系做成数组
+         * tail(collect(v)) as coll,  tail 是获得除去第一条之外，之后的所有数据
+         * FOREACH(x in coll | delete x)  是删除第一条之后的所有同等数据
+         * WITH head(collect(v)) as v1  head 是第一条记录，RETURN v1 将这条记录返回（目前不对结果做处理）
+         */
         var createstr = 'MATCH (u:User {userId:"'+userId+'"}),(p:Post {postId:"'+postId+'"}) '+
             'MERGE  (u)-[v:VIEWER]->(p) '+
             'SET v.by = '+new Date().getTime()+' ' +
@@ -77,6 +87,15 @@ if(Meteor.isServer){
             'RETURN v1';
         runQueryOne(createstr)
     }
+    /*
+     * 本函数目的是保证Neo4J里记录的VIEWER数据关系和Mongodb中的数据存在且一致
+     * 用户userId, 帖子 postId
+     * 操作过程：
+     * 1. postId在Neo4j中是否存在（postInNeo4j），不存在则创建
+     * 2. 用户userId在Neo4j中是否存在（userInNeo4j），不存在则创建
+     * 3. 用户看了帖子，[:USER{userId:userId}]-[v:VIEWER]->[:POST{postId:postId}],v是否存在，不存在则建立
+     * 4. 看同一个帖子的用户数在 Neo4J和Mongodb中是否一致，多了的删除，少了的增加
+     */
     ensureUserViewPostInNeo4j = function(userId,postId){
         var postInNeo4j = runQueryOne('MATCH (p:Post{postId:"'+postId+'"}) RETURN p')
         if(!postInNeo4j){
@@ -94,6 +113,11 @@ if(Meteor.isServer){
             insertViewerToNeo4j(userId,postId)
         }
 
+
+        /* 计算Neo4J中看了帖子的用户列表
+         * count(v)计算数量，列表用 collect(u.userId)合并到一个数组里
+         * 该查询返回一个二维数组 [0][0] 是 count(v), [0][1] 是看了帖子的用户列表
+         */
         var queryString = 'MATCH (u:User)-[v:VIEWER]->(p:Post{postId:"'+postId+'"})  RETURN count(v),collect(u.userId)'
         var queryResult = null;
         try {
@@ -121,6 +145,7 @@ if(Meteor.isServer){
                 console.log('To Remove in Neo4J:'+toRemoveInNeo4j)
                 if(toRemoveInNeo4j && toRemoveInNeo4j.length > 0){
                     toRemoveInNeo4j.forEach(function(otherUserId){
+                        // 在Neo4J中删除Mongodb中不存在的阅读关系v
                         var removestr = 'MATCH (:User{userId:"'+otherUserId+'"})-[v:VIEWER]->(:Post{postId:"'+postId+'"}) DELETE v';
                         try {
                             queryResult = Neo4j.query(removestr);

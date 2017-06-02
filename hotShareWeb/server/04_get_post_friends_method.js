@@ -4,6 +4,18 @@ if(Meteor.isServer){
         if (!Match.test(userId, String) || !Match.test(postId, String) || !Match.test(skip, Number) || !Match.test(limit, Number)) {
             return [];
         }
+        /*
+         * 读懂本条必备的知识：
+         * MATCH/WRERE
+         * WITH AS, 定义相当于局部变量
+         * distinct 剔除重复
+         * collect 将数据合并到一个数组中
+         * size 计算数组的大小
+         *
+         * 前三行计算相遇过的朋友（看过本帖的人，和用户看过的其他的帖子的用户数量）
+         * 第四行计算相遇次数
+         * 第五行根据createdAt排序
+         */
         var queryString = 'MATCH (u:User) WHERE u.userId="'+userId+'" WITH u ' +
             'MATCH (p:Post) WHERE p.postId="'+postId+'" WITH u,p ' +
             'MATCH (u1:User)-[v1:VIEWER]->(p:Post) WHERE u1.userId <>"'+userId+'" WITH distinct u1 as meeter,u,p SKIP '+skip+' LIMIT '+ limit +

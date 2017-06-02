@@ -7,6 +7,14 @@ if(Meteor.isServer){
 
         var suggestPostsUserId = Meteor.users.findOne({'username': 'suggestPosts'})._id;
         getSuggestPostsFromNeo4J = function(userId,postId,skip,limit){
+            /*
+             * 读懂本条必备的知识：
+             * MATCH/WRERE
+             * WITH AS, 定义相当于局部变量
+             * distinct 剔除重复
+             * collect 将数据合并到一个数组中
+             * UNWIND 将数据解散到 Neo4J可以操作的逐条记录
+             */
             var queryString = '' +
                 'MATCH (u:User)-[v:VIEWER]->(p:Post)<--(u1:User),(u1:User)-[v1:VIEWER]->(p1:Post) ' +
                 'WHERE p.postId="'+ postId + '" and ' +
