@@ -860,8 +860,8 @@
 .storySource input[type="radio"]{display: inline-block;}
 .storySource input[type="radio"]:checked + label{color: #166fff;}
 
-.post-theme-btn{
-  width: 68px;height: 68px;padding: 10px;color: #fff;position: fixed;right: 5px;bottom: 55px;z-index: 9999;
+.post-theme-btn,.post-pin-image{
+  width: 68px;height: 68px;padding: 10px;color: #fff;position: fixed;right: 5px;bottom: 55px;z-index: 9999; cursor: pointer;
   div{width: 48px; height: 48px; line-height: 48px; background-color: #00c4ff;text-align: center;border-radius: 50%; box-shadow: 1px 3px 15px #4a4949;}
 }
 .post-theme-box-mask{position: fixed; left: 0; top: 0; right: 0; bottom: 0; z-index: 10000; display: none;}
@@ -915,4 +915,19 @@
       transition: all .5s ease-out;
     }
   }
+}
+
+.post-pin-image {
+  left: 5px;
+  div{ background-color: orangered}
+}
+
+.pinImagesContent{
+  padding: 10px;
+  ul{height: 90px;height: 30vw; padding: 0; margin: 0;}
+  li{
+    float: left;width: 33%;height: 90px;height: 30vw; padding: 0 5px;
+    img{width: 100%; height: 100%; object-fit: cover;}
+  }
+  .inlineScoring{padding: 10px 5px;}
 }
