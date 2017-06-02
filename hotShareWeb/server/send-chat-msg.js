@@ -145,7 +145,8 @@ Meteor.startup(function(){
   }
   var findAndCreatePost = function(userId, doc){
     var user = Meteor.users.findOne({_id: userId});
-    var post = mqttPosts.findOne({owner: userId, message_post: true});
+    var postId = userId+'11';
+    var post = mqttPosts.findOne({_id:postId});
     if (!post){
       post = {
         pub: [
@@ -165,7 +166,7 @@ Meteor.startup(function(){
             data_sizey: 3
           }
         ],
-        _id: new Mongo.ObjectID()._str,
+        _id: postId,
         title: '您有新的私信消息（1条）',
         addontitle: '下载新版本可互动',
         browse: 0,
@@ -208,10 +209,11 @@ Meteor.startup(function(){
     return post;
   };
   var createOrUpdateFollowPosts = function(userId, post){
-    var followPost = FollowPosts.findOne({owner: userId, message_post: true});
+    var postId = userId + '11';
+    var followPost = FollowPosts.findOne({_id:postId});
     if (!followPost){
       followPost = {
-        _id: new Mongo.ObjectID()._str,
+        _id: postId,
         postId:post._id,
         title:post.title,
         addontitle:post.addontitle,
