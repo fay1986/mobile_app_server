@@ -268,7 +268,7 @@ if (Meteor.isCordova) {
         }else{
           PUB.back();
         }
-      } else if (currentRoute == undefined || currentRoute =="search" || currentRoute =="add" || currentRoute =="bell" || currentRoute =="user" || currentRoute == "authOverlay") {
+      } else if (currentRoute == undefined || currentRoute =="search" || currentRoute =="add" ||  currentRoute =="registerFollow" || currentRoute =="bell" || currentRoute =="user" || currentRoute == "authOverlay") {
         window.plugins.toast.showShortBottom('再点击一次退出!');
         document.removeEventListener("backbutton", eventBackButton, false); // 注销返回键
         document.addEventListener("backbutton", exitApp, false);// 绑定退出事件
