@@ -15,4 +15,4 @@ rest_api_url = "http://"+server_domain_name;
 review_post_url = "http://"+server_domain_name + '/restapi/postInsertHook/';
 //review_post_url = 'http://192.168.1.65:5000/restapi/postInsertHook/';
 theme_host_url = 'http://cdcdn.tiegushi.com';
-version_host_url = 'http://hotversion.duapp.com';
+version_host_url = 'http://data.tiegushi.com/versions/version.json';
