@@ -40,6 +40,8 @@ if Meteor.isServer
       console.log(err, res)
     )
 
+    rawPath = 'http://'  +server_domain_name+'/raw/' + postId;
+
     cdn.refreshObjectCaches({
         ObjectType: 'File',
         ObjectPath: rawPath
@@ -47,7 +49,6 @@ if Meteor.isServer
         console.log(err, res)
     )
 
-    rawPath = 'http://'  +server_domain_name+'/raw/' + postId;
     cdn.refreshObjectCaches({
         ObjectType: 'File',
         ObjectPath: rawPath
