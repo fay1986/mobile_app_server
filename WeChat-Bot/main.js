@@ -8,6 +8,7 @@ var login = require('ddp-login');
 var async = require('async');
 var mqtt = require('mqtt');
 var http= require('http');
+var debug_on = process.env.DEBUG || false;
 
 var Datastore = require('nedb')
     , db = new Datastore({ filename: 'wechatbot.db', autoload: true });
@@ -37,8 +38,9 @@ mqttClient.on('message' ,function (topic,message) {
             }, {
                 $set: {by: new Date().getTime()}
             }, {upsert: true}, function (err, doc) {
-                console.log(err)
-                console.log(doc)
+                debug_on && console.log(err)
+                debug_on && console.log(doc)
+                db.persistence.compactDatafile();
                 // A new document { _id: 'id5', planet: 'Pluton', distance: 38 } has been added to the collection
             });
         }
@@ -108,6 +110,7 @@ function testLogin(callback){
             } catch(e){
             }
             try {
+                console.log('机器人助理 无法通过DDP连接到服务器 '+host+':'+port)
                 callback('机器人助理 无法通过DDP连接到服务器 '+host+':'+port)
             } catch(e){
             }
@@ -120,6 +123,7 @@ function testLogin(callback){
                 //reportToWechatRoomAlertALL('机器人助理 登陆故事贴失败')
                 ddpClient.close()
                 try{
+                    console.log('无法通过DDP登陆故事贴')
                     callback('无法通过DDP登陆故事贴')
                 } catch (e){
                 }
@@ -131,6 +135,7 @@ function testLogin(callback){
                 // reportToWechatRoom('机器人助理 成功登陆故事贴,耗时'+timeDiff+'ms')
                 // ddpClient.close()
                 try{
+                    debug_on && console.log('成功登陆('+timeDiff+'ms)')
                     callback(null,'成功登陆('+timeDiff+'ms)')
                 } catch (e){
                 }
@@ -152,19 +157,21 @@ function testSubscribeShowPost(callback){
                 ddpClient.unsubscribe('WrnSqg89a3r4nPwXr')
                 ddpClient.close()
                 try{
+                    console.log('无法通过DDP获取帖子数据')
                     callback('无法通过DDP获取帖子数据')
                 } catch (e){
 
                 }
                 return
             } else {
-                console.log('posts complete:');
-                console.log(ddpClient.collections.posts);
+                debug_on && console.log('posts complete:');
+                debug_on && console.log(ddpClient.collections.posts);
                 var timeDiff = new Date() - begin
                 //reportToWechatRoom('成功获取一篇帖子数据,  耗时'+timeDiff+'ms')
                 ddpClient.unsubscribe('WrnSqg89a3r4nPwXr')
                 ddpClient.close()
                 try{
+                    debug_on && console.log('帖子数据('+timeDiff+'ms)');
                     callback(null,'帖子数据('+timeDiff+'ms)')
                 } catch (e){
                 }
@@ -184,6 +191,7 @@ function getProductionServerOnlineStatus(callback){
                     for(var i=0;i<docs.length;i++){
                         serverLists.push(docs[i].service+'['+docs[i].serviceIndex+']')
                     }
+                    console.log('不在线或异常，请检查')
                     callback(serverLists.toString()+'不在线或异常，请检查')
                 })
                 return
@@ -202,6 +210,7 @@ function getProductionServerOnlineStatus(callback){
                     }
                     try{
                         var msg = '['+prodServerOnline+'/' +prodServer+']产品服务器在线,['+testServerOnline+'/' +testServer+']本地服务器在线'
+                        debug_on && console.log(msg)
                         callback(null,msg)
                     } catch (e){
                     }
@@ -213,6 +222,10 @@ function getProductionServerOnlineStatus(callback){
 function reportHowManyProductionServerIsBeingMonitored() {
     db.find({isProd: true}, function (err, docs) {
         var serverLists = []
+        if(err) {
+            console.log('nedb find err: ' + err)
+        }
+
         if (docs.length > 0) {
             for (var i = 0; i < docs.length; i++) {
                 serverLists.push(docs[i].service + '[' + docs[i].serviceIndex + ']')
@@ -229,18 +242,22 @@ function reportHowManyProductionServerIsBeingMonitored() {
 function testSwitchAccount(callback){
     var begin = new Date();
 
-    if (!loginUser.id)
+    if (!loginUser.id) {
+        debug_on && console.log('loginUser.id=' + loginUser.id)
         return;
+    }
 
     switchAccount(ddpClient, loginUser.id, 'mdaRAZBL73d8KsQP7', function(err){
         if (err){
             ddpClient.close();
             //reportToWechatRoomAlertALL('！');
             //reportToWechatRoomAlertALL(error);
+            console.log('切换帐号  失败')
             try{callback && callback('切换帐号  失败');}catch(e){}
         } else {
             var timeDiff = new Date() - begin;
             //reportToWechatRoom('切换帐号,  耗时'+timeDiff+'ms');
+            debug_on && console.log('切换帐号('+timeDiff+'ms)')
             try{callback && callback(null,'切换帐号('+timeDiff+'ms)');}catch(e){}
         }
     });
@@ -253,11 +270,13 @@ function testPostNew(callback){
     ddpClient.call('/posts/insert', [post], function(error, res){
         if (error){
             try{ddpClient.close()}catch(e){}
+            console.log('发贴失败')
             return callback('发贴失败');
         }
 
+        debug_on && console.log('发贴成功')
         ddpClient.call('/posts/remove', [{_id: post._id}], function(){
-            console.log('post-id:', post._id);
+            debug_on && console.log('post-id:', post._id);
             var timeDiff = new Date() - begin;
             try{callback && callback(null,'发贴('+timeDiff+'ms)');}catch(e){}
         });
@@ -286,15 +305,17 @@ function testImportPost(callback){
 
             var timeDiff = new Date() - begin;
             try{
-                callback && callback(null,'快速导入('+timeDiff+'ms)');
                 http.get('http://host1.tiegushi.com/import-cancel/' + id);
                 ddpClient.call('/posts/remove', [{_id: id}]);
+                debug_on && console.log('快速导入('+timeDiff+'ms)')
+                callback && callback(null,'快速导入('+timeDiff+'ms)');
             }catch(e){}
         });
     });
     req.on('error', function(err){
         try{ddpClient.close()}catch(e){}
         console.log('http err:', err);
+        console.log('快速导入失败')
         return callback('快速导入失败');
     });
     req.end();
