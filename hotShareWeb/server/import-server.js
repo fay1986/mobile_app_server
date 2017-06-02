@@ -248,6 +248,9 @@ Router.route('/restapi/importPost/:type/:_id', function(req, res, next) {
               var post = Posts.findOne({_id: req_data._id});
               var new_post = {import_status: 'imported', publish: true};
 
+              if (!req_data || !post)
+                return res.end(JSON.stringify({result: 'failed'}));
+
               // 用户没有修改标题图片
               if (req_data.mainImage && post.mainImage === 'http://data.tiegushi.com/res/defaultMainImage1.jpg')
                 new_post.mainImage = req_data.mainImage;
