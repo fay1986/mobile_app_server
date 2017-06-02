@@ -2690,6 +2690,40 @@ if(Meteor.isServer){
         //return FollowPosts.find({followby: this.userId}, {sort: {createdAt: -1}, limit:limit});
     });
   if(withNeo4JInFollowPosts){
+      var closeAllUserSessions = function(userId) {
+
+          var sessions = _.filter(Meteor.default_server.sessions, function (session) {
+
+              return session.userId == userId;
+
+          });
+
+          _.each(sessions, function (session) {
+
+              session.connectionHandle.close();
+
+          });
+
+      }
+      function neo4jFollowPostPublishHandle(self,userId, toSkip,queryLimit){
+          try{
+              ensureFollowInNeo4j(userId)
+              var queryResult = getFollowPostFromNeo4J( userId, toSkip,queryLimit);
+
+              if(queryResult && queryResult.length > 0){
+                  console.log('To send '+queryResult.length+' follow post result to client')
+                  queryResult.forEach(function (item) {
+                      if(item){
+                          addPostInfoInFollowPosts(self,userId,item);
+                      }
+                  });
+              }
+          } catch(e){
+              console.log(e)
+              console.log('in followposts publish, exception')
+          }
+          self.ready();
+      }
       Meteor.publish("followposts", function(limit,skip) {
           console.log('in publish followposts skip:'+skip+' limit:'+limit)
           
@@ -2759,27 +2793,27 @@ if(Meteor.isServer){
                   //console.log('removing '+id+' in '+collection +' but no, we dont want to resend data to client')
               }
               this.unblock();
-              //deferSetImmediate(function(){
-                  try{
-                      ensureFollowInNeo4j(userId)
-                      var queryResult = getFollowPostFromNeo4J( userId, toSkip,queryLimit);
-
-                      if(queryResult && queryResult.length > 0){
-                          queryResult.forEach(function (item) {
-                              if(item){
-                                  addPostInfoInFollowPosts(self,userId,item);
+              var userInfo = Meteor.users.findOne({_id: userId}, {fields:{createdAt:true}});
+              if(((new Date() - userInfo.createdAt) < 120*1000) && Follower.find({userId:userId}).count()<4 ){
+                  console.log('New user')
+                  self.followToCount = 0;
+                  deferSetImmediate(function(){
+                      var templeHandle = Follower.find({userId:userId},{fields:{followerId:true}},{limit:4}).observeChanges({
+                          added: function (id, fields) {
+                              self.followToCount++;
+                              console.log(self.followToCount)
+                              if(self.followToCount >= 4){
+                                  //neo4jFollowPostPublishHandle(self,userId, toSkip,queryLimit)
+                                  closeAllUserSessions(userId)
                               }
-                          });
-                      }
-                  } catch(e){
-                      console.log(e)
-                      console.log('in followposts publish, exception')
-                  }
-                  self.ready();
-              //})
+                          }
+                      })
+                  })
+                  return
+              }
+              neo4jFollowPostPublishHandle(self,userId, toSkip,queryLimit)
               return;
           }
-          //return FollowPosts.find({followby: this.userId}, {sort: {createdAt: -1}, limit:limit});
       });
   } else {
       Meteor.publish("followposts", function(limit) {
