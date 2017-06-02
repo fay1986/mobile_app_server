@@ -33,6 +33,9 @@ neo4jServerLists.forEach(function(item){
 var testQueryString = 'MATCH (n) RETURN count(n)'
 function doTestNeo4J(dbGraph,callback){
     dbGraph.query(testQueryString, function(err,result){
+        if(err)
+            console.log('check neo4j err:' + err + ' result:' + result)
+
         if(!err && result && result.length > 0){
             var count = result[0]['count(n)']
             callback(null,count+' nodes on '+dbGraph.options.server)
