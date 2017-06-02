@@ -2722,77 +2722,37 @@ if(Meteor.isServer){
               }
 
               var lastTime = new Date().getTime()-30*1000
-              var newUserlastTime = new Date().getTime()-1*1000
-              var userInfo = Meteor.users.findOne({_id: this.userId}, {createdAt:1})
-              var createTime = userInfo.createdAt
-              var date = new Date().getTime() - createTime
-              console.log(date)
-              if(date < 60*1000){
-                console.log('this is a new user')
-                if(self._session.newUserFollowPostInterval){
-                      Meteor.clearInterval(self._session.newUserFollowPostInterval);
-                      self._session.newUserFollowPostInterval = null;
-                  }
-                  self._session.newUserFollowPostInterval = Meteor.setInterval(function(){
-                      var queryResult = getLatestFollowPostFromNeo4J(userId,newUserlastTime)
-                      newUserlastTime = new Date().getTime()-1*1000
-                      try{
-                          if(queryResult && queryResult.length > 0){
-                              queryResult.forEach(function (item) {
-                                  if(item){
-                                      addPostInfoInFollowPosts(self,userId,item);
-                                  }
-                              });
-                          }
-                      } catch(e) {
-                          console.log(e)
-                          console.log('in followposts get latest, exception')
-
-                          if(self._session.newUserFollowPostInterval){
-                              Meteor.clearInterval(self._session.newUserFollowPostInterval);
-                              self._session.newUserFollowPostInterval = null;
-                          }
-                      }
-                  }, 1000*1);
+              if(self._session.followPostInterval){
+                  Meteor.clearInterval(self._session.followPostInterval);
+                  self._session.followPostInterval = null;
               }
-              else
-              {
-                if(self._session.followPostInterval){
-                      Meteor.clearInterval(self._session.followPostInterval);
-                      self._session.followPostInterval = null;
-                  }
-                self._session.followPostInterval = Meteor.setInterval(function(){
-                      var queryResult = getLatestFollowPostFromNeo4J(userId,lastTime)
-                      lastTime = new Date().getTime()-30*1000
-                      try{
-                          if(queryResult && queryResult.length > 0){
-                              queryResult.forEach(function (item) {
-                                  if(item){
-                                      addPostInfoInFollowPosts(self,userId,item);
-                                  }
-                              });
-                          }
-                      } catch(e) {
-                          console.log(e)
-                          console.log('in followposts get latest, exception')
-
-                          if(self._session.followPostInterval){
-                              Meteor.clearInterval(self._session.followPostInterval);
-                              self._session.followPostInterval = null;
-                          }
+              self._session.followPostInterval = Meteor.setInterval(function(){
+                  var queryResult = getLatestFollowPostFromNeo4J(userId,lastTime)
+                  lastTime = new Date().getTime()-30*1000
+                  try{
+                      if(queryResult && queryResult.length > 0){
+                          queryResult.forEach(function (item) {
+                              if(item){
+                                  addPostInfoInFollowPosts(self,userId,item);
+                              }
+                          });
                       }
-                  }, 1000*30);
-              }
+                  } catch(e) {
+                      console.log(e)
+                      console.log('in followposts get latest, exception')
+
+                      if(self._session.followPostInterval){
+                          Meteor.clearInterval(self._session.followPostInterval);
+                          self._session.followPostInterval = null;
+                      }
+                  }
+              }, 1000*30);
 
               self.onStop(function(){
                   console.log('onStop follow post subscriber')
                   if(self._session.followPostInterval){
                       Meteor.clearInterval(self._session.followPostInterval);
                       self._session.followPostInterval = null;
-                  }
-                  if(self._session.newUserFollowPostInterval){
-                      Meteor.clearInterval(self._session.newUserFollowPostInterval);
-                      self._session.newUserFollowPostInterval = null;
                   }
               })
               self.removed = function(collection, id){
