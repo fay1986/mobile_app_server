@@ -404,15 +404,17 @@ Template._simpleChatToChatItem.events({
 
     Session.set("history_view", history);
 
-    Session.set("pcurrentIndex", paraIndex);
-    Session.set("pcommetsId", owner);
-    Session.set("pcommentsName", ownerName);
-    Session.set("toasted", false);
-    console.log('ispcomment---'+paraIndex+'---'+owner+'---'+ownerName+'---'+$(e.currentTarget).data('ispcomment'))
-    if ($(e.currentTarget).data('ispcomment')) {
-      Session.set("isPcommetReply", true);
-    } else {
-      Session.set("isPcommetReply", false);
+    if (paraIndex){
+      Session.set("pcurrentIndex", paraIndex);
+      Session.set("pcommetsId", owner);
+      Session.set("pcommentsName", ownerName);
+      Session.set("toasted", false);
+      console.log('ispcomment---'+paraIndex+'---'+owner+'---'+ownerName+'---'+$(e.currentTarget).data('ispcomment'))
+      if ($(e.currentTarget).data('ispcomment')) {
+        Session.set("isPcommetReply", true);
+      } else {
+        Session.set("isPcommetReply", false);
+      }
     }
     Router.go('/posts/' + postId);
   },

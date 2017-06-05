@@ -89,10 +89,18 @@
     <div class="name">{{form.name}}</div>
       <div class="schat_post_abstract {{postAbstractStyle to}}" id="{{postId}}" data-pindex={{to.pcommentIndexNum}} data-owner={{form.id}} data-ownername={{form.name}} data-ispcomment={{to.isPcomments}}>
         {{#if to.isThumbsUp}}
-        <p>赞了您的文章 <strong>第{{formatPIndex to.pcommentIndexNum}}段:</strong></p>
+          {{#if to.pcommentIndexNum}}
+          <p>赞了您的文章 <strong>第{{formatPIndex to.pcommentIndexNum}}段:</strong></p>
+          {{else}}
+           <p>赞了您的文章</p>
+          {{/if}}
         {{/if}}
         {{#if to.isThumbsDown}}
-        <p>踩了您的文章 <strong>第{{formatPIndex to.pcommentIndexNum}}段:</strong></p>
+          {{#if to.pcommentIndexNum}}
+          <p>踩了您的文章 <strong>第{{formatPIndex to.pcommentIndexNum}}段:</strong></p>
+          {{else}}
+          <p>踩了您的文章</p>
+          {{/if}}
         {{/if}}
         {{#if to.isPcomments}}
         <p>评论了您的文章 <strong>第{{formatPIndex to.pcommentIndexNum}}段:</strong></p>

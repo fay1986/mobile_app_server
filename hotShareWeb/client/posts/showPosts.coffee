@@ -1663,7 +1663,6 @@ if Meteor.isClient
         $('.post-theme-box').hide()
         $('.post-theme-box-mask').hide()
       'click .pinthumbsUp':(e)->
-        # TODO 发送私信
         post = Session.get("postContent")
         postId = post._id
         pinImages = post.pinImages
@@ -1688,17 +1687,29 @@ if Meteor.isClient
           e.target.style.color="rgb(243,11,68)"
           e.target.style.fontSize="larger"
 
+          # 发送私信
+          to = {
+            id: post.owner,
+            name: post.ownerName,
+            icon: post.ownerIcon,
+            pcomment: ''
+          }
+          sendMqttMessageToUser('thumbsUp',to,post)
+
         post.pinImages = pinImages
         Session.set('postContent',post)
         Meteor.defer ()->
-          Posts.update({_id: postId},{$set:{pinImages,pinImages}}, (error, result)->
+          Posts.update({_id: postId},{$set:{"pinImages":pinImages,"ptype":"like"}}, (error, result)->
             if error
               console.log(error.reason);
             else
               console.log("success");
           )
+          if (favp = FavouritePosts.findOne({postId: postId, userId: userId}))
+            FavouritePosts.update({_id: favp._id}, {$set: {updateAt: new Date()}})
+          else
+            FavouritePosts.insert({postId: postId, userId: userId, createdAt: new Date(), updateAt: new Date()}) 
       'click .pinthumbsDown':(e)->
-        # TODO 发送私信
         post = Session.get("postContent")
         postId = post._id
         pinImages = post.pinImages
@@ -1722,10 +1733,19 @@ if Meteor.isClient
           e.target.className="fa fa-thumbs-down pinthumbsDown"
           e.target.style.color="rgb(0,0,255)"
 
+          # 发送私信
+          to = {
+            id: post.owner,
+            name: post.ownerName,
+            icon: post.ownerIcon,
+            pcomment: ''
+          }
+          sendMqttMessageToUser('thumbsDown',to,post)
+
         post.pinImages = pinImages
         Session.set('postContent',post)
         Meteor.defer ()->
-          Posts.update({_id: postId},{$set:{pinImages,pinImages}}, (error, result)->
+          Posts.update({_id: postId},{$set:{"pinImages":pinImages,"ptype":"dislike"}}, (error, result)->
             if error
               console.log(error.reason);
             else
