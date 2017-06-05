@@ -285,40 +285,53 @@ function testPostNew(callback){
 
 function testImportPost(callback){
     var begin = new Date();
-    var req = http.request({
-        hostname: 'host1.tiegushi.com',
-        port: 80,
-        path: '/import-server/ras6CfDNxX7mD6zq7/' + encodeURIComponent('http://www.baidu.com'),
-        method: 'GET'
-    }, function(res){
-        var text = '';
-        res.setEncoding('utf8'); 
-        res.on('data', function(chunk){
-            text += chunk;
-        });
-        res.on('end', function(){
-            var result = text.trim().split('\r\n');
-            var json = JSON.parse(result[result.length-1]).json;
-            var id = json.substr(json.lastIndexOf('/')+1);
-            console.log('http res:', result);
-            console.log('import post id:', id);
+    var postId = null;
 
-            var timeDiff = new Date() - begin;
-            try{
+    try {
+        var req = http.request({
+            hostname: 'host1.tiegushi.com',
+            port: 80,
+            path: '/import-server/ras6CfDNxX7mD6zq7/' + encodeURIComponent('http://www.baidu.com'),
+            method: 'GET'
+        }, function(res){
+            var text = '';
+            res.setEncoding('utf8');
+            res.on('data', function(chunk){
+                text += chunk;
+            });
+            res.on('end', function(){
+                var result = text.trim().split('\r\n');
+                var json = JSON.parse(result[result.length-1]).json;
+                var id = json.substr(json.lastIndexOf('/')+1);
+                console.log('http res:', result);
+                console.log('import post id:', id);
+
+                postId = id;
+
+                var timeDiff = new Date() - begin;
                 http.get('http://host1.tiegushi.com/import-cancel/' + id);
                 ddpClient.call('/posts/remove', [{_id: id}]);
+                postId = null;
                 debug_on && console.log('快速导入('+timeDiff+'ms)')
                 callback && callback(null,'快速导入('+timeDiff+'ms)');
-            }catch(e){}
+            });
         });
-    });
-    req.on('error', function(err){
-        try{ddpClient.close()}catch(e){}
-        console.log('http err:', err);
+        req.on('error', function(err){
+            try{ddpClient.close()}catch(e){}
+            console.log('http err:', err);
+            console.log('快速导入失败')
+            return callback('快速导入失败');
+        });
+        req.end();
+    } catch(e) {
+        try{
+            if (postId != null)
+                ddpClient.call('/posts/remove', [{_id: postId}]);
+            ddpClient.close()
+        }catch(e){}
         console.log('快速导入失败')
         return callback('快速导入失败');
-    });
-    req.end();
+    }
 }
 
 var globalRoom = null
