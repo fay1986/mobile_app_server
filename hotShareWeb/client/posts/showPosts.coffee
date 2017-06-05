@@ -990,13 +990,17 @@ if Meteor.isClient
 
     'click #report': (event)->
       Router.go('reportPost')
-    'click .postImageItem': (e)->
+    'click .postImageItem, click .pinImage': (e)->
       swipedata = []
       i = 0
       selected = 0
       console.log "=============click on image index is: " + this.index
-      for image in Session.get('postContent').pub
-        if image.imgUrl
+      IMGS = Session.get('postContent').pub
+      if Session.get('postContent').pinImages and Session.get('postContent').pinImages.images
+        IMGS = Session.get('postContent').pinImages.images.concat(IMGS)
+      # for image in Session.get('postContent').pub
+      for image in IMGS
+        if image.isImage and image.imgUrl
           if image.imgUrl is this.imgUrl
             selected = i
           swipedata.push
@@ -1609,6 +1613,39 @@ if Meteor.isClient
         return theme_host_url
       get_hover: (theme)->
         return theme.style is Session.get('postContent').style or (!Session.get('postContent').style and theme.default is true)
+      hasPinImages:()->
+        return Session.get('postContent') and Session.get('postContent').pinImages
+      pinImages:->
+        if Session.get('postContent') and Session.get('postContent').pinImages
+          return Session.get('postContent').pinImages
+      pinImageStyle:(images)->
+        if images.length == 1
+          return "width:100%;height: 200px;height: 30vh;"
+        if images.length == 2
+          return "width: 50%;height: 200px;height: 50vw;";
+        return "";
+      pinImglike:->
+        if this.pinImages.likeSum is undefined
+          0
+        else
+          this.pinImages.likeSum
+      pinImgdislike:->
+        if this.pinImages.dislikeSum is undefined
+          0
+        else
+          this.pinImages.dislikeSum
+      pinImgselfClickedUp:->
+        userId = Meteor.userId()
+        if this.pinImages.dislikeUserId isnt undefined and this.pinImages.likeUserId[userId] is true
+          return true
+        else
+          return false
+      pinImgselfClickedDown:->
+        userId = Meteor.userId()
+        if this.pinImages.dislikeUserId isnt undefined and this.pinImages.dislikeUserId[userId] is true
+          return true
+        else
+          return false
     Template.showPosts.events
       'click .post-theme-btn': ()->
         $('.post-theme-box').show()
@@ -1625,3 +1662,72 @@ if Meteor.isClient
       'click .post-theme-box .btn-succ': ()->
         $('.post-theme-box').hide()
         $('.post-theme-box-mask').hide()
+      'click .pinthumbsUp':(e)->
+        # TODO 发送私信
+        post = Session.get("postContent")
+        postId = post._id
+        pinImages = post.pinImages
+        userId = Meteor.userId()
+        
+        if pinImages.likeUserId[userId] and pinImages.likeUserId[userId] is true
+          pinImages.likeUserId[userId] = false
+          if pinImages.likeSum > 0
+            pinImages.likeSum -= 1 
+            e.target.className="fa fa-thumbs-o-up pinthumbsUp"
+            e.target.style = ""
+        else
+          if pinImages.dislikeUserId[userId] and pinImages.dislikeUserId[userId] is true
+            pinImages.dislikeUserId[userId] = false
+            if pinImages.dislikeSum > 0
+              pinImages.dislikeSum -= 1 
+              $('.pinthumbsDown')[0].className = "fa fa-thumbs-o-down pinthumbsDown"
+              $('.pinthumbsDown')[0].style = ""
+          pinImages.likeUserId[userId] = true
+          pinImages.likeSum += 1 
+          e.target.className="fa fa-thumbs-up pinthumbsUp"
+          e.target.style.color="rgb(243,11,68)"
+          e.target.style.fontSize="larger"
+
+        post.pinImages = pinImages
+        Session.set('postContent',post)
+        Meteor.defer ()->
+          Posts.update({_id: postId},{$set:{pinImages,pinImages}}, (error, result)->
+            if error
+              console.log(error.reason);
+            else
+              console.log("success");
+          )
+      'click .pinthumbsDown':(e)->
+        # TODO 发送私信
+        post = Session.get("postContent")
+        postId = post._id
+        pinImages = post.pinImages
+        userId = Meteor.userId()
+
+        if pinImages.dislikeUserId[userId] and pinImages.dislikeUserId[userId] is true
+          pinImages.dislikeUserId[userId] = false
+          if pinImages.dislikeSum > 0
+            pinImages.dislikeSum -= 1 
+            e.target.className="fa fa-thumbs-o-down pinthumbsDown"
+            e.target.style = ""
+        else
+          if pinImages.likeUserId[userId] and pinImages.likeUserId[userId] is true
+            pinImages.likeUserId[userId] = false
+            if pinImages.likeSum > 0
+              pinImages.likeSum -= 1 
+              $('.pinthumbsUp')[0].className = "fa fa-thumbs-o-up pinthumbsUp"
+              $('.pinthumbsUp')[0].style = ""
+          pinImages.dislikeUserId[userId] = true
+          pinImages.dislikeSum += 1 
+          e.target.className="fa fa-thumbs-down pinthumbsDown"
+          e.target.style.color="rgb(0,0,255)"
+
+        post.pinImages = pinImages
+        Session.set('postContent',post)
+        Meteor.defer ()->
+          Posts.update({_id: postId},{$set:{pinImages,pinImages}}, (error, result)->
+            if error
+              console.log(error.reason);
+            else
+              console.log("success");
+          )

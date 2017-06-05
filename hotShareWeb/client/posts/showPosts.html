@@ -117,7 +117,28 @@
           </div>
         </div>
         {{/if}}-->
-
+        {{#if pinImages}}
+        <div class="pinImagesContent">
+          <ul class="clearfix"> 
+            {{#each pinImages.images}}
+            <li style="{{pinImageStyle pinImages.images}}"><img class="pinImage" src="{{imgUrl}}" width="100%"/></li>
+            {{/each}}
+          </ul>
+          <div class='inlineScoring'>
+            {{#if pinImgselfClickedUp}}
+            <i class="fa fa-thumbs-up pinthumbsUp" style="color:red;font-size: larger;">{{pinImglike}}&nbsp;&nbsp;</i>
+            {{else}}
+            <i class="fa fa-thumbs-o-up pinthumbsUp" style="font-size: small;">{{pinImglike}}&nbsp;&nbsp;</i>
+            {{/if}} 
+            {{#if pinImgselfClickedDown}}
+            <i class="fa fa-thumbs-down pinthumbsDown" style="color:blue;font-size: small;">{{pinImgdislike}}&nbsp;&nbsp;</i>
+            {{else}}
+              <i class="fa fa-thumbs-o-down pinthumbsDown" style="font-size: small;">{{pinImgdislike}}&nbsp;&nbsp;</i>
+            {{/if}} 
+            <!--<i class="fa fa-commenting-o pcomments" style="font-size: larger; padding: 0 4px;"></i>-->
+          </div>
+        </div>
+        {{/if}}
         <div class="gridster" style="position:relative;margin-top:0px;padding-top:0px;">
           <div id="test">
               {{#if displayPostContent}}
