@@ -1631,6 +1631,11 @@ if Meteor.isClient
           return true
         else
           return false
+      showPostPinImagesIntro:->
+        owner = Session.get('postContent').owner
+        if owner is Meteor.userId() and localStorage.getItem('pinImagesIntros') isnt 'true'
+          return true
+        return false
     Template.showPosts.events
       'click .post-theme-btn': ()->
         $('.post-theme-box').show()

@@ -25,6 +25,9 @@
       $('body').removeClass('savetip-html-body');
       $(this).remove();
       localStorage.setItem('savetipFlag',true);
+      if(Meteor.userId() === Session.get('postContent').owner){
+        $('.piniamge-tip-layer').show();
+      }
     });
   </script>
 </template>

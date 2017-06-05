@@ -28,3 +28,33 @@
     });
   </script>
 </template>
+
+<template name="pinImagesIntros">
+  <div id="pinImagesIntros" class="piniamge-tip-layer">
+    <svg style="width: 100%;height: 100%;" viewBox="0,0,100%,100%">
+      <defs>
+        <filter id="introsFilter" x="-0.1" y="-0.1">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="3" />
+        </filter>
+        <mask id="introsMask">
+          <rect x="0" y="0" width="100%" height="100%" style="stroke:none;fill: #ffffff;opacity: 0.6;"></rect>
+          <ellipse cx="0" cy="100%" rx="32" ry="32" fill="#000" transform="translate(40,-90)" filter="url(#introsFilter)"></ellipse>
+        </mask>
+      </defs>
+      <rect x="0" y="0" width="100%" height="100%" style="stroke: none;fill: #000; mask: url(#introsMask);"></rect>
+    </svg>
+    <div class="intros-container" style="bottom: 20%;">
+      <div style="padding: 0 10%;"><img src="/intros/pin-hint-tip.png" width="100%;" /></div>
+      <div style="margin-top: 100px;margin-left: 60px;text-align: left;"><img src="/intros/pin-hint-btn.png" style="height: 80px;"/></div>
+    </div>
+  </div>
+  <script>
+    $('.piniamge-tip-layer').on('click touchstart',function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      $('body').removeClass('intros-html-body');
+      $(this).remove();
+      localStorage.setItem('pinImagesIntros',true);
+    });
+  </script>
+</template>
