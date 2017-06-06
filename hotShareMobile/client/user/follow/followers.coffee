@@ -1,23 +1,5 @@
 #space 2
 if Meteor.isClient
-  @addFollower = (data)->
-    followerId = data.followerId
-    callback = ()->
-      blackId = BlackList.findOne({blackBy: Meteor.userId()})._id
-      BlackList.update({_id: blackId}, {$pull: {blacker: followerId}})
-      Follower.insert data
-    #对方在黑名单中
-    if BlackList.find({blackBy: Meteor.userId(), blacker:{$in: [followerId]}}).count() > 0
-       navigator.notification.confirm(
-                '你已将对方加入黑名单，是否解除？'
-                (index)->
-                    if index is 2
-                       callback()
-                '提示'
-                ['暂不','解除']
-            )
-    else
-      Follower.insert data
   Template.followers.rendered=->
     $('.content').css 'min-height',$(window).height()
     $(window).scroll (event)->
