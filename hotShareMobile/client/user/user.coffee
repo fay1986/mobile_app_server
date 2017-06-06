@@ -216,6 +216,41 @@ if Meteor.isClient
       Meteor.setTimeout ()->
         Router.go '/searchFollow'
       ,animatePageTrasitionTimeout
+    'click #scan-qrcode': ()->
+      selectMediaFromAblum 1, (cancel, result,currentCount,totalCount)->
+        if cancel
+          return
+        if result
+          cordova.plugins.barcodeScanner.decodeImage(
+            result.URI.substr('file://'.length)
+            (res)->
+              if (res.indexOf('/webuser/to?') >= 0)
+                uri = new URL(res)
+                query = {}
+                uri.search.substr(1).split('&').forEach (item)->
+                  query[item.split('=')[0]] = item.split('=')[1]
+                Meteor.call 'bind_web_user', query['userId'], query['touserId'], query['p'], query['postId'], (err, r)->
+                  if err || !r
+                    return window.plugins.toast.showLongCenter("绑定web用户失败，请重试~")
+                  switch query['p']
+                    when 'message' # 私信消息
+                      Router.go('/simple-chat/user-list/'+Meteor.userId())
+                    when 'post'    # 浏览贴子
+                      Router.go('/posts/'+query['postId'])
+                    else
+                      console.log('绑定web用户发现未知的场景类型:', query['p'])
+                  window.plugins.toast.showLongCenter("绑定web用户成功~")
+              else if res.indexOf('http://') >= 0
+                callback = (index)->
+                  if index is 2
+                    cordova.InAppBrowser.open(res, '_system')
+                navigator.notification.confirm res, callback, '识别结果', ['返回','打开网站']
+              else
+                navigator.notification.confirm res, null, '识别结果', ['知道了']
+            (err)->
+              console.log('识别二维码失败：', err)
+              window.plugins.toast.showLongCenter("识别二维码失败，请重试~")
+          )
     'click .icon':(e)->
       val = e.currentTarget.innerHTML
       uploadFile 160, 160, 60, (status,result)->
