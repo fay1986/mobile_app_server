@@ -9,6 +9,7 @@ if Meteor.isServer
 
   request = Meteor.npmRequire('request')
   Fiber = Meteor.npmRequire('fibers')
+  QRImage = Meteor.npmRequire('qr-image')
 
   ###
   Router.route '/posts/:_id', {
@@ -148,7 +149,19 @@ if Meteor.isServer
       fastRender: true
     }
   ###
-
+  Router.route('/restapi/webuser-qrcode', {where: 'server'}).get(()->
+    userId = this.params.query.userId
+    touserId = this.params.query.touserId
+    place = this.params.query.p
+    postId = this.params.query.postId
+    try
+      img = QRImage.image('http://' + server_domain_name + '/webuser/to?userId=' + userId + '&touserId=' + touserId + '&p=' + place + '&postId=' + postId ,{size: 10})
+      this.response.writeHead(200, {'Content-Type': 'image/png'})
+      img.pipe(this.response)
+    catch
+      this.response.writeHead(414, {'Content-Type': 'text/html'})
+      this.response.end('<h1>414 Request-URI Too Large</h1>')
+    )
   Router.route('/restapi/postInsertHook/:_userId/:_postId', (req, res, next)->
     return_result = (result)->
       res.writeHead(200, {
