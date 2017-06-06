@@ -12,7 +12,7 @@
 if Meteor.isClient
   Template.listPosts.rendered=->
     $('.content').css 'min-height',$(window).height()
-    if FollowPosts.find().count()<1
+    if FollowPosts.find().count()<4
       toLoadFollowPost()
 
     if !$('.home #wrapper').data("plugin_xpull")
