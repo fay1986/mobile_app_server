@@ -64,6 +64,8 @@ if Meteor.isClient
       channel = Session.get "focusOn"
       if channel is channelName
         return true
+    withFromExample:()->
+      return withFromExample
     display_footer:()->
       console.log "document_body_scrollTop=" + Session.get("document_body_scrollTop")
       setTimeout(
