@@ -13,6 +13,14 @@ if Meteor.isClient
   Template.listPosts.rendered=->
     $('.content').css 'min-height',$(window).height()
     toLoadFollowPost();
+    $('#list').xpull(
+      {
+        onPullStart: ()->
+        callback: ()->
+          console.log('pull to refresh follow posts')
+          toLoadLatestFollowPost()
+      }
+    )
 #    $('.mainImage').css('height',$(window).height()*0.55)
     $(window).scroll (event)->
         target = $("#showMoreResults");

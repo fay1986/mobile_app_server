@@ -2616,7 +2616,7 @@ if(Meteor.isServer){
           return Moments.find({currentPostId: postId},{sort: {createdAt: -1},limit:limit});
       }
   });
-    function formatFollowPost(userId,postInfo){
+    formatFollowPost = function(userId,postInfo){
       var ownerIcon = '';
       var publish = false;
       if(postInfo.ownerIcon){
@@ -2629,7 +2629,9 @@ if(Meteor.isServer){
           publish = postInfo.publish
       } else {
           var post = Posts.findOne({_id:postInfo.postId},{fields:{'publish':true}});
-          publish = post.publish;
+          if(post){
+              publish = post.publish;
+          }
       }
       var fields = {
           postId:postInfo.postId,
@@ -2726,7 +2728,7 @@ if(Meteor.isServer){
           }
           self.ready();
       }
-      Meteor.publish("followposts", function(limit,skip) {
+      Meteor.publish("followposts", function(limit,skip,hasPullToRefresh) {
           console.log('in publish followposts skip:'+skip+' limit:'+limit)
           
           if(this.userId === null || !Match.test(limit, Number))
@@ -2736,6 +2738,7 @@ if(Meteor.isServer){
               var userId = this.userId;
               var toSkip = 0;
               var queryLimit = limit;
+              var needIntervalHelper = !hasPullToRefresh;
 
               if(typeof skip !== 'undefined'){
                   if(skip >= 0){
@@ -2757,32 +2760,34 @@ if(Meteor.isServer){
                   self._session.skipFollowPost[userId] += queryLimit;
               }
 
-              var lastTime = new Date().getTime()-30*1000
-              if(self._session.followPostInterval){
-                  Meteor.clearInterval(self._session.followPostInterval);
-                  self._session.followPostInterval = null;
-              }
-              self._session.followPostInterval = Meteor.setInterval(function(){
-                  var queryResult = getLatestFollowPostFromNeo4J(userId,lastTime)
-                  lastTime = new Date().getTime()-30*1000
-                  try{
-                      if(queryResult && queryResult.length > 0){
-                          queryResult.forEach(function (item) {
-                              if(item){
-                                  addPostInfoInFollowPosts(self,userId,item);
-                              }
-                          });
-                      }
-                  } catch(e) {
-                      console.log(e)
-                      console.log('in followposts get latest, exception')
-
-                      if(self._session.followPostInterval){
-                          Meteor.clearInterval(self._session.followPostInterval);
-                          self._session.followPostInterval = null;
-                      }
+              if(needIntervalHelper){
+                  var lastTime = new Date().getTime()-30*1000
+                  if(self._session.followPostInterval){
+                      Meteor.clearInterval(self._session.followPostInterval);
+                      self._session.followPostInterval = null;
                   }
-              }, 1000*30);
+                  self._session.followPostInterval = Meteor.setInterval(function(){
+                      var queryResult = getLatestFollowPostFromNeo4J(userId,lastTime)
+                      lastTime = new Date().getTime()-30*1000
+                      try{
+                          if(queryResult && queryResult.length > 0){
+                              queryResult.forEach(function (item) {
+                                  if(item){
+                                      addPostInfoInFollowPosts(self,userId,item);
+                                  }
+                              });
+                          }
+                      } catch(e) {
+                          console.log(e)
+                          console.log('in followposts get latest, exception')
+
+                          if(self._session.followPostInterval){
+                              Meteor.clearInterval(self._session.followPostInterval);
+                              self._session.followPostInterval = null;
+                          }
+                      }
+                  }, 1000*30);
+              }
 
               self.onStop(function(){
                   console.log('onStop follow post subscriber')

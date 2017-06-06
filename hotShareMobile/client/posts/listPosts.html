@@ -8,6 +8,15 @@
       {{#if loadError}}
           <div>{{_ "loadFailNotification"}}</div>
       {{/if}}
+        <div class="xpull">
+            <div class="xpull__start-msg">
+                <div class="xpull__start-msg-text"></div>
+                <div class="xpull__arrow"></div>
+            </div>
+            <div class="xpull__spinner">
+                <div class="xpull__spinner-circle"></div>
+            </div>
+        </div>
       {{#each myPosts}}
       <!-- {{#if isfollowerpost postId}} -->
       <div class="mainImageListItem">

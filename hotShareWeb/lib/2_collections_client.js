@@ -128,13 +128,33 @@ if(Meteor.isClient){
                 Meteor.setTimeout(toLoadFollowPost,2000);
             }
         };
+        toLoadLatestFollowPost = function(){
+            latestPost = FollowPosts.findOne({},{sort:{createdAt:-1}})
+            since = 0
+            if(latestPost){
+                since = latestPost.createdAt
+            }
+            Meteor.call('pullLatestPosts', since, 10,function(err,result){
+                console.log(err)
+                console.log(result)
+                if(!err && result && result.length > 0){
+                    result.forEach(function(item){
+                        if(item && item._id){
+                            if(!FollowPosts.findOne({_id:item._id})){
+                                FollowPosts._collection.insert(item)
+                            }
+                        }
+                    })
+                }
+            });
+        }
         toLoadFollowPost = function(){
             if( followPostStatus === 'loaded'){
                 console.log('Called here')
                 followPostStatus = 'loading'
                 Session.set('followPostsCollection','loading')
                 Session.set("followpostsitemsLimit", FOLLOWPOSTS_ITEMS_INCREMENT+followPostsInMemory);
-                Meteor.subscribe('followposts', FOLLOWPOSTS_ITEMS_INCREMENT, followPostsInMemory, {
+                Meteor.subscribe('followposts', FOLLOWPOSTS_ITEMS_INCREMENT, followPostsInMemory,true, {
                     onError: subscribeFollowPostsOnError,
                     onStop:function(){
                         if (followPostStatus === 'loading'){
