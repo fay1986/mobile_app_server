@@ -82,6 +82,8 @@ Template.bellPostTips.events({
     trackEvent("blkMsgBox", "clickBlkMsgBox");
     Session.set('showBellPostTips',false);
     Meteor.call('updataFeedsWithMe', Meteor.userId());
-    Router.go('/bell');
+    // Router.go('/bell');
+    // showQrTips(touserId,dashboard,postId)
+    return showQrTips('','message',Session.get('postContent')._id);
   }
 });

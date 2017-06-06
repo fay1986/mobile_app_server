@@ -1,0 +1,35 @@
+<template name="qrcodeTipPage">
+<div class="qr-page">
+  <div class="qr-head">
+    <div class="close"><i class="fa fa-times" aria-hidden="true"></i></div>
+  </div>
+  <div class="qr-body">
+    <img id="qrcodeImg" src="" style="width:100%; height:100%;"/>
+  </div>
+  <div class="qr-foot">
+    <div>长按图片保存二维码</div>
+  </div>
+  <canvas id="qrCanvas" width="100" height="100" style="display:none;background:#fff;opacity: 0;">
+  </canvas>
+  
+  <img src="/img/qr-tip-1.png" width="0" height="0" id="qrTip1"/>
+  <img src="/img/qr-tip-2.png" width="0" height="0" id="qrTip2"/>
+</div>
+<script>
+  touch.on('#qrcodeImg','hold',function(ev){
+    // TODO: insert latest msg(with qr info)
+    console.log('保存二维码');
+    var msgs = SimpleChat.Messages.find({is_read:false}).fetch();
+    WebWaitReadMsg.insert({
+      _id: Meteor.userId(),
+      qrcode:qrCodeUrl,
+      messages:msgs
+    },function(err,_id){
+      if(!err){
+        qrCodeUrl = null;
+      }
+    })
+  });
+  
+</script>
+</template>

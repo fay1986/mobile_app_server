@@ -58,6 +58,8 @@ PersonNames = new Meteor.Collection('personNames');
 Themes = new Meteor.Collection('themes');
 PostExamples = new Meteor.Collection('postExamples');
 
+WebWaitReadMsg = new Meteor.Collection('webwaitreadmsg');
+
 if(Meteor.isServer){
   Meteor.startup(function(){
     if (Themes.find({}).count() <= 0){
@@ -3890,6 +3892,12 @@ if(Meteor.isServer){
       return doc._id === userId
     }
   });
+
+  WebWaitReadMsg.allow({
+    insert: function (userId, doc){
+        return userId === doc._id;
+    }
+  })
 
   SearchSource.defineSource('topics', function(searchText, options) {
     var options = {sort: {createdAt: -1}, limit: 20};

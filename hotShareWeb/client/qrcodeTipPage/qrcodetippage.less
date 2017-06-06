@@ -1,0 +1,15 @@
+.qr-page {
+  position: fixed;top: 0;right: 0;bottom: 0;left: 0;background: #fff;z-index: 999999;
+  > div{position: absolute; left:0;right: 0;}
+  .qr-head{
+    top: 0; height: 40px;z-index: 9;
+    .close{float: right;padding: 10px; cursor: pointer;}
+    i{font-size: 26px;}
+  }
+  .qr-body{top: 0; bottom: 0;overflow-x: hidden;overflow-y: auto; -webkit-overflow-scrolling: touch;}
+  .qr-foot{
+    bottom: 0; height: 200px; background: url(/img/qr-tip-3.png);z-index: 9;background-size: contain; background-position: bottom;background-repeat: no-repeat;
+    div{text-align: center; font-size: 16px; font-weight: bold; position: absolute;width: 100%; bottom: 90px;}
+  }
+  .saveQrCode {width: 200px;height: 40px;color: #fff;background: deepskyblue;line-height: 40px;text-align: center;margin: 0 auto;border-radius: 20px; cursor: pointer;}
+}
