@@ -10,7 +10,7 @@ if(Meteor.isServer){
                 }
                 this.unblock();
                 userId = this.userId;
-
+                ensureFollowInNeo4j(userId)
                 var queryResult = getLatestFollowPostFromNeo4J(userId,since)
                 var returnResult = []
                 try{
