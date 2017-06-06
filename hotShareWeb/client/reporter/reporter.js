@@ -296,6 +296,17 @@ Template.reporter.events({
       $('.rp-click-area').removeClass('rp-click-area-disable');
     });
   },
+  'click .removeReposts': function(e){
+    PUB.confirm('此帖已通过，将删除审核帖子，请确认！',function(){
+      toastr.remove();
+      $('.rp-click-area').addClass('rp-click-area-disable');
+      Meteor.call('deleteRepostsOnly',e.currentTarget.id,Meteor.userId());
+      $('tr#' + e.currentTarget.id).remove();
+      $('.reviewPostContent').hide();
+      toastr.info('已删除');
+      $('.rp-click-area').removeClass('rp-click-area-disable');
+    });
+  },
   'click .restore': function(e,t){
     PUB.confirm('是否恢复该帖？',function(){
       toastr.remove();

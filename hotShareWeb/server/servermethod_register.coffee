@@ -544,6 +544,10 @@ if Meteor.isServer
           locked = LockedUsers.findOne({_id: owner._id})
           if locked is undefined
             LockedUsers.insert(owner)
+      'deleteRepostsOnly': (postId,userId)->
+        if !confirmReporterAuth(userId)
+          return false
+        RePosts.remove(postId)
       'restorePost': (postId,userId)->
         if !confirmReporterAuth(userId)
           return false
