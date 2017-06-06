@@ -30,6 +30,22 @@ if Meteor.isClient
   @isAndroidFunc = ()->
     userAgent = navigator.userAgent.toLowerCase()
     return (userAgent.indexOf('android') > -1) or (userAgent.indexOf('linux') > -1)
+  compareSwipeImgNew = (obj1,obj2)->
+    val1 = obj1.y
+    val2 = obj2.y
+    if val1 < val2
+      return -1
+    else if val1 > val2
+      return 1
+    else
+      val3 = obj1.x
+      val4 = obj2.x
+      if val3 < val4
+        return -1
+      else if val3 > val4
+        return 1
+      else
+        return 0
   window.getDocHeight = ->
     D = document
     Math.max(
@@ -1034,21 +1050,26 @@ if Meteor.isClient
       PUB.actionSheet(menus, menuTitle, callback)
     'click .postImageItem, click .pinImage': (e)->
       swipedata = []
+      swipedataSort = []
       i = 0
       selected = 0
-      console.log "=============click on image index is: " + this.index
-      IMGS = Session.get('postContent').pub
-      if Session.get('postContent').pinImages and Session.get('postContent').pinImages.images
-        IMGS = Session.get('postContent').pinImages.images.concat(IMGS)
-      # for image in Session.get('postContent').pub
+      IMGS = $('.postImageItem')
       for image in IMGS
-        if image.isImage and image.imgUrl
-          if image.imgUrl is this.imgUrl
-            selected = i
-          swipedata.push
-            href: image.imgUrl
-            title: image.text
-          i++
+        x = parseInt($(image).css('left'))
+        y = parseInt($(image).css('top'))
+        href = $(image).children('img').attr('data-original')
+        swipedataSort.push 
+          x: x
+          y: y
+          href: href
+      swipedataSort.sort(compareSwipeImgNew) #数组重排序
+      # console.log swipedataSort
+      for imageurl in swipedataSort
+        if imageurl.href is this.imgUrl
+          selected = i
+        swipedata.push
+          href: imageurl.href
+        i++
       if swipedata.length > 0
         $.swipebox swipedata,{
           initialIndexOnArray: selected

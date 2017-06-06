@@ -1015,14 +1015,13 @@ if Meteor.isClient
       for image in IMGS
         x = parseInt($(image).css('left'))
         y = parseInt($(image).css('top'))
-        # index = y * x #二维转换为一维 关系式不对。
         href = $(image).children('img').attr('data-original')
         swipedataSort.push 
           x: x
           y: y
           href: href
       swipedataSort.sort(compareSwipeImgNew) #数组重排序
-      console.log swipedataSort
+      # console.log swipedataSort
       for imageurl in swipedataSort
         if imageurl.href is this.imgUrl
           selected = i
@@ -1034,33 +1033,6 @@ if Meteor.isClient
         hideCloseButtonOnMobile : true
         loopAtEnd: false
       }
-
-    # 'click .postImageItem, click .pinImage': (e)->
-    #   swipedata = []
-    #   i = 0
-    #   selected = 0
-    #   console.log "=============click on image index is: " + this.index
-    #   IMGS = Session.get('postContent').pub
-    #   if Session.get('postContent').pinImages and Session.get('postContent').pinImages.images
-    #     IMGS = Session.get('postContent').pinImages.images.concat(IMGS)
-    #   # for image in Session.get('postContent').pub
-    #   for image in IMGS
-    #     if image.isImage and image.imgUrl
-          # if image.imgUrl is this.imgUrl
-          #   selected = i
-          # console.log image
-          # console.log 'ssssssssssss'
-          # swipedata.push
-          #   href: image.imgUrl
-          #   title: image.text
-          # i++
-    #   console.log '-------end'
-    #   console.log swipedata
-      # $.swipebox swipedata,{
-      #   initialIndexOnArray: selected
-      #   hideCloseButtonOnMobile : true
-      #   loopAtEnd: false
-      # }
   Template.postFooter.helpers
     refcomment:->
       RC = Session.get 'RC'
