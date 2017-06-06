@@ -167,7 +167,7 @@ if Meteor.isClient
                      userId: Meteor.userId()
                      followerId: this.userId
                  })._id
-      Follower.remove(FollowerId)
+      removeFollower(FollowerId)
     'click .addFollow':(e)->
       if Meteor.user().profile.fullname
          username = Meteor.user().profile.fullname

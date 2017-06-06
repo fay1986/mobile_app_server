@@ -1034,14 +1034,14 @@ if Meteor.isClient
               #Meteor.call('addBlackList', blackerId, Meteor.userId())
               BlackList.insert({blacker: [blackerId],blackBy: Meteor.userId()})
               if FollowerId
-                Follower.remove(FollowerId._id)
+                removeFollower(FollowerId._id)
               Session.set('fromeaddblacllist', true)
               Router.go '/my_blacklist'
             else
               id = BlackList.findOne({blackBy: Meteor.userId()})._id
               BlackList.update({_id: id}, {$addToSet: {blacker: blackerId}})
               if FollowerId
-                Follower.remove(FollowerId._id)
+                removeFollower(FollowerId._id)
               Session.set('fromeaddblacllist', true)
               Router.go '/my_blacklist'
           else

@@ -101,7 +101,7 @@ if Meteor.isClient
                      userId: Meteor.userId()
                      followerId: followerId
                  })._id
-      Follower.remove(FollowerId)
+      removeFollower(FollowerId)
     'click .add':(e)->
       #true 列出偶像列表，false 列出粉丝列表
       if Session.get('followers_tag')

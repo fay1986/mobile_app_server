@@ -377,9 +377,7 @@ if Meteor.isClient
       addFollower(insertObj)
     'click #unFollowAuthor': (e)->
       followId = Follower.findOne({followerId: Session.get("ProfileUserId1"), userId: Meteor.userId()})._id
-      Follower.remove {
-        _id: followId
-      }
+      removeFollower(followId)
     'click .userProfile .back':()->
       if window.userProfileTrackerHandler
         window.userProfileTrackerHandler.stop()
@@ -532,9 +530,7 @@ if Meteor.isClient
       addFollower(insertObj)
     'click #unFollowAuthor': (e)->
       followId = Follower.findOne({followerId: Session.get("ProfileUserId2"), userId: Meteor.userId()})._id
-      Follower.remove {
-        _id: followId
-      }
+      removeFollower(followId)
     'click .userProfile .back':()->
       if window.userProfileTrackerHandler
         window.userProfileTrackerHandler.stop()
@@ -686,9 +682,7 @@ if Meteor.isClient
       addFollower(insertObj)
     'click #unFollowAuthor': (e)->
       followId = Follower.findOne({followerId: Session.get("ProfileUserId3"), userId: Meteor.userId()})._id
-      Follower.remove {
-        _id: followId
-      }
+      removeFollower(followId)
     'click .userProfile .back':()->
       if window.userProfileTrackerHandler
         window.userProfileTrackerHandler.stop()
@@ -843,9 +837,7 @@ if Meteor.isClient
       addFollower(insertObj)
     'click #unFollowAuthor': (e)->
       followId = Follower.findOne({followerId: Session.get("ProfileUserId"), userId: Meteor.userId()})._id
-      Follower.remove {
-        _id: followId
-      }
+      removeFollower(followId)
     'click .userProfile .back':()->
       if window.userProfileTrackerHandler
         window.userProfileTrackerHandler.stop()

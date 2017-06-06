@@ -36,7 +36,7 @@ Template.registerFollow.events
                      userId: Meteor.userId()
                      followerId: @userId
                  })._id
-      Follower.remove(followerId)
+      removeFollower(followerId)
     else
       #匿名用户刚注册，系统就已经分配随机全名
       if Meteor.user().profile and Meteor.user().profile.fullname
