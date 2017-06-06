@@ -145,6 +145,7 @@ if(Meteor.isClient){
                             }
                         }
                     })
+                    $('.home #wrapper').data("plugin_xpull").init()
                 }
             });
         }

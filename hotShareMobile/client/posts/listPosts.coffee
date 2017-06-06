@@ -12,16 +12,21 @@
 if Meteor.isClient
   Template.listPosts.rendered=->
     $('.content').css 'min-height',$(window).height()
-    toLoadFollowPost();
-    $('#list').xpull(
-      {
-        onPullStart: ()->
-        callback: ()->
-          console.log('pull to refresh follow posts')
-          toLoadLatestFollowPost()
-      }
-    )
-#    $('.mainImage').css('height',$(window).height()*0.55)
+    if FollowPosts.find().count()<1
+      toLoadFollowPost()
+
+    if !$('.home #wrapper').data("plugin_xpull")
+      $('.home #wrapper').xpull(
+        {
+          onPullStart: ()->
+          callback: ()->
+            console.log('pull to refresh follow posts')
+            toLoadLatestFollowPost()
+        }
+      )
+    else
+      $('.home #wrapper').data("plugin_xpull").init()
+    #    $('.mainImage').css('height',$(window).height()*0.55)
     $(window).scroll (event)->
         target = $("#showMoreResults");
         if (!target.length)
