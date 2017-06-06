@@ -290,7 +290,7 @@ if Meteor.isClient
     'click .subscribeAutorPage_okBtn':(e,t)->
       owner = Meteor.users.findOne({_id: Session.get('postContent').owner})
       ownerName = if owner.profile.fullname then owner.profile.fullname else owner.username
-      Follower.insert {
+      addFollower {
         userId: Meteor.userId()
         userName: Meteor.user().profile.fullname || Meteor.user().username
         userIcon: Meteor.user().profile.icon || '/userPicture.png'

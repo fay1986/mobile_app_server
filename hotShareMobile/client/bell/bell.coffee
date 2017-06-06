@@ -123,7 +123,7 @@ if Meteor.isClient
       console.log(this._id)
       Meteor.call 'updataFeedsWithMe', Meteor.userId()
     'click .acceptrequest': (event)->
-       Follower.insert {
+      addFollower {
          userId: this.requesteeId
          userName: this.requestee
          userIcon: this.requesteeIcon
@@ -134,7 +134,7 @@ if Meteor.isClient
          followerDesc: ''
          createAt: new Date()
        }
-       Follower.insert {
+      addFollower {
          userId: this.requesterId
          userName: this.requester
          userIcon: this.requesterIcon

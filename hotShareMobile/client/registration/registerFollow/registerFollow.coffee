@@ -43,7 +43,7 @@ Template.registerFollow.events
         username = Meteor.user().profile.fullname
       else
         username = Meteor.user().username
-      Follower.insert {
+      addFollower {
         userId: Meteor.userId()
         #用户更新fullname后，这里存放fullname
         userName: username

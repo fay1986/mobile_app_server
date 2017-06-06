@@ -296,7 +296,7 @@ if Meteor.isClient
           BlackList.update({_id: blackId}, {$pull: {blacker: id}})
           blacker = Meteor.users.findOne({_id: id})
           blackerName = if blacker.profile.fullname then blacker.profile.fullname else blacker.username
-          Follower.insert {
+          addFollower {
             userId: Meteor.userId()
             userName: Meteor.user().profile.fullname || Meteor.user().username
             userIcon: Meteor.user().profile.icon || '/userPicture.png'

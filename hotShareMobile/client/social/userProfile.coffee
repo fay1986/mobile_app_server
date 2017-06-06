@@ -96,7 +96,7 @@ if Meteor.isClient
       addFollower(insertObj)
       return
     if Feeds.findOne({"requesteeId":Meteor.userId(),"requesterId":UserProfile._id})
-      Follower.insert {
+      addFollower {
         userId: Meteor.userId()
         userName: username
         userIcon: Meteor.user().profile.icon
@@ -107,7 +107,7 @@ if Meteor.isClient
         followerDesc: ''
         createAt: new Date()
       }
-      Follower.insert {
+      addFollower {
         userId: UserProfile._id
         userName: requestee
         userIcon: UserProfile.profile.icon
