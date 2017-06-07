@@ -17,8 +17,10 @@ if(Meteor.isClient){
 
   var drawQr2Canvas = function(canvas,text1,text2,touserId,dashboard,postId) {
     var ctx = canvas.getContext("2d");
-    var cH = document.body.clientHeight - 100 ;
-    var cW = document.body.clientWidth - 50;
+    // var cH = document.body.clientHeight;
+    var cW = document.body.clientWidth;
+    var cH = cW * 1.2;
+    $('.qr-foot').css('max-height',(document.body.clientHeight-cH-10)+'px');
     qrCodeUrl = 'http://'+server_domain_name+'/restapi/webuser-qrcode?userId='+Meteor.userId()+'&touserId='+touserId+'&p='+dashboard+'&postId='+postId;
     // qrCodeUrl = '/restapi/webuser-qrcode?userId='+Meteor.userId()+'&touserId='+touserId+'&p='+dashboard+'&postId='+postId;
 
@@ -29,40 +31,40 @@ if(Meteor.isClient){
     ctx.fillStyle="white";
     ctx.fill();
     ctx.fillStyle="rgb(241,86,113)";
-    ctx.font = "14px Arial";
+    ctx.font = "16px Arial";
     ctx.textAlign="center";
-    ctx.fillText(text1,parseInt(cW*0.5),parseInt(cH*0.7));
-    ctx.fillText(text2,parseInt(cW*0.5),parseInt(cH*0.7+30));
+    ctx.fillText(text1,parseInt(cW*0.5),parseInt(cH*0.9));
+    ctx.fillText(text2,parseInt(cW*0.5),parseInt(cH*0.9+30));
 
     var qrTip1 = document.getElementById('qrTip1');
     var qrTip2 = document.getElementById('qrTip2');
     var count = 0;
     if(qrTip2.complete){
-      ctx.drawImage(qrTip1,20,30,50,56);
+      ctx.drawImage(qrTip1,10,20,50,56);
       convertCanvasToImage(canvas);
     } else {
       qrTip1.onload =function(){ 
-        ctx.drawImage(qrTip1,20,30,50,56);
+        ctx.drawImage(qrTip1,10,20,50,56);
         convertCanvasToImage(canvas);
       }
     }
     if(qrTip2.complete){
-      ctx.drawImage(qrTip2,parseInt(cW*0.1),90,parseInt(cW*0.8),parseInt(cW*0.8));
+      ctx.drawImage(qrTip2,parseInt(cW*0.1),60,parseInt(cW*0.8),parseInt(cW*0.8));
       convertCanvasToImage(canvas);
     } else {
       qrTip2.onload =function(){ 
-        ctx.drawImage(qrTip2,parseInt(cW*0.1),90,parseInt(cW*0.8),parseInt(cW*0.8));
+        ctx.drawImage(qrTip2,parseInt(cW*0.1),60,parseInt(cW*0.8),parseInt(cW*0.8));
         convertCanvasToImage(canvas);
       }
     }
     var qrImage = new Image();
     qrImage.src = qrCodeUrl;
     if(qrImage.complete){
-      ctx.drawImage(qrImage,parseInt(cW*0.2),130,parseInt(cW*0.6),parseInt(cW*0.6));
+      ctx.drawImage(qrImage,parseInt(cW*0.2),100,parseInt(cW*0.6),parseInt(cW*0.6));
       convertCanvasToImage(canvas);
     } else {
       qrImage.onload =function(){
-        ctx.drawImage(qrImage,parseInt(cW*0.2),130,parseInt(cW*0.6),parseInt(cW*0.6));
+        ctx.drawImage(qrImage,parseInt(cW*0.2),100,parseInt(cW*0.6),parseInt(cW*0.6));
         convertCanvasToImage(canvas);
       }
     }
