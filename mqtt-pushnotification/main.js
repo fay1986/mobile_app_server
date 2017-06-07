@@ -122,6 +122,40 @@ function checkTTLAndSendNotification(id, item, callback) {
     }
 }
 
+function cloneMsgToAssociatedUsers(toUser, message) {
+  if(!toUser || !toUser._id || !toUser.profile || !toUser.profile.usersAssociated)
+    return;
+
+  var msg = {};
+  for (var key in message)
+    msg[key] = message[key];
+
+  if(!msg || !msg.to || !msg.to.id || !msg.to.name || !msg.to.icon || msg.ttl)
+    return;
+
+  var users = db.collection('users');
+  var associated = toUser.profile.usersAssociated;
+  for(var i=0; i<associated.length; i++) {
+      users.findOne({ _id: associated[i] }, {fields: {
+        profile: true
+      }}, function (err, oneUser) {
+        if (err)
+          return console.log('Error:'+err);
+        if (!oneUser || !oneUser._id || !oneUser.profile || !oneUser.profile.fullname || !oneUser.profile.icon)
+          return console.log('user not found: ' + associated[i]);
+
+        msg.to.id   = oneUser._id;
+        msg.to.name = oneUser.profile.fullname;
+        msg.to.icon = oneUser.profile.icon;
+        msg.ttl = 1;
+        try {
+          client.publish('/t/msg/u/'+oneUser._id, JSON.stringify(msg), {qos:1});
+          debug_on && console.log('>>> send ' + JSON.stringify(msg))
+        } catch(e){};
+      })
+  }
+}
+
 function sendNotification(message, toUserId ,type, cb) {
   var toUserId = toUserId;
   var userId = message.form.id;
@@ -130,11 +164,19 @@ function sendNotification(message, toUserId ,type, cb) {
   var pushTokens = db.collection('pushTokens');
   var PushMessages = db.collection('pushmessages');
 
-  users.findOne({ _id: toUserId }, function (err, toUser) {
+  users.findOne({ _id: toUserId }, {fields: {
+    type: true,
+    token: true,
+    profile: true
+  }}, function (err, toUser) {
     if (err) {
       console.log('Error:'+err)
       return cb && cb(err);
     }
+
+    if(projectName && projectName == 't')
+      cloneMsgToAssociatedUsers(toUser, message);
+
     if (toUser && toUser.type && toUser.token) {
       pushTokens.findOne({ type: toUser.type, token: toUser.token }, function (err, pushTokenObj) {
         if (err) {
