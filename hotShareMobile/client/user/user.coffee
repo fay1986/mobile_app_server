@@ -229,7 +229,7 @@ if Meteor.isClient
                 query = {}
                 uri.search.substr(1).split('&').forEach (item)->
                   query[item.split('=')[0]] = item.split('=')[1]
-                Meteor.call 'bind_web_user', query['userId'], query['touserId'], query['p'], query['postId'], (err, r)->
+                Meteor.call 'bind_web_user', Meteor.userId(), query['userId'], query['touserId'], query['p'], query['postId'], (err, r)->
                   if err || !r
                     return window.plugins.toast.showLongCenter("绑定web用户失败，请重试~")
                   switch query['p']

@@ -18,6 +18,12 @@ if(Meteor.isServer){
                 mqtt_connection.publish(topic,JSON.stringify(message),{qos:1})
             })
         }
+        sendMqttUserMessage=function(user_id, message) {
+            //console.log('>>> sendMqttUserMessage: ' + JSON.stringify(message))
+            try{
+                sendMqttMessage("/t/msg/u/" + user_id, message);
+            }catch(e){}
+        };
         mqttPostViewHook=function(userId,postId){
             try{
                 sendMqttMessage('postView',{userId:userId,postId:postId})
