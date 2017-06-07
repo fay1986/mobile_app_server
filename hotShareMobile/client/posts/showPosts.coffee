@@ -1656,7 +1656,7 @@ if Meteor.isClient
           return false
       showPostPinImagesIntro:->
         owner = Session.get('postContent').owner
-        if owner is Meteor.userId() and localStorage.getItem('pinImagesIntros') isnt 'true'
+        if owner is Meteor.userId() and localStorage.getItem('pinImagesIntros') isnt 'true' and withPinImage
           return true
         return false
     Template.showPosts.events
