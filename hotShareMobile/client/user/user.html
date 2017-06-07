@@ -1,10 +1,13 @@
 <template name="user">
   <div class="user" id="userPage">
     <div class="head">
+    {{#if withQRTips}}
       <div id="scan-qrcode" class="leftButton">
-      <!--<div id="follow" class="leftButton">-->
           <div style="height: 48px;margin-left: -10px;margin-top: -10px;padding: 12px 12px;padding-top: 6px;box-sizing: border-box;overflow: hidden;"><img style="height:25px;" src="/scan.png" /></div>
-          <!--<span class="fa fa-plus"></span><i class="fa fa-user"></i>-->
+    {{else}}
+      <div id="follow" class="leftButton">
+          <span class="fa fa-plus"></span><i class="fa fa-user"></i>
+    {{/if}}
       </div>
       <div>
         <strong>{{_ "mySelf"}}</strong>

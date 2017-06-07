@@ -1607,6 +1607,8 @@ if Meteor.isClient
           return $theme.attr('href', theme_host_url + style)
         $('head').append('<link id="post-theme" rel="stylesheet" type="text/css" href="'+theme_host_url + style+'">')
     Template.showPosts.helpers
+      withPinImage: ()->
+        return withPinImage
       is_owner: ()->
         return Meteor.userId() is Session.get('postContent').owner
       themes: ()->

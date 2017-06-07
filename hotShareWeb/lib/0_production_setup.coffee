@@ -37,3 +37,5 @@
 # @withLoginTokenMax = 10
 @CHECK_UPDATE = true # 强制更新和推荐更新启用标志
 @withFromExample = true #故事贴样张
+@withPinImage = true #pin图
+@withQRTips = true

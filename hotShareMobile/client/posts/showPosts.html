@@ -1,6 +1,8 @@
 <template name="showPosts">
   {{#if is_owner}}
-  <div class="post-pin-image"><div>pin图</div></div>
+    {{#if withPinImage}}
+    <div class="post-pin-image"><div>pin图</div></div>
+    {{/if}}
   <div class="post-theme-btn"><div>模板</div></div>
   {{/if}}
   <div class="post-theme-box-mask"></div>
