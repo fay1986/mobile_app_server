@@ -67,10 +67,19 @@ Template.bellPostTips.helpers({
   },
   feedsCount: function(){
 
-    return Feeds.find({followby: Meteor.userId(), isRead:{$ne: true}, checked:{$ne: true}}).count();
+    // return Feeds.find({followby: Meteor.userId(), isRead:{$ne: true}, checked:{$ne: true}}).count();
+    return SimpleChat.Messages.find({'to.id':Meteor.userId(),is_read:false}).count();
   },
   lsatFeed: function(){
     return Feeds.findOne({followby: Meteor.userId(), isRead:{$ne: true}, checked:{$ne: true}}, {sort: {createdAt: -1}});
+  },
+  lastIcon: function(){
+    var lastMsg = SimpleChat.Messages.findOne({'to.id':Meteor.userId(),is_read:false},{sort:{create_time:-1}});
+    if(lastMsg && lastMsg.form && lastMsg.form.icon){
+      return lastMsg.form.icon
+    } else {
+      return '/userPicture.png'
+    }
   },
   onLoadData: function(){
     renderPage();
