@@ -1,6 +1,7 @@
 <template name="listPosts">
   {{>connectionBanner}}
   <div id="wrapper">
+    <div id="list-post">
       <div class="xpull">
           <div class="xpull__start-msg">
               <div class="xpull__start-msg-text"></div>
@@ -57,6 +58,7 @@
         <span class="loading">{{_ "loading"}}</span>
       </div>
       {{/if}}
+    </div>
     </div>
     <div class="popUpBox">
       {{> userProfileBox}}

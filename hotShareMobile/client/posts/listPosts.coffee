@@ -14,8 +14,8 @@ if Meteor.isClient
     $('.content').css 'min-height',$(window).height()
     if FollowPosts.find().count()<4
       toLoadFollowPost()
-    if !$('.home #wrapper').data("plugin_xpull")
-      $('.home #wrapper').xpull(
+    if !$('.home #wrapper #list-post').data("plugin_xpull")
+      $('.home #wrapper #list-post').xpull(
         {
           onPullStart: ()->
           callback: ()->
@@ -24,7 +24,7 @@ if Meteor.isClient
         }
       )
     else
-      $('.home #wrapper').data("plugin_xpull").init()
+      $('.home #wrapper #list-post').data("plugin_xpull").init()
     Deps.autorun (h)->
       if FollowPosts.find().count()>3
         h.stop()

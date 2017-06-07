@@ -145,7 +145,7 @@ if(Meteor.isClient){
                             }
                         }
                     })
-                    $('.home #wrapper').data("plugin_xpull").init()
+                    $('.home #wrapper #list-post').data("plugin_xpull").init()
                     return callback && callback(result)
                 } else {
                     return callback && callback(null)
