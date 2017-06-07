@@ -14,7 +14,6 @@ if Meteor.isClient
     $('.content').css 'min-height',$(window).height()
     if FollowPosts.find().count()<4
       toLoadFollowPost()
-
     if !$('.home #wrapper').data("plugin_xpull")
       $('.home #wrapper').xpull(
         {
@@ -26,7 +25,12 @@ if Meteor.isClient
       )
     else
       $('.home #wrapper').data("plugin_xpull").init()
+    Deps.autorun (h)->
+      if FollowPosts.find().count()>3
+        h.stop()
+        initLoadMoreForListPosts()
     #    $('.mainImage').css('height',$(window).height()*0.55)
+    ###
     $(window).scroll (event)->
         target = $("#showMoreResults");
         if (!target.length)
@@ -42,6 +46,7 @@ if Meteor.isClient
             if (target.data("visible"))
                 console.log("target became invisible (below viewable arae)");
                 target.data("visible", false);
+    ###
   Template.listPosts.helpers
     getBrowseCount:(browse)->
       if (browse)

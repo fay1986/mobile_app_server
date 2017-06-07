@@ -128,7 +128,7 @@ if(Meteor.isClient){
                 Meteor.setTimeout(toLoadFollowPost,2000);
             }
         };
-        toLoadLatestFollowPost = function(){
+        toLoadLatestFollowPost = function(callback){
             latestPost = FollowPosts.findOne({},{sort:{createdAt:-1}})
             since = 0
             if(latestPost){
@@ -146,6 +146,9 @@ if(Meteor.isClient){
                         }
                     })
                     $('.home #wrapper').data("plugin_xpull").init()
+                    return callback && callback(result)
+                } else {
+                    return callback && callback(null)
                 }
             });
         }
