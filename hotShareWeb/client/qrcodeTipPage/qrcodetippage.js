@@ -78,7 +78,34 @@ Template.qrcodeTipPage.onRendered(function () {
   var text1 = "保存这个二维码到系统相册";
   var text2 = "在APP中导入二维码，才能查看消息哦~";
   var data = this.data;
-  drawQr2Canvas(canvas,text1,text2,data.touserId,data.dashboard,data.postId)
+  drawQr2Canvas(canvas,text1,text2,data.touserId,data.dashboard,data.postId);
+
+  // 消息转存
+  var msgs = SimpleChat.Messages.find({is_read:false, 'to.id': Meteor.userId()}).fetch();
+  Meteor.subscribe('webwaitreadmsg',Meteor.userId(),function(){
+    var waitReadMsg = WebWaitReadMsg.findOne({_id: Meteor.userId()});
+    if(waitReadMsg){
+      msgs = waitReadMsg.messages.concat(msgs);
+      WebWaitReadMsg.update({_id: Meteor.userId()},{$set:{qrcode: qrCodeUrl,messages:msgs}},function(err,num){
+        if(err){
+          console.log(err)
+        }
+      });
+    } else {
+      WebWaitReadMsg.insert({_id: Meteor.userId(),qrcode: qrCodeUrl,messages:msgs},function(err,_id){
+        if(err){
+          console.log(err)
+        }
+      });
+    }
+  });
+
+  // 移除未读消息
+  SimpleChat.Messages.remove({is_read:false,'to.id': Meteor.userId()},function(err,num){
+    if(err){
+      console.log(err)
+    }
+  });
 });
 
 Template.qrcodeTipPage.events({
@@ -86,4 +113,8 @@ Template.qrcodeTipPage.events({
     $('.qr-page').remove();
     qrCodeUrl = null;
   }
+});
+
+Template.qrcodeTipPage.onDestroyed(function () {
+  qrCodeUrl = null;
 });

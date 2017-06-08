@@ -20,16 +20,16 @@
   touch.on('#qrcodeImg','hold',function(ev){
     // TODO: insert latest msg(with qr info)
     console.log('保存二维码');
-    var msgs = SimpleChat.Messages.find({is_read:false, 'to.id': Meteor.userId()}).fetch();
-    WebWaitReadMsg.insert({
-      _id: Meteor.userId(),
-      qrcode:qrCodeUrl,
-      messages:msgs
-    },function(err,_id){
-      if(!err){
-        qrCodeUrl = null;
-      }
-    })
+    // var msgs = SimpleChat.Messages.find({is_read:false, 'to.id': Meteor.userId()}).fetch();
+    // WebWaitReadMsg.insert({
+    //   _id: Meteor.userId(),
+    //   qrcode:qrCodeUrl,
+    //   messages:msgs
+    // },function(err,_id){
+    //   if(!err){
+    //     qrCodeUrl = null;
+    //   }
+    // }) 
   });
   
 </script>

@@ -3900,10 +3900,16 @@ if(Meteor.isServer){
 
   WebWaitReadMsg.allow({
     insert: function (userId, doc){
-        return userId === doc._id;
+        return userId === doc._id
+    },
+    update: function (userId, doc){
+        return userId === doc._id
     }
   })
 
+  Meteor.publish('webwaitreadmsg',function(userId){
+     return WebWaitReadMsg.find({_id: userId});
+  });
   SearchSource.defineSource('topics', function(searchText, options) {
     var options = {sort: {createdAt: -1}, limit: 20};
 

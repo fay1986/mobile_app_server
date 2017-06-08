@@ -63,7 +63,8 @@ Template.bellPostTips.helpers({
     //         }
     //     }
     // }
-    return feedsCount > 0 && showBellPostTips;
+    // return feedsCount > 0 && showBellPostTips;
+    return feedsCount > 0
   },
   feedsCount: function(){
 
