@@ -12,7 +12,7 @@ if (Meteor.isServer) {
         try {
           console.log('bind_web_user: userId=' + userId + ' touserId=' + touserId + ' p=' + p +' postId=' + postId + ' this.userId=' + this_userId)
           if ((!this_userId) || (!userId) || (!p) || (!postId)) {
-              return false;
+              return {result: false, message: '无效的二维码！'};
           }
 
           var webUser = Meteor.users.findOne({_id: userId}, {fields:{profile:1}});
@@ -21,8 +21,13 @@ if (Meteor.isServer) {
           //console.log('appUser=' + JSON.stringify(appUser))
           if(!(webUser && webUser.profile && appUser && appUser.profile)) {
               console.log('webUser or appUser not found')
-              return false;
+              return {result: false, message: '无效的二维码！'};
           }
+
+          //clone message to associated appuser
+          var msg = WebWaitReadMsg.findOne({_id: webUser._id});
+          if(!msg)
+            return {result: false, message: '此二维码已经绑定过了！'};
 
           //check relationship
           var pre_webAssociated = (webUser.profile.usersAssociated) ? webUser.profile.usersAssociated : [];
@@ -41,11 +46,6 @@ if (Meteor.isServer) {
             console.log(webAssociated)
             Meteor.users.update({_id: webUser._id}, {$set: {'profile.usersAssociated': webAssociated}});
           }
-
-          //clone message to associated appuser
-          var msg = WebWaitReadMsg.findOne({_id: webUser._id});
-          if(!msg)
-            return false;
 
           if(msg && msg.qrcode && msg.messages) {
             for(var i=0; i<msg.messages.length; i++){
@@ -72,11 +72,11 @@ if (Meteor.isServer) {
           if(msg && msg._id)
             WebWaitReadMsg.remove({_id: webUser._id});
 
-          return true;
+          return {result: true};
 
         } catch (error) {
           console.log('addTopicsAtReview ERR=', error)
-          return true;
+          return {result: true};
         }
       }
     });
