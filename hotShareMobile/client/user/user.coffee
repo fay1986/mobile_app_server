@@ -61,6 +61,8 @@ if Meteor.isClient
             Session.set('myCounterCollection','loaded')
         })
   Template.user.helpers
+    withQRTips:->
+      return withQRTips
     isLoading:->
       if Session.get('myPostsCount') isnt undefined
         return false
