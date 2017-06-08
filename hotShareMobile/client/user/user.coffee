@@ -219,42 +219,74 @@ if Meteor.isClient
         Router.go '/searchFollow'
       ,animatePageTrasitionTimeout
     'click #scan-qrcode': ()->
-      selectMediaFromAblum 1, (cancel, result,currentCount,totalCount)->
-        if cancel
-          return
-        if result
-          cordova.plugins.barcodeScanner.decodeImage(
-            result.URI.substr('file://'.length)
-            (res)->
-              if (res.indexOf('/webuser/to?') >= 0)
-                uri = new URL(res)
-                query = {}
-                uri.search.substr(1).split('&').forEach (item)->
-                  query[item.split('=')[0]] = item.split('=')[1]
-                if (!query['userId'] or !query['p'])
-                  return window.plugins.toast.showLongCenter("无效的二维码，请重试~")
-                Meteor.call 'bind_web_user', Meteor.userId(), query['userId'], query['touserId'], query['p'], query['postId'], (err, r)->
-                  if err || !r || !r.result
-                    return window.plugins.toast.showLongCenter(r.message || "绑定web用户失败，请重试~")
-                  switch query['p']
-                    when 'message' # 私信消息
-                      Router.go('/simple-chat/user-list/'+Meteor.userId())
-                    when 'post'    # 浏览贴子
-                      Router.go('/posts/'+query['postId'])
-                    else
-                      console.log('绑定web用户发现未知的场景类型:', query['p'])
-                  window.plugins.toast.showLongCenter("绑定web用户成功~")
-              else if res.indexOf('http://') >= 0
-                callback = (index)->
-                  if index is 2
-                    cordova.InAppBrowser.open(res, '_system')
-                navigator.notification.confirm res, callback, '识别结果', ['返回','打开网站']
+      options = {
+        title: '扫描二维码，请选择？'
+        buttonLabels: ['摄像头扫描', '识别本地图片']
+        addCancelButtonWithLabel: '取消'
+        androidEnableCancelButton: true
+      }
+      bind_web_user =(res)->
+        if (res.indexOf('/webuser/to?') >= 0)
+          uri = new URL(res)
+          query = {}
+          uri.search.substr(1).split('&').forEach (item)->
+            query[item.split('=')[0]] = item.split('=')[1]
+          if (!query['userId'] or !query['p'])
+            return window.plugins.toast.showLongCenter("无效的二维码，请重试~")
+          
+          window.plugins.toast.showLongCenter("识别成功，正在绑定web用户...")
+          Meteor.call 'bind_web_user', Meteor.userId(), query['userId'], query['touserId'], query['p'], query['postId'], (err, r)->
+            if err || !r || !r.result
+              return window.plugins.toast.showLongCenter(r.message || "绑定web用户失败，请重试~")
+            switch query['p']
+              when 'message' # 私信消息
+                Router.go('/simple-chat/user-list/'+Meteor.userId())
+              when 'post'    # 浏览贴子
+                Router.go('/posts/'+query['postId'])
               else
-                navigator.notification.confirm res, null, '识别结果', ['知道了']
+                console.log('绑定web用户发现未知的场景类型:', query['p'])
+            window.plugins.toast.showLongCenter("绑定web用户成功~")
+        else if res.indexOf('http://') >= 0
+          callback = (index)->
+            if index is 2
+              cordova.InAppBrowser.open(res, '_system')
+          navigator.notification.confirm res, callback, '识别结果', ['返回','打开网站']
+        else
+          navigator.notification.confirm res, null, '识别结果', ['知道了']
+
+      window.plugins.actionsheet.show options, (index)->
+        if index is 1
+          cordova.plugins.barcodeScanner.scan(
+            (res)->
+              bind_web_user(res.text)
             (err)->
-              console.log('识别二维码失败：', err)
-              window.plugins.toast.showLongCenter("识别二维码失败，请重试~")
+              window.plugins.toast.showLongCenter("扫描二维码失败~")
+            {
+              preferFrontCamera: false # iOS and Android
+              showFlipCameraButton: true # iOS and Android
+              showTorchButton: true # iOS and Android
+              torchOn: false # Android, launch with the torch switched on (if available)
+              prompt: "Place a barcode inside the scan area" # Android
+              resultDisplayDuration: 500 # Android, display scanned text for X ms. 0 suppresses it entirely, default 1500
+              formats: "QR_CODE,PDF_417" # default: all but PDF_417 and RSS_EXPANDED
+              orientation: "portrait" # Android only (portrait|landscape), default unset so it rotates with the device
+              # disableAnimations: true # iOS
+              # disableSuccessBeep: false # iOS
+            }
           )
+        else if index is 2
+          selectMediaFromAblum 1, (cancel, result,currentCount,totalCount)->
+            if cancel
+              return
+            if result
+              cordova.plugins.barcodeScanner.decodeImage(
+                result.URI.substr('file://'.length)
+                (res)->
+                  bind_web_user(res)
+                (err)->
+                  console.log('识别二维码失败：', err)
+                  window.plugins.toast.showLongCenter("识别二维码失败，请重试~")
+              )
     'click .icon':(e)->
       val = e.currentTarget.innerHTML
       uploadFile 160, 160, 60, (status,result)->
