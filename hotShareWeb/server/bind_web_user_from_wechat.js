@@ -34,6 +34,7 @@ if (Meteor.isServer) {
           var pre_appAssociated = (appUser.profile.usersAssociated) ? appUser.profile.usersAssociated : [];
           var webAssociated = pre_webAssociated;
           var appAssociated = pre_appAssociated;
+          var alreadyAssociated = false;
 
           if(!checkContains(pre_appAssociated, webUser._id)) {
             appAssociated = pre_appAssociated.concat(webUser._id);
@@ -46,8 +47,12 @@ if (Meteor.isServer) {
             console.log(webAssociated)
             Meteor.users.update({_id: webUser._id}, {$set: {'profile.usersAssociated': webAssociated}});
           }
+          else {
+            console.log('appUser: ' + this_userId + ' webUser: ' + webUser._id + ' already associated !')
+            alreadyAssociated = true;
+          }
 
-          if(msg && msg.qrcode && msg.messages) {
+          if((!alreadyAssociated) && msg && msg.qrcode && msg.messages) {
             for(var i=0; i<msg.messages.length; i++){
               var oneMsg = msg.messages[i];
 
@@ -56,10 +61,10 @@ if (Meteor.isServer) {
                   continue;
 
                 for(var j=0; j<webAssociated.length; j++){
-                  var sendToUser = Meteor.users.findOne({_id: webAssociated[j]}, {fields:{profile:1}});
-                  if(sendToUser && sendToUser.profile && sendToUser.profile.fullname && sendToUser.profile.icon) {
+                  var sendToUser = Meteor.users.findOne({_id: webAssociated[j]}, {fields:{username:1, profile:1}});
+                  if(sendToUser && sendToUser.profile && (sendToUser.profile.fullname || sendToUser.username) && sendToUser.profile.icon) {
                     oneMsg.to.id =   sendToUser._id;
-                    oneMsg.to.name = sendToUser.profile.fullname;
+                    oneMsg.to.name = sendToUser.profile.fullname || sendToUser.username;
                     oneMsg.to.icon = sendToUser.profile.icon;
                     //console.log('>> send message: ' + JSON.stringify(oneMsg))
                     sendMqttUserMessage(sendToUser._id, oneMsg);
@@ -72,11 +77,14 @@ if (Meteor.isServer) {
           if(msg && msg._id)
             WebWaitReadMsg.remove({_id: webUser._id});
 
+          if(alreadyAssociated)
+            return {result: false, message: '已经绑定过该用户！'};
+
           return {result: true};
 
         } catch (error) {
           console.log('addTopicsAtReview ERR=', error)
-          return {result: true};
+          return {result: false, message: '绑定失败！'};
         }
       }
     });

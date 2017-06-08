@@ -137,15 +137,16 @@ function cloneMsgToAssociatedUsers(toUser, message) {
   var associated = toUser.profile.usersAssociated;
   for(var i=0; i<associated.length; i++) {
       users.findOne({ _id: associated[i] }, {fields: {
+        username: true,
         profile: true
       }}, function (err, oneUser) {
         if (err)
           return console.log('Error:'+err);
-        if (!oneUser || !oneUser._id || !oneUser.profile || !oneUser.profile.fullname || !oneUser.profile.icon)
+        if (!oneUser || !oneUser._id || !oneUser.profile || !(oneUser.profile.fullname || oneUser.username) || !oneUser.profile.icon)
           return console.log('user not found: ' + associated[i]);
 
         msg.to.id   = oneUser._id;
-        msg.to.name = oneUser.profile.fullname;
+        msg.to.name = oneUser.profile.fullname || oneUser.username;
         msg.to.icon = oneUser.profile.icon;
         msg.ttl = 1;
         try {
