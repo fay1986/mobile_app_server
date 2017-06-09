@@ -104,7 +104,7 @@ Template.bellPostTips.events({
       if(user && user.profile && user.profile.associated && user.profile.associated.length > 0){
         return $('#bellPostDialog').fadeIn();
       }
-      return showQrTips('','message',Session.get('postContent')._id);
+      return showQrTips('','post',Session.get('postContent')._id);
     }else{
       Router.go('/bell');
     }
