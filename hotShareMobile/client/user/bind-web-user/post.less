@@ -1,0 +1,36 @@
+.bind-web-user-post{
+  ._mask{position: fixed; left: 0; top: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.72); z-index: 9998;}
+  ._box{
+    background-color: #fff;height: 400px;position: fixed;top: 50%;left: 5%;right: 5%;z-index: 9999;margin-top: -200px;border-radius: 5px; padding-bottom: 48px; box-sizing: border-box; color: #353535; overflow: hidden;
+    padding-bottom: 48px; padding-top: 20px;
+    ._title{
+      text-align: center; font-size: 12px;
+      span{display: block; font-size: 16px; color: #2196f3; font-weight: bold;}
+    }
+    ._msgs{
+      position: absolute;top: 70px;bottom: 55px;padding: 0px;margin: 0px;right: 20px;left: 20px;overflow: auto;
+      li{
+        position: relative;padding: 10px;padding-left: 50px; border-top: 1px dotted #999;
+        ._icon{width: 40px;height: 40px;position: absolute;left: 0px;top: 10px;border-radius: 50%;}
+        ._text{font-size: 12px; padding-top: 2px;}
+        ._imgs{
+          padding-top: 5px;
+          img{width: 40px; height: 40px; margin-right: 5px; margin-bottom: 5px; border:1px solid #ccc;}
+        }
+        ._time{
+          font-weight: bold; font-size: 16px;
+          strong{
+            font-size: 12px; float: right; color: #999; font-weight: normal; margin-top: 3px;
+            i{padding-right: 5px; font-size: 14px;}
+          }
+        }
+      }
+      li:first-child{border-top: none;}
+    }
+    ._btns{
+      position: absolute; left: 0; right: 0; height: 48px; line-height: 48px; bottom: 0px; border-top: 1px solid #ccc;
+      ._btn{width: 50%; float: left; border-left: 1px solid #ccc; text-align: center; height: 48px; line-height: 48px; color: #999; font-size: 16px;}
+      ._btn:first-child{border-left: none; color: #2196f3; font-weight: bold;}
+    }
+  }
+}

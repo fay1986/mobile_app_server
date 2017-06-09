@@ -1,0 +1,31 @@
+<template name="bindWebUserPost">
+  <div class="bind-web-user-post">
+    <div class="_mask"></div>
+    <div class="_box">
+      <div class="_title">
+        <span>绑定web用户成功~</span>此用户的私信消息：
+      </div>
+      <ul class="_msgs">
+        {{#each msgs}}
+        <li>
+          <img class="_icon" src="{{form.icon}}" />
+          <div class="_time">{{form.name}}<strong><i class="fa fa-clock-o" aria-hidden="true"></i>{{time_diff_str create_time}}</strong></div>
+          {{#if images}}
+          <div class="_imgs">
+            {{#each images}}
+            <img src="{{url}}" />
+            {{/each}}
+          </div>
+          {{else}}
+          <div class="_text">{{text}}</div>
+          {{/if}}
+        </li>
+        {{/each}}
+      </ul>
+      <div class="_btns">
+        <div class="_btn btn-post">继续阅读</div>
+        <div class="_btn btn-msg">更多消息</div>
+      </div>
+    </div>
+  </div>
+</template>
