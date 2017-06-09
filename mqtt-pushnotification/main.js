@@ -134,26 +134,20 @@ function cloneMsgToAssociatedUsers(toUser, message) {
     return;
 
   var users = db.collection('users');
-  var associated = toUser.profile.usersAssociated;
+  var associated = toUser.profile.associated;
   for(var i=0; i<associated.length; i++) {
-      users.findOne({ _id: associated[i] }, {fields: {
-        username: true,
-        profile: true
-      }}, function (err, oneUser) {
-        if (err)
-          return console.log('Error:'+err);
-        if (!oneUser || !oneUser._id || !oneUser.profile || !(oneUser.profile.fullname || oneUser.username) || !oneUser.profile.icon)
-          return console.log('user not found: ' + associated[i]);
+    var oneUser = associated[i];
+    if (!oneUser || !oneUser.id || !oneUser.name || !oneUser.icon)
+      return console.log('user not found: ' + associated[i]);
 
-        msg.to.id   = oneUser._id;
-        msg.to.name = oneUser.profile.fullname || oneUser.username;
-        msg.to.icon = oneUser.profile.icon;
-        msg.ttl = 1;
-        try {
-          client.publish('/t/msg/u/'+oneUser._id, JSON.stringify(msg), {qos:1});
-          debug_on && console.log('>>> send ' + JSON.stringify(msg))
-        } catch(e){};
-      })
+    msg.to.id   = oneUser.id;
+    msg.to.name = oneUser.name;
+    msg.to.icon = oneUser.icon;
+    msg.ttl = 1;
+    try {
+      client.publish('/t/msg/u/'+oneUser.id, JSON.stringify(msg), {qos:1});
+      debug_on && console.log('>>> send ' + JSON.stringify(msg))
+    } catch(e){};
   }
 }
 

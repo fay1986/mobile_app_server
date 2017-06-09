@@ -67,18 +67,19 @@ if (Meteor.isServer) {
             for(var i=0; i<msg.messages.length; i++){
               var oneMsg = msg.messages[i];
 
-              if (oneMsg && oneMsg.to) {
+              if (oneMsg && oneMsg.to && (!oneMsg.ttl)) {
                 if(oneMsg.to.id != webUser._id)
                   continue;
 
                 for(var j=0; j<webAssociated.length; j++){
-                  var sendToUser = Meteor.users.findOne({_id: webAssociated[j]}, {fields:{username:1, profile:1}});
-                  if(sendToUser && sendToUser.profile && (sendToUser.profile.fullname || sendToUser.username) && sendToUser.profile.icon) {
-                    oneMsg.to.id =   sendToUser._id;
-                    oneMsg.to.name = sendToUser.profile.fullname || sendToUser.username;
-                    oneMsg.to.icon = sendToUser.profile.icon;
+                  var sendToUser = webAssociated[j];
+                  if(sendToUser && sendToUser.name && sendToUser.icon) {
+                    oneMsg.to.id =   sendToUser.id;
+                    oneMsg.to.name = sendToUser.name;
+                    oneMsg.to.icon = sendToUser.icon;
+                    oneMsg.ttl = 1;
                     //console.log('>> send message: ' + JSON.stringify(oneMsg))
-                    sendMqttUserMessage(sendToUser._id, oneMsg);
+                    sendMqttUserMessage(sendToUser.id, oneMsg);
                   }
                 }
               }
