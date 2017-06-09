@@ -84,6 +84,13 @@ Template.bellPostTips.helpers({
   },
   onLoadData: function(){
     renderPage();
+  },
+  associatedUserName: function(){
+    var user = Meteor.user();
+    if(user && user.profile && user.profile.associated && user.profile.associated[0] && user.profile.associated[0].name){
+      return user.profile.associated[0].name;
+    }
+    return '';
   }
 });
 
@@ -92,10 +99,23 @@ Template.bellPostTips.events({
     trackEvent("blkMsgBox", "clickBlkMsgBox");
     Session.set('showBellPostTips',false);
     Meteor.call('updataFeedsWithMe', Meteor.userId());
+    var user = Meteor.user();
     if(withQRTips){
+      if(user && user.profile && user.profile.associated && user.profile.associated.length > 0){
+        return $('#bellPostDialog').fadeIn();
+      }
       return showQrTips('','message',Session.get('postContent')._id);
     }else{
       Router.go('/bell');
     }
+  },
+  'click #closeBellPostDialog': function(){
+    // 移除未读消息
+    SimpleChat.Messages.remove({is_read:false,'to.id': Meteor.userId()},function(err,num){
+      if(err){
+        console.log(err)
+      }
+    });
+    $('#bellPostDialog').fadeOut();
   }
 });

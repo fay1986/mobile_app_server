@@ -9,6 +9,16 @@
       <div class="_count">{{feedsCount}}</div>
     </div>
   </div>
+
+  <div id="bellPostDialog">
+    <div class="bg">
+      <div class="title">提示</div>
+      <div class="body">
+        您关联了帐号<strong>{{associatedUserName}}</strong>， 消息已经转发到关联的帐号,打开「故事贴」并登陆此帐号查看消息!
+      </div>
+      <div id="closeBellPostDialog" class="foot">知道了</div>
+    </div>
+  </div>
   {{onLoadData}}
   {{else}}
   {{onLoadData}}
