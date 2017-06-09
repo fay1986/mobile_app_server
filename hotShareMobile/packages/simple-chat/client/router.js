@@ -393,12 +393,12 @@ Template._simpleChatToChatItem.events({
     // subtext = text.match(new RegExp(firstSubstring + "(.*)" + secSubsrting));
     // console.log("sub text is: ", subtext[1]);
     // paraIndex = subtext[1];
-    var history = [];
+    var history = Session.get('history_view') || [];
     var paraIndex = $(e.currentTarget).data('pindex');
     var owner = $(e.currentTarget).data('owner');
     var ownerName = $(e.currentTarget).data('ownername');
     history.push({
-      view: 'bellcontent',
+      view: 'simple-chat/to/user?id='+owner,
       scrollTop: document.body.scrollTop
     });
 
@@ -1359,6 +1359,13 @@ Template._simpleChatToChatLabelRemove.events({
 Template._simpleChatListLayout.events({
   'click li': function(e, t){
     var _id = e.currentTarget.id;
+    var history = Session.get('history_view') || [];
+    history.push({
+      view: 'simple-chat/user-list/'+Meteor.userId(),
+      scrollTop: document.body.scrollTop
+    });
+
+    Session.set("history_view", history);
     if(this.isGroups){
       Router.go(AppConfig.path + '/to/group?id='+_id);
     } else {
