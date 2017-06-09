@@ -3,11 +3,11 @@
   > div{position: absolute; left:0;right: 0;}
   .qr-head{
     top: 0; height: 40px;z-index: 9;
-    .close{float: right;padding: 10px; cursor: pointer;}
-    i{font-size: 26px;}
+    .close{line-height: 40px;cursor: pointer;}
+    i{display: inline-block;font-size: 26px;line-height: 40px;width: 26px;height: 40px;text-align: center;vertical-align: bottom;}
   }
-  .qr-body{top: 0; bottom: 0;overflow-x: hidden;overflow-y: auto; -webkit-overflow-scrolling: touch;}
-  .qr-foot{bottom: 0; z-index: 9;background-size: contain; background-position: bottom;background-repeat: no-repeat;background: #fff;}
-  .qr-foot:after{content:"长按图片保存二维码"; position: absolute; top: 0;left: 0;right: 0;text-align: center; font-size: 16px; font-weight: bold;}
+  .qr-body{top: 40px; bottom: 0;overflow-x: hidden;overflow-y: auto; -webkit-overflow-scrolling: touch;}
+  .qr-foot{bottom: 0; z-index: 9;background-size: contain; background-position: bottom;padding-bottom: 10px;background-repeat: no-repeat;background: #fff;}
+  // .qr-foot:after{content:"长按二维码保存消息"; position: absolute; top: 0;left: 0;right: 0;text-align: center; font-size: 16px; font-weight: bold;}
   .saveQrCode {width: 200px;height: 40px;color: #fff;background: deepskyblue;line-height: 40px;text-align: center;margin: 0 auto;border-radius: 20px; cursor: pointer;}
 }

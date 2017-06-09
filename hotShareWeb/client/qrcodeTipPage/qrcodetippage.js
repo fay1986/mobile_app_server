@@ -15,12 +15,13 @@ if(Meteor.isClient){
     return image.src = canvas.toDataURL("image/png");
   };
 
-  var drawQr2Canvas = function(canvas,text1,text2,touserId,dashboard,postId) {
+  var drawQr2Canvas = function(canvas,touserId,dashboard,postId) {
     var ctx = canvas.getContext("2d");
     // var cH = document.body.clientHeight;
     var cW = document.body.clientWidth;
+    cW = 2*cW;
     var cH = cW * 1.2;
-    $('.qr-foot').css('max-height',(document.body.clientHeight-cH-10)+'px');
+    $('.qr-foot').css('height',(document.body.clientHeight-(cH/2))+'px');
     qrCodeUrl = 'http://'+server_domain_name+'/restapi/webuser-qrcode?userId='+Meteor.userId()+'&touserId='+touserId+'&p='+dashboard+'&postId='+postId;
     // qrCodeUrl = '/restapi/webuser-qrcode?userId='+Meteor.userId()+'&touserId='+touserId+'&p='+dashboard+'&postId='+postId;
 
@@ -30,41 +31,30 @@ if(Meteor.isClient){
     ctx.rect(0,0,cW,cH);
     ctx.fillStyle="white";
     ctx.fill();
-    ctx.fillStyle="rgb(241,86,113)";
-    ctx.font = "16px Arial";
-    ctx.textAlign="center";
-    ctx.fillText(text1,parseInt(cW*0.5),parseInt(cH*0.9));
-    ctx.fillText(text2,parseInt(cW*0.5),parseInt(cH*0.9+30));
 
-    var qrTip1 = document.getElementById('qrTip1');
+    ctx.textAlign="center";
+    ctx.fillStyle = "black";
+    ctx.font = "48px Arial";
+    ctx.fillText('请在故事贴中扫描二维码',parseInt(cW*0.5),60);
+    
     var qrTip2 = document.getElementById('qrTip2');
-    var count = 0;
     if(qrTip2.complete){
-      ctx.drawImage(qrTip1,10,20,50,56);
-      convertCanvasToImage(canvas);
-    } else {
-      qrTip1.onload =function(){ 
-        ctx.drawImage(qrTip1,10,20,50,56);
-        convertCanvasToImage(canvas);
-      }
-    }
-    if(qrTip2.complete){
-      ctx.drawImage(qrTip2,parseInt(cW*0.1),60,parseInt(cW*0.8),parseInt(cW*0.8));
+      ctx.drawImage(qrTip2,parseInt(cW*0.15),parseInt(cW*0.6)+130,parseInt(cW*0.7),parseInt(cW*0.25));
       convertCanvasToImage(canvas);
     } else {
       qrTip2.onload =function(){ 
-        ctx.drawImage(qrTip2,parseInt(cW*0.1),60,parseInt(cW*0.8),parseInt(cW*0.8));
+        ctx.drawImage(qrTip2,parseInt(cW*0.15),parseInt(cW*0.6)+130,parseInt(cW*0.7),parseInt(cW*0.25));
         convertCanvasToImage(canvas);
       }
     }
     var qrImage = new Image();
     qrImage.src = qrCodeUrl;
     if(qrImage.complete){
-      ctx.drawImage(qrImage,parseInt(cW*0.2),100,parseInt(cW*0.6),parseInt(cW*0.6));
+      ctx.drawImage(qrImage,parseInt(cW*0.2),90,parseInt(cW*0.6),parseInt(cW*0.6));
       convertCanvasToImage(canvas);
     } else {
       qrImage.onload =function(){
-        ctx.drawImage(qrImage,parseInt(cW*0.2),100,parseInt(cW*0.6),parseInt(cW*0.6));
+        ctx.drawImage(qrImage,parseInt(cW*0.2),90,parseInt(cW*0.6),parseInt(cW*0.6));
         convertCanvasToImage(canvas);
       }
     }
@@ -75,10 +65,8 @@ if(Meteor.isClient){
 Template.qrcodeTipPage.onRendered(function () {
   window.qrCodeUrl = null;
   var canvas = document.getElementById('qrCanvas');
-  var text1 = "保存这个二维码到系统相册";
-  var text2 = "在APP中导入二维码，才能查看消息哦~";
   var data = this.data;
-  drawQr2Canvas(canvas,text1,text2,data.touserId,data.dashboard,data.postId);
+  drawQr2Canvas(canvas,data.touserId,data.dashboard,data.postId);
 
   // 消息转存
   var msgs = SimpleChat.Messages.find({is_read:false, 'to.id': Meteor.userId()}).fetch();
@@ -112,6 +100,16 @@ Template.qrcodeTipPage.events({
   'click .close':function(){
     $('.qr-page').remove();
     qrCodeUrl = null;
+  },
+  'click #qrDownloadAPP':function(){
+    if(isIOS){
+      trackEvent('Download','from Post Tail, IOS')
+    }else if(isAndroidFunc()){
+      trackEvent('Download','from Post Tail, Android')
+    }else {
+      trackEvent('Download','from Post Tail, Outside Wechat')
+    }
+    return window.open('http://a.app.qq.com/o/simple.jsp?pkgname=org.hotshare.everywhere', '_system');
   }
 });
 
