@@ -18,7 +18,7 @@ Example respones:
 
 ```
 {
-  "status": "success",
+  "status": "success",  // 登录成功
   "data":{
     "authToken": "qpmW0Vx4RFudmSqjGz0Idqj169pcHNqthQW--3LMtLi",
     "userId": "rzMssYa8LAN7iuMe"
