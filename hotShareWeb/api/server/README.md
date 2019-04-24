@@ -18,7 +18,7 @@ Example respones:
 
 ```
 {
-  "status": "success",
+  "status": "success", // 登录成功
   "data":{
     "authToken": "qpmW0Vx4RFudmSqjGz0Idqj169pcHNqthQW--3LMtLi",
     "userId": "rzMssYa8LAN7iuMe"
@@ -38,7 +38,7 @@ Example respones:
 
 ```
 {
-  "status": "success",
+  "status": "success",  // 登出成功
   "data": {
     "message": "You've been logged out!"
   }
@@ -87,7 +87,7 @@ curl -X POST "@data.json" http://testworkai.tiegushi.com/api/v1/groups/xxxxxx/fa
 Example respones:
 ```
 {
-  "success": true
+  "success": true  //单张标注完成
 }
 ```
 ### 多张批量标注
@@ -141,10 +141,10 @@ Example respones:
 [
   {
     "_id": "02db41813a9513816357444b",
-    "group_id": "xxx",
-    "faceId": "xxxxxxxxxx",
-    "url": "http://workaiossqn.tiegushi.com/8a89f902-32d8-11e8-8756-a4caa09c959f",
-    "name": "APITEST1",
+    "group_id": "xxx", // 组id
+    "faceId": "xxxxxxxxxx",  face  id
+    "url": "http://workaiossqn.tiegushi.com/8a89f902-32d8-11e8-8756-a4caa09c959f", // 图片地址
+    "name": "APITEST1",  // 标注人名
     "label_times": 2,
     "createAt": "2019-03-20T08:33:07.899Z",
     "updateAt": "2019-03-20T08:33:11.835Z"
@@ -200,14 +200,14 @@ Example respones:
 ```
 [
   {
-    "uuid": "xxxx",
-    "name": "xxxx",
-    "in_out": "inout",
-    "groupId": "xxxxxxx",
+    "uuid": "xxxx",  // 设备id
+    "name": "xxxx",  // 标注人名
+    "in_out": "inout", // 设备状态
+    "groupId": "xxxxxxx",  // 组id
     "createAt": "2019-02-22T03:23:35.904Z",
-    "camera_run": false,
+    "camera_run": false, // 摄像头在线状态
     "islatest": false,
-    "online": true
+    "online": true  // 设备在线状态
   }
 ]
 ```
@@ -244,7 +244,7 @@ Example respones:
 ```
 {
   "_id": "xxxxxxxxxx",
-  "name": groupName,
+  "name": groupName,  // 组名
   "icon": "",
   "describe": "",
   "create_time": "2019-03-20T06:04:16.569Z",
@@ -275,7 +275,7 @@ curl -X POST -H "X-Auth-Token: GMh-1Dtg3909k5IOxJozqhjFQQPDkQ1FtKOtJ2stbq6" -H "
 Example respones:
 ```
 {
-  "groupId": "8b129fc47a3fa97cbd6f7837"
+  "groupId": "8b129fc47a3fa97cbd6f7837"  // 组名
 }
 ```
 
@@ -311,9 +311,9 @@ Example respones:
   {
     "_id": "71f3fd7f055e5aa01bc29fcd",
     "group_id": "9933aa9c429695857e9d52dd",
-    "faceId": "12967",
+    "faceId": "12967", // face  id
     "url": "http://onm4mnb4w.bkt.clouddn.com/8855772a-2b0d-11e7-9bfc-d065caa81a04",
-    "name": "A",
+    "name": "A", // 标记的人名
     "faces": [
       {
         "id": "12967",
